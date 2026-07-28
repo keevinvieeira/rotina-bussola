@@ -2,7 +2,7 @@
   "summary": {
     "scanned_files": 5,
     "secrets_found": 0,
-    "vulns_found": 36,
+    "vulns_found": 35,
     "config_issues": 0
   },
   "findings": [
@@ -319,15 +319,6 @@
       "file": "index.html",
       "line": 3730,
       "snippet": "timeContainer.innerHTML = '<p class=\"text-xs text-gray-400 italic\">Nenhuma tarefa conclu\u00edda com tempo contabilizado ainda.</p>';",
-      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
-    },
-    {
-      "category": "Code Vulnerability",
-      "title": "DOM XSS - Unsafe innerHTML assignment",
-      "severity": "HIGH",
-      "file": "index.html",
-      "line": 3927,
-      "snippet": "if (headerNameEl) headerNameEl.innerHTML = `\ud83d\udc64 ${currentUser.name}`;",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     }
   ]

@@ -3937,9 +3937,13 @@
         }
 
         // ================= SISTEMA DE AUTENTICAÇÃO REAL (FIREBASE AUTH & FIRESTORE) =================
+        // Usa o próprio domínio Cloudflare como authDomain quando em HTTPS.
+        // Combinado com o arquivo _redirects, o Firebase auth handler é servido via proxy
+        // pelo mesmo domínio, eliminando erros COOP (Cross-Origin-Opener-Policy).
+        const isLocalDev = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const firebaseConfig = {
             apiKey: "AIzaSyBuC_hEPjI-CT9O63AcqJKoHAtBxMoP6Ew",
-            authDomain: "bussula-da-rotina.firebaseapp.com",
+            authDomain: isLocalDev ? "bussula-da-rotina.firebaseapp.com" : window.location.hostname,
             projectId: "bussula-da-rotina",
             storageBucket: "bussula-da-rotina.firebasestorage.app",
             messagingSenderId: "535505405224",
@@ -4177,55 +4181,28 @@
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
 
-            // Tenta popup primeiro. Se falhar por bloqueio COOP (Cloudflare) ou popup bloqueado,
-            // faz fallback automático para signInWithRedirect.
+            // Com authDomain apontando para o próprio domínio Cloudflare (via proxy _redirects),
+            // o popup funciona normalmente pois tudo é same-origin.
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
                     closeAuthModal();
                     refreshAgendaView();
                 }
-            } catch (popupErr) {
-                const couldFallback = [
-                    'auth/popup-blocked',
-                    'auth/popup-closed-by-user',
-                    'auth/internal-error',   // COOP headers do Cloudflare bloqueiam window.opener
-                    'auth/cancelled-popup-request'
-                ].includes(popupErr.code);
-
-                if (couldFallback) {
-                    // Usa redirecionamento direto — imune a COOP e bloqueadores de popup
-                    try {
-                        await auth.signInWithRedirect(provider);
-                    } catch (redirectErr) {
-                        showGoogleAuthError(redirectErr);
-                    }
+            } catch (err) {
+                console.error('[Bussola] Erro Google Auth:', err.code, err.message);
+                if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+                    // Popup bloqueado — fallback para redirect
+                    await auth.signInWithRedirect(provider);
+                } else if (err.code === 'auth/popup-closed-by-user') {
+                    // Usuário fechou o popup — não mostrar erro
+                    return;
                 } else {
-                    showGoogleAuthError(popupErr);
+                    const el = document.getElementById('loginAlert');
+                    const msg = `Erro Google Auth (${err.code}): ${err.message}`;
+                    if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+                    else alert(msg);
                 }
-            }
-        }
-
-        function showGoogleAuthError(err) {
-            console.error('[Bussola] Erro Google Auth:', err.code, err.message);
-            const el = document.getElementById('loginAlert');
-
-            let msg = '';
-            if (err.code === 'auth/internal-error') {
-                msg = `⚠️ Erro interno do Google Auth. Verifique:\n\n` +
-                      `1. Google Cloud Console → APIs & Credenciais → OAuth 2.0 → adicione o domínio '${window.location.hostname}' nas Origens JavaScript autorizadas.\n\n` +
-                      `2. Firebase Console → Authentication → Configurações → Domínios autorizados → confirme que '${window.location.hostname}' está listado.`;
-                alert(msg);
-            } else if (err.code === 'auth/unauthorized-domain') {
-                msg = `⚠️ Domínio '${window.location.hostname}' não autorizado. Adicione em: Firebase Console → Authentication → Configurações → Domínios autorizados.`;
-                if (el) { el.textContent = msg; el.classList.remove('hidden'); }
-                else alert(msg);
-            } else if (err.code === 'auth/operation-not-allowed') {
-                alert('⚠️ Login com Google não está ativado. Ative em: Firebase Console → Authentication → Método de login → Google.');
-            } else {
-                msg = `Erro Google Auth (${err.code}): ${err.message}`;
-                if (el) { el.textContent = msg; el.classList.remove('hidden'); }
-                else alert(msg);
             }
         }
 
