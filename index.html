@@ -335,19 +335,14 @@
     <main id="tab-agenda" class="max-w-[1400px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <!-- Seletor de Semanas -->
-        <div class="lg:col-span-3 bg-indigo-50/50 p-4 rounded-xl shadow-inner border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex gap-2">
-                <button onclick="changeWeek(-1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3 py-2 rounded-lg text-xs transition shadow-sm">
-                    ◀ Semana Anterior
-                </button>
-                <button onclick="reorganizeActiveWeek()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-lg text-xs transition shadow-sm flex items-center gap-1" title="Reorganizar rotina de cozinha e tarefas domésticas desta semana">
-                    ✨ Reorganizar Rotina
-                </button>
-            </div>
+        <div class="lg:col-span-3 bg-indigo-50/50 p-4 rounded-xl shadow-inner border border-indigo-100 flex items-center justify-between gap-4">
+            <button onclick="changeWeek(-1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3.5 py-2 rounded-lg text-xs transition shadow-sm">
+                ◀ Semana Anterior
+            </button>
             <div class="text-center">
                 <span id="currentWeekRangeLabel" class="text-xs sm:text-sm font-extrabold text-indigo-900 block tracking-tight">Carregando semana...</span>
             </div>
-            <button onclick="changeWeek(1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3 py-2 rounded-lg text-xs transition shadow-sm">
+            <button onclick="changeWeek(1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3.5 py-2 rounded-lg text-xs transition shadow-sm">
                 Próxima Semana ▶
             </button>
         </div>
@@ -355,7 +350,12 @@
         <!-- Coluna de Projetos (Backlog / Fila) -->
         <div class="lg:col-span-1 order-2 lg:order-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-6">
             <div>
-                <h2 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">🗂️ Painel de Projetos</h2>
+                <div class="flex justify-between items-center mb-4 pb-2 border-b gap-2">
+                    <h2 class="text-xl font-bold text-gray-900 truncate">🗂️ Painel de Projetos</h2>
+                    <button onclick="reorganizeActiveWeek()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold transition shadow-xs shrink-0 flex items-center gap-1" title="Reorganizar rotina de cozinha e tarefas domésticas desta semana">
+                        ✨ Reorganizar Rotina
+                    </button>
+                </div>
                 
                 <!-- Input para novos projetos -->
                 <div class="flex gap-2 mb-6">
@@ -794,14 +794,9 @@
             const isCurrentWeek = (targetWeekKey === realCurrentWeekKey);
             const badge = isCurrentWeek 
                 ? `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">✨ (Semana Atual)</span>` 
-                : `<button onclick="goToCurrentWeek()" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-300 transition shadow-xs">📅 Ir para Semana Atual</button>`;
+                : ``;
 
             return `Semana ${targetWeekKey.split('-W')[1]} / ${date.getFullYear()} (${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}/${monday.getFullYear()} a ${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}/${sunday.getFullYear()}) ${badge}`;
-        }
-
-        function goToCurrentWeek() {
-            autoDetectCurrentWeek();
-            refreshAgendaView();
         }
 
         function getWeekNumber(weekKey) {
@@ -4155,10 +4150,7 @@
                 if (activeEmailEl) activeEmailEl.innerText = currentUser.email;
                 if (headerActionsEl) {
                     headerActionsEl.innerHTML = `
-                        <button onclick="openAuthModal()" title="Trocar de Conta" class="text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2.5 py-1 rounded-lg text-indigo-100 font-extrabold transition flex items-center gap-1 shadow-sm">
-                            🔄 Trocar Conta
-                        </button>
-                        <button onclick="logoutUser()" title="Encerrar Sessão" class="text-[10px] bg-rose-700/90 hover:bg-rose-600 px-2.5 py-1 rounded-lg text-rose-100 font-extrabold transition flex items-center gap-1 shadow-sm">
+                        <button onclick="logoutUser()" title="Encerrar Sessão" class="text-[10px] bg-rose-700/90 hover:bg-rose-600 px-3 py-1 rounded-lg text-rose-100 font-extrabold transition flex items-center gap-1 shadow-sm">
                             🚪 Sair
                         </button>
                     `;
