@@ -3937,13 +3937,9 @@
         }
 
         // ================= SISTEMA DE AUTENTICAÇÃO REAL (FIREBASE AUTH & FIRESTORE) =================
-        // Usa o próprio domínio Cloudflare como authDomain quando em HTTPS.
-        // Combinado com o arquivo _redirects, o Firebase auth handler é servido via proxy
-        // pelo mesmo domínio, eliminando erros COOP (Cross-Origin-Opener-Policy).
-        const isLocalDev = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const firebaseConfig = {
             apiKey: "AIzaSyBuC_hEPjI-CT9O63AcqJKoHAtBxMoP6Ew",
-            authDomain: isLocalDev ? "bussula-da-rotina.firebaseapp.com" : window.location.hostname,
+            authDomain: "bussula-da-rotina.firebaseapp.com",
             projectId: "bussula-da-rotina",
             storageBucket: "bussula-da-rotina.firebasestorage.app",
             messagingSenderId: "535505405224",
