@@ -30,78 +30,86 @@
                 transform: translateY(0);
             }
         }
+        /* Custom scrollbar utility for mobile navigation tab bar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 <body class="bg-indigo-950 text-gray-800 font-sans min-h-screen m-0 p-0 overflow-x-hidden">
 
     <!-- Landing Page Inicial (Pré-Login) -->
-    <div id="landingPage" class="min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden">
+    <div id="landingPage" class="min-h-screen min-h-[100dvh] bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex flex-col justify-between p-4 sm:p-6 md:p-10 relative overflow-hidden">
         <!-- Background Blur Accents -->
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full filter blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full filter blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/4 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/20 rounded-full filter blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-1/3 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-purple-600/20 rounded-full filter blur-3xl pointer-events-none"></div>
 
         <!-- Top Brand Bar -->
-        <div class="max-w-6xl w-full mx-auto flex justify-between items-center z-10">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/30">🧭</div>
+        <div class="max-w-6xl w-full mx-auto flex justify-between items-center z-10 gap-3">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-lg shadow-indigo-500/30 shrink-0">🧭</div>
                 <div>
-                    <h1 class="text-xl font-extrabold tracking-tight">Bússola da Rotina</h1>
-                    <p class="text-[11px] text-indigo-300 font-medium leading-none">Gestão Inteligente de Rotina</p>
+                    <h1 class="text-base sm:text-xl font-extrabold tracking-tight">Bússola da Rotina</h1>
+                    <p class="text-[10px] sm:text-[11px] text-indigo-300 font-medium leading-none">Gestão Inteligente de Rotina</p>
                 </div>
             </div>
-            <button onclick="openAuthModal()" class="bg-white/10 hover:bg-white/20 border border-white/15 px-4 py-2 rounded-xl text-xs font-bold transition backdrop-blur-md">
+            <button onclick="openAuthModal()" class="bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition backdrop-blur-md shrink-0">
                 Entrar / Criar Conta
             </button>
         </div>
 
         <!-- Main Hero Section -->
-        <div class="max-w-4xl w-full mx-auto my-auto py-12 text-center z-10 flex flex-col items-center">
-            <div class="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-400/30 px-3.5 py-1.5 rounded-full text-xs font-bold text-indigo-300 mb-6 backdrop-blur-md">
+        <div class="max-w-4xl w-full mx-auto my-auto py-8 sm:py-12 text-center z-10 flex flex-col items-center">
+            <div class="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 bg-indigo-500/10 border border-indigo-400/30 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-indigo-300 mb-4 sm:mb-6 backdrop-blur-md">
                 <span>🧭 Bússola da Rotina</span>
-                <span class="w-1 h-1 rounded-full bg-indigo-400"></span>
-                <span>Planejamento, Foco & Equilíbrio</span>
+                <span class="w-1 h-1 rounded-full bg-indigo-400 hidden sm:inline-block"></span>
+                <span class="hidden sm:inline">Planejamento, Foco & Equilíbrio</span>
             </div>
 
-            <h2 class="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight mb-6">
+            <h2 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight mb-4 sm:mb-6 px-2">
                 Organize sua rotina com <br class="hidden sm:block">
                 <span class="bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">clareza e produtividade cirúrgica</span>.
             </h2>
 
-            <p class="text-sm md:text-base text-slate-300 max-w-2xl font-normal leading-relaxed mb-8">
+            <p class="text-xs sm:text-sm md:text-base text-slate-300 max-w-2xl font-normal leading-relaxed mb-6 sm:mb-8 px-2">
                 Planeje suas tarefas semanais, equilibre seus limites de trabalho, estudos e vida pessoal, e acompanhe seus projetos em tempo real com sincronização na nuvem.
             </p>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center mb-14">
-                <button onclick="openAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-8 py-3.5 rounded-2xl text-sm shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto justify-center mb-8 sm:mb-12 px-4 sm:px-0">
+                <button onclick="openAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
                     🚀 Entrar ou Criar Conta (Gratuito)
                 </button>
             </div>
 
             <!-- Features Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-left">
-                <div class="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-lg mb-3 font-bold">📅</div>
-                    <h3 class="text-sm font-bold text-white mb-1">Agenda Semanal Inteligente</h3>
-                    <p class="text-xs text-slate-400 leading-snug">Distribuição dinâmica de rotinas e tarefas com reajuste automático de horários.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full text-left">
+                <div class="bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl backdrop-blur-sm">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-lg mb-2.5 font-bold">📅</div>
+                    <h3 class="text-xs sm:text-sm font-bold text-white mb-1">Agenda Semanal Inteligente</h3>
+                    <p class="text-[11px] sm:text-xs text-slate-400 leading-snug">Distribuição dinâmica de rotinas e tarefas com reajuste automático de horários.</p>
                 </div>
-                <div class="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-lg mb-3 font-bold">🗂️</div>
-                    <h3 class="text-sm font-bold text-white mb-1">Painel de Projetos</h3>
-                    <p class="text-xs text-slate-400 leading-snug">Organize suas demandas por etapas: Em Andamento, Na Fila e Concluídos.</p>
+                <div class="bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl backdrop-blur-sm">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-lg mb-2.5 font-bold">🗂️</div>
+                    <h3 class="text-xs sm:text-sm font-bold text-white mb-1">Painel de Projetos</h3>
+                    <p class="text-[11px] sm:text-xs text-slate-400 leading-snug">Organize suas demandas por etapas: Em Andamento, Na Fila e Concluídos.</p>
                 </div>
-                <div class="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-300 flex items-center justify-center text-lg mb-3 font-bold">⚙️</div>
-                    <h3 class="text-sm font-bold text-white mb-1">Regras de Produtividade</h3>
-                    <p class="text-xs text-slate-400 leading-snug">Defina limites diários por segmento para manter o equilíbrio e evitar sobrecarga.</p>
+                <div class="bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl backdrop-blur-sm sm:col-span-2 md:col-span-1">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-300 flex items-center justify-center text-lg mb-2.5 font-bold">⚙️</div>
+                    <h3 class="text-xs sm:text-sm font-bold text-white mb-1">Regras de Produtividade</h3>
+                    <p class="text-[11px] sm:text-xs text-slate-400 leading-snug">Defina limites diários por segmento para manter o equilíbrio e evitar sobrecarga.</p>
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="max-w-6xl w-full mx-auto text-center z-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <p class="text-xs text-slate-400">© 2026 Bússola da Rotina • Todos os direitos reservados.</p>
-            <div class="flex gap-4 text-xs">
+        <div class="max-w-6xl w-full mx-auto text-center z-10 pt-4 sm:pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p class="text-[11px] sm:text-xs text-slate-400">© 2026 Bússola da Rotina • Todos os direitos reservados.</p>
+            <div class="flex gap-4 text-[11px] sm:text-xs">
                 <a href="/politica-de-privacidade.html" target="_blank" class="text-indigo-300 hover:text-white underline transition">Política de Privacidade</a>
                 <a href="/termos-de-servico.html" target="_blank" class="text-indigo-300 hover:text-white underline transition">Termos de Serviço</a>
             </div>
@@ -213,39 +221,39 @@
 
     <!-- Conteúdo Principal do App (Apenas para usuários autenticados) -->
     <div id="appMainContent" class="hidden bg-gray-50 min-h-screen pb-12">
-        <header class="bg-indigo-600 text-white py-6 shadow-md mb-8">
-        <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-            <div class="flex flex-col items-center md:items-start">
-                <h1 class="text-2xl font-bold flex items-center gap-2">🧭 Bússola</h1>
-                <p class="text-indigo-200 text-sm">Planejamento, foco e equilíbrio</p>
-            </div>
-            
-            <!-- Navegação entre Abas (Esquerda) -->
-            <div class="flex bg-indigo-800 p-1 rounded-lg shrink-0">
-                <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition">
-                    📅 Agenda e Projetos
-                </button>
-                <button onclick="switchTab('analise')" id="tabBtn-analise" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
-                    📊 Análise de Produtividade
-                </button>
-                <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
-                    ⚙️ Configurações
-                </button>
-            </div>
+        <header class="bg-indigo-600 text-white py-4 sm:py-6 shadow-md mb-6 sm:mb-8">
+            <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                <div class="flex flex-col items-center md:items-start">
+                    <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">🧭 Bússola</h1>
+                    <p class="text-indigo-200 text-xs sm:text-sm">Planejamento, foco e equilíbrio</p>
+                </div>
+                
+                <!-- Navegação entre Abas (Rolagem Horizontal no Celular sem barra) -->
+                <div class="flex bg-indigo-800 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar scrollbar-none justify-start sm:justify-center shrink-0">
+                    <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        📅 Agenda e Projetos
+                    </button>
+                    <button onclick="switchTab('analise')" id="tabBtn-analise" class="text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        📊 Análise de Produtividade
+                    </button>
+                    <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" class="text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        ⚙️ Configurações
+                    </button>
+                </div>
 
-            <!-- Botão de Usuário/Login (Último elemento à direita) -->
-            <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
-                <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white transition shadow-sm">
-                    <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Visitante</span>
-                    <div id="userHeaderActions" class="flex items-center gap-1.5 ml-1">
-                        <button onclick="openAuthModal()" title="Fazer Login" class="text-[10px] bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded-lg text-white font-extrabold transition flex items-center gap-1 shadow-sm">
-                            🔑 Entrar / Cadastrar
-                        </button>
+                <!-- Botão de Usuário/Login -->
+                <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
+                    <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition shadow-sm">
+                        <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Visitante</span>
+                        <div id="userHeaderActions" class="flex items-center gap-1.5 ml-1">
+                            <button onclick="openAuthModal()" title="Fazer Login" class="text-[10px] bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded-lg text-white font-extrabold transition flex items-center gap-1 shadow-sm">
+                                🔑 Entrar / Cadastrar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
     <!-- Modal de Gerenciamento de Segmentos (Categorias) -->
     <div id="modalSegments" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
