@@ -1,0 +1,199 @@
+{
+  "summary": {
+    "scanned_files": 3,
+    "secrets_found": 0,
+    "vulns_found": 21,
+    "config_issues": 0
+  },
+  "findings": [
+    {
+      "category": "Code Vulnerability",
+      "title": "Insecure HTTP Protocol URL in Production Code",
+      "severity": "LOW",
+      "file": "ai_studio_code _v3.html",
+      "line": 8,
+      "snippet": "<link rel=\"icon\" type=\"image/svg+xml\" href=\"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234f46e5' stroke='%23312e81' stroke-width='4'/><circle cx='50' cy='50' r='38' fill='none' stroke='white' stroke-width='2' stroke-dasharray='4 2'/><polygon points='50,15 62,50 50,85 38,50' fill='%23ef4444'/><polygon points='50,15 62,50 50,50' fill='%23f97316'/><polygon points='50,85 38,50 50,50' fill='%23e0e7ff'/><circle cx='50' cy='50' r='6' fill='%23312e81'/></svg>\">",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 1071,
+      "snippet": "progressBar.innerHTML = '<div class=\"h-full bg-gray-300 w-full rounded-full\"></div>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 1073,
+      "snippet": "legendContainer.innerHTML = '<span class=\"text-[10px] text-gray-400 italic\">Nenhum esfor\u00e7o planejado para hoje.</span>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 1283,
+      "snippet": "card.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 1478,
+      "snippet": "itemDiv.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 2393,
+      "snippet": "card.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 2715,
+      "snippet": "daySection.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 2731,
+      "snippet": "tasksContainer.innerHTML = emptyMsg;",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 2759,
+      "snippet": "timeline.innerHTML = '<p class=\"text-gray-500 text-sm\">Sem compromissos fixos agendados para este dia.</p>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 2922,
+      "snippet": "row.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 3458,
+      "snippet": "insightsContainer.innerHTML = balanceInsightHTML + insight1 + insight2 + insight3 + insight4;",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 3539,
+      "snippet": "row.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 3554,
+      "snippet": "timeContainer.innerHTML = '<p class=\"text-xs text-gray-400 italic\">Nenhuma tarefa conclu\u00edda com tempo contabilizado ainda.</p>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 800,
+      "snippet": "itemDiv.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 983,
+      "snippet": "card.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 1226,
+      "snippet": "daySection.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 1243,
+      "snippet": "tasksContainer.innerHTML = emptyMsg;",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 1271,
+      "snippet": "timeline.innerHTML = '<p class=\"text-gray-500 text-sm\">Sem compromissos fixos agendados para este dia.</p>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 1609,
+      "snippet": "insightsContainer.innerHTML = insight1 + insight2 + insight3 + insight4;",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 1687,
+      "snippet": "row.innerHTML = `",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "bussola_limpa.html",
+      "line": 1702,
+      "snippet": "timeContainer.innerHTML = '<p class=\"text-xs text-gray-400 italic\">Nenhuma tarefa conclu\u00edda com tempo contabilizado ainda.</p>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    }
+  ]
+}

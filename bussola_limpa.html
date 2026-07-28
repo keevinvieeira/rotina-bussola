@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;">
+    <title>Bússola - Meu Organizador de Rotina</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos interativos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DOMPurify para sanitização defensiva contra XSS -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
+    <style>
+        .slide-fade {
+            animation: slideFadeIn 0.25s ease-out forwards;
+        }
+        @keyframes slideFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen pb-12">
+
+    <header class="bg-indigo-600 text-white py-6 shadow-md mb-8">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <div class="flex flex-col items-center md:items-start">
+                <h1 class="text-2xl font-bold flex items-center gap-2">🧭 Bússola</h1>
+                <p class="text-indigo-200 text-sm">Foco, produtividade e fins de semana livres</p>
+            </div>
+            
+            <!-- Navegação entre Abas -->
+            <div class="flex bg-indigo-800 p-1 rounded-lg shrink-0">
+                <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition">
+                    📅 Agenda e Projetos
+                </button>
+                <button onclick="switchTab('analise')" id="tabBtn-analise" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
+                    📊 Análise de Produtividade
+                </button>
+            </div>
+
+            <div class="flex gap-2 flex-wrap justify-center md:justify-end">
+                <button onclick="toggleModalIO()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs font-semibold transition">
+                    Importar / Exportar
+                </button>
+                <button onclick="resetWeeklyChecks()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-2 rounded-lg text-xs font-semibold transition">
+                    Reiniciar Semana
+                </button>
+                <button onclick="openResetAllModal()" class="bg-rose-700 hover:bg-rose-800 px-3 py-2 rounded-lg text-xs font-semibold transition">
+                    🚨 Resetar Tudo
+                </button>
+                <button id="btnNotif" onclick="requestNotificationPermission()" class="bg-indigo-900 hover:bg-black px-3 py-2 rounded-lg text-xs font-semibold transition">
+                    🔔 Notificações
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal de Importação / Exportação -->
+    <div id="modalIO" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-xl p-6 max-w-lg w-full shadow-lg">
+            <h3 class="text-lg font-bold mb-1">Sincronizar e Integração</h3>
+            <p class="text-xs text-gray-500 mb-4">Escolha visualizar os dados estruturados de backup ou o código fonte do aplicativo.</p>
+            
+            <div class="flex gap-2 mb-3">
+                <button onclick="exportData()" class="flex-1 py-1.5 px-2 text-xs font-bold rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition flex items-center justify-center gap-1">📦 Dados JSON</button>
+                <button onclick="viewAppHTML()" class="flex-1 py-1.5 px-2 text-xs font-bold rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition flex items-center justify-center gap-1">🌐 Código HTML do App</button>
+            </div>
+
+            <textarea id="ioTextarea" rows="8" placeholder="O conteúdo será exibido aqui..." class="w-full border border-gray-300 rounded-lg p-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"></textarea>
+            
+            <div class="flex justify-end gap-2 flex-wrap">
+                <button onclick="toggleModalIO()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-gray-100 transition">Fechar</button>
+                <button onclick="copyTextareaContent()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">📋 Copiar Conteúdo</button>
+                <button onclick="downloadBackup()" class="px-3 py-1.5 bg-emerald-650 hover:bg-emerald-750 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">📥 Baixar .json</button>
+                <button onclick="importData()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs transition font-bold">Importar Dados JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reset Completo (Resetar Tudo) -->
+    <div id="modalResetAll" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-lg border border-rose-100">
+            <div class="flex items-center gap-2.5 mb-3 text-rose-600">
+                <span class="text-2xl">🚨</span>
+                <h3 class="text-lg font-bold">Excluir Todas as Tarefas?</h3>
+            </div>
+            <p class="text-xs text-gray-500 mb-4 leading-relaxed">
+                Esta ação apagará permanentemente **todas as suas tarefas, comentários e projetos** salvos localmente e restaurará a agenda aos padrões iniciais.
+            </p>
+            <p class="text-xs font-bold text-gray-700 mb-2">
+                Para confirmar a exclusão, digite a palavra <span class="text-rose-600 select-all font-extrabold">DELETAR</span> abaixo:
+            </p>
+            <input type="text" id="resetAllConfirmInput" placeholder="Digite DELETAR..." oninput="checkResetAllConfirmation()" class="w-full border border-gray-300 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500 mb-4">
+            
+            <div class="flex justify-end gap-2">
+                <button onclick="closeResetAllModal()" class="px-4 py-2 border rounded-lg text-xs hover:bg-gray-100 transition font-semibold">Cancelar</button>
+                <button id="btnConfirmResetAll" onclick="executeResetAll()" disabled class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Sim, excluir tudo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 1: AGENDA E PROJETOS -->
+    <main id="tab-agenda" class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Seletor de Semanas -->
+        <div class="lg:col-span-3 bg-indigo-50/50 p-4 rounded-xl shadow-inner border border-indigo-100 flex items-center justify-between gap-4">
+            <button onclick="changeWeek(-1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3 py-2 rounded-lg text-xs transition shadow-sm">
+                ◀ Semana Anterior
+            </button>
+            <div class="text-center">
+                <span id="currentWeekRangeLabel" class="text-xs sm:text-sm font-extrabold text-indigo-900 block tracking-tight">Carregando semana...</span>
+            </div>
+            <button onclick="changeWeek(1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3 py-2 rounded-lg text-xs transition shadow-sm">
+                Próxima Semana ▶
+            </button>
+        </div>
+        
+        <!-- Coluna de Projetos (Backlog / Fila) -->
+        <div class="lg:col-span-1 order-2 lg:order-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-6">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">🗂️ Painel de Projetos</h2>
+                
+                <!-- Input para novos projetos -->
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="newProjectInput" placeholder="Novo projeto/tarefa..." class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button onclick="addProjectItem()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition">+</button>
+                </div>
+
+                <!-- Em Andamento -->
+                <div class="mb-6">
+                    <h3 class="font-semibold text-emerald-600 text-xs uppercase mb-3 tracking-wider">🟢 Em Andamento</h3>
+                    <div id="listAndamento" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        <!-- JS Dinâmico -->
+                    </div>
+                </div>
+
+                <!-- Na Fila -->
+                <div>
+                    <h3 class="font-semibold text-amber-500 text-xs uppercase mb-3 tracking-wider">🟡 Na Fila (Aguardando)</h3>
+                    <div id="listFila" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        <!-- JS Dinâmico -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna da Agenda Diária -->
+        <div class="lg:col-span-2 order-1 lg:order-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-2 border-b">
+                <h2 id="agendaTitle" class="text-xl font-bold text-gray-900">📅 Agenda do Dia</h2>
+                <div class="flex flex-wrap gap-3 items-center w-full sm:w-auto">
+                    <div class="flex bg-gray-100 p-1 rounded-lg shrink-0 select-none">
+                        <button onclick="switchAgendaView('daily')" id="viewBtn-daily" class="bg-white text-indigo-700 shadow-sm px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1">📅 Dia</button>
+                        <button onclick="switchAgendaView('weekly')" id="viewBtn-weekly" class="text-gray-600 hover:text-gray-800 px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1">📆 Semana</button>
+                    </div>
+                    <select id="daySelector" onchange="loadDaySchedule()" class="bg-gray-100 border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto shrink-0">
+                        <option value="1">Segunda-Feira</option>
+                        <option value="2">Terça-Feira</option>
+                        <option value="3">Quarta-Feira</option>
+                        <option value="4">Quinta-Feira</option>
+                        <option value="5">Sexta-Feira</option>
+                        <option value="6">Sábado</option>
+                        <option value="0">Domingo</option>
+                    </select>
+                    <select id="weeklyStatusFilter" onchange="loadWeeklySchedule()" class="hidden bg-gray-100 border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto shrink-0">
+                        <option value="all">Todas as tarefas</option>
+                        <option value="pending">Pendentes</option>
+                        <option value="completed">Concluídas</option>
+                    </select>
+                    <input type="text" id="weeklySearchFilter" oninput="loadWeeklySchedule()" placeholder="Buscar tarefa..." class="hidden bg-gray-100 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-40 shrink-0">
+                </div>
+            </div>
+
+            <!-- Adicionar Tarefa Diária -->
+            <details id="addTaskDetails" class="mb-6 bg-gray-50 rounded-lg border border-gray-200">
+                <summary class="p-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 rounded-lg">➕ Adicionar Nova Tarefa a este dia</summary>
+                <div class="p-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Início</label>
+                            <input type="time" id="newTaskTime" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Fim</label>
+                            <input type="time" id="newTaskTimeEnd" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Título da Tarefa</label>
+                        <input type="text" id="newTaskTitle" placeholder="Título da tarefa..." class="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Descrição</label>
+                        <input type="text" id="newTaskDesc" placeholder="Descrição rápida..." class="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Segmento (Categoria)</label>
+                        <select id="newTaskCategory" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="trabalho-pessoal">👤 Trabalho (Pessoal)</option>
+                            <option value="trabalho-esposa">💼 Trabalho (Esposa)</option>
+                            <option value="trabalho-pai">💼 Trabalho (Pai)</option>
+                            <option value="trabalho-mae">💼 Trabalho (Mãe)</option>
+                            <option value="trabalho-irma">💼 Trabalho (Irmã)</option>
+                            <option value="domestico">🧹 Serviços Domésticos</option>
+                            <option value="educacao">📚 Educação Contínua</option>
+                            <option value="exercicio">💪 Exercício Físico</option>
+                        </select>
+                    </div>
+                    <button onclick="addDailyTask()" class="md:col-span-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-semibold transition mt-2">Confirmar e Salvar</button>
+                </div>
+            </details>
+
+            <div id="scheduleTimeline" class="space-y-4">
+                <!-- JS Dinâmico -->
+            </div>
+            <div id="weeklyTimeline" class="hidden space-y-6">
+                <!-- JS Dinâmico -->
+            </div>
+        </div>
+    </main>
+
+    <!-- ABA 2: ANÁLISE DE PRODUTIVIDADE -->
+    <main id="tab-analise" class="max-w-6xl mx-auto px-4 hidden grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Bloco de Métricas / Insights -->
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">💡 Insights Semanais</h2>
+                <div id="insightsContainer" class="space-y-4 text-sm text-gray-600">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloco dos Gráficos -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-8">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">📈 Desempenho Visual</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs font-semibold uppercase text-gray-400 mb-4">Conclusão de Tarefas Semanais</span>
+                        <div class="w-full max-w-[220px]">
+                            <canvas id="completionDoughnutChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center w-full">
+                        <span class="text-xs font-semibold uppercase text-gray-400 mb-4">Taxa de Conclusão por Dia</span>
+                        <div class="w-full h-48">
+                            <canvas id="weeklyBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">⏱️ Distribuição de Tempo Investido (Tarefas Concluídas)</h2>
+                <div id="timeDistributionContainer" class="space-y-4">
+                    <!-- JS Dinâmico -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE INÍCIO DE TAREFA (POPUP DE AVISO) -->
+    <div id="modalTaskAlert" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-all duration-300 opacity-0">
+        <div class="bg-white rounded-2xl shadow-2xl border border-indigo-100 max-w-md w-full p-6 transform scale-95 transition-all duration-300 flex flex-col items-center text-center">
+            <!-- Icon/Visual -->
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-3xl mb-4 animate-bounce">
+                🧭
+            </div>
+            
+            <span class="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold mb-2" id="alertTaskCategory">Trabalho</span>
+            
+            <h3 class="text-xl font-extrabold text-gray-950 mb-1" id="alertTaskTitle">Título da Tarefa</h3>
+            <span class="text-xs text-indigo-650 font-bold mb-3 block" id="alertTaskTime">08:00</span>
+            
+            <p class="text-sm text-gray-500 mb-6 bg-gray-50 p-3 rounded-lg w-full border border-gray-150" id="alertTaskDesc">Descrição da tarefa...</p>
+            
+            <div class="flex gap-2 w-full">
+                <button onclick="acknowledgeTaskAlert()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-1.5 text-sm">
+                    🚀 Ok, começar!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estrutura de Agenda Diária Padrão
+        const defaultSchedule = {
+            1: [], // Segunda
+            2: [], // TerÃ§a
+            3: [], // Quarta
+            4: [], // Quinta
+            5: [], // Sexta
+            6: [], // SÃ¡bado
+            0: []  // Domingo
+        };
+
+        // Estrutura de Projetos Unificada
+        const defaultProjects = [];
+
+        // Definição das Categorias/Segmentos e estilos de cores (bg light e dark)
+        const taskCategories = {
+            'domestico': { label: '🧹 Serviços Domésticos', bg: 'bg-blue-100 text-blue-800 border-blue-200', darkBg: 'bg-blue-900/30 border-blue-500/30 text-blue-300' },
+            'educacao': { label: '📚 Educação Contínua', bg: 'bg-purple-100 text-purple-800 border-purple-200', darkBg: 'bg-purple-900/30 border-purple-500/30 text-purple-300' },
+            'exercicio': { label: '💪 Exercício Físico', bg: 'bg-teal-100 text-teal-800 border-teal-200', darkBg: 'bg-teal-900/30 border-teal-500/30 text-teal-300' },
+            'trabalho-esposa': { label: '💼 Trabalho (Esposa)', bg: 'bg-emerald-100 text-emerald-800 border-emerald-200', darkBg: 'bg-emerald-900/30 border-emerald-500/30 text-emerald-300' },
+            'trabalho-pai': { label: '💼 Trabalho (Pai)', bg: 'bg-amber-100 text-amber-800 border-amber-200', darkBg: 'bg-amber-900/30 border-amber-500/30 text-amber-300' },
+            'trabalho-mae': { label: '💼 Trabalho (Mãe)', bg: 'bg-orange-100 text-orange-800 border-orange-200', darkBg: 'bg-orange-900/30 border-orange-500/30 text-orange-300' },
+            'trabalho-irma': { label: '💼 Trabalho (Irmã)', bg: 'bg-pink-105 text-pink-800 border-pink-200', darkBg: 'bg-pink-900/30 border-pink-500/30 text-pink-300' },
+            'trabalho-pessoal': { label: '👤 Trabalho (Pessoal)', bg: 'bg-gray-100 text-gray-800 border-gray-200', darkBg: 'bg-white/10 border-white/20 text-white/90' }
+        };
+
+        // Helper para acesso seguro ao localStorage (evita SecurityError em iframe)
+        function safeGetItem(key) {
+            try {
+                return localStorage.getItem(key);
+            } catch (e) {
+                console.warn("Não foi possível acessar o localStorage.getItem para chave: " + key, e);
+                return null;
+            }
+        }
+
+        function safeSetItem(key, value) {
+            try {
+                localStorage.setItem(key, value);
+            } catch (e) {
+                console.warn("Não foi possível salvar no localStorage.setItem para chave: " + key, e);
+            }
+        }
+
+        function safeRemoveItem(key) {
+            try {
+                localStorage.removeItem(key);
+            } catch (e) {
+                console.warn("Não foi possível remover do localStorage.removeItem para chave: " + key, e);
+            }
+        }
+
+        function isScheduleEmpty(schedule) {
+            if (!schedule || typeof schedule !== 'object') return true;
+            for (let day in schedule) {
+                if (Array.isArray(schedule[day]) && schedule[day].length > 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Helpers de cálculo de datas e semanas
+        function getWeekKey(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+        }
+
+        function getWeekRangeString(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(d.setDate(diff));
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            
+            const pad = (n) => String(n).padStart(2, '0');
+            return `Semana ${getWeekKey(date).split('-W')[1]} / ${date.getFullYear()} (${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}/${monday.getFullYear()} a ${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}/${sunday.getFullYear()})`;
+        }
+
+        function getWeekNumber(weekKey) {
+            const match = weekKey.match(/-W(\d+)/);
+            return match ? parseInt(match[1], 10) : 28;
+        }
+
+        // Geradores dinâmicos de cronograma de 3 meses (13 semanas)
+        function generateInitialProjectsForWeek(weekKey) {
+            const weekNo = getWeekNumber(weekKey);
+            
+            // Deep copy defaultProjects
+            const weekProjects = JSON.parse(JSON.stringify(defaultProjects));
+            
+            weekProjects.forEach(proj => {
+                // Configuração base de status e done
+                if (proj.id === 7 || proj.id === 8) { // Site Esposa e CRM
+                    if (weekNo >= 33) {
+                        proj.done = true;
+                    }
+                } else if (proj.id === 10) { // Site Mãe
+                    if (weekNo >= 33 && weekNo <= 36) {
+                        proj.status = "andamento";
+                    } else if (weekNo >= 37) {
+                        proj.status = "andamento";
+                        proj.done = true;
+                    }
+                } else if (proj.id === 11) { // Site Pai
+                    if (weekNo === 37) {
+                        proj.status = "andamento";
+                    } else if (weekNo >= 38) {
+                        proj.status = "andamento";
+                        proj.done = true;
+                    }
+                } else if (proj.id === 12) { // Site Irmã
+                    if (weekNo >= 38 && weekNo <= 41) {
+                        proj.status = "andamento";
+                    } else if (weekNo >= 42) {
+                        proj.status = "andamento";
+                        proj.done = true;
+                    }
+                }
+            });
+            return weekProjects;
+        }
+
+        function generateInitialScheduleForWeek(weekKey) {
+            const weekNo = getWeekNumber(weekKey);
+            const weekSchedule = JSON.parse(JSON.stringify(defaultSchedule));
+            
+            for (let day in weekSchedule) {
+                weekSchedule[day] = weekSchedule[day].map(task => {
+                    let t = { ...task };
+                    if (33 <= weekNo && weekNo <= 36) {
+                        // Foco na imobiliária/site da Mãe
+                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
+                            t.title = t.title.replace("site da Esposa", "site da Mãe (Imobiliária)").replace("CRM Esposa", "Design do site da Mãe").replace("IA de Agendamento", "Ajustes do site da Mãe");
+                            t.desc = t.desc.replace("site da Esposa", "site da Mãe").replace("CRM", "Design").replace("IA", "Upload de Imóveis");
+                            t.category = "trabalho-mae";
+                        }
+                        if (t.title.includes("IA")) {
+                            t.title = "Foco Médio: Upload fotos imobiliária";
+                            t.desc = "Trabalho mãe";
+                            t.category = "trabalho-mae";
+                        }
+                    } else if (weekNo === 37) {
+                        // Foco no site do Pai
+                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
+                            t.title = "Foco: Desenvolvimento do site do Pai";
+                            t.desc = "Implementação e estrutura do site";
+                            t.category = "trabalho-pai";
+                        }
+                    } else if (38 <= weekNo && weekNo <= 41) {
+                        // Foco no site da Irmã
+                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
+                            t.title = "Foco: Desenvolvimento do site da Irmã";
+                            t.desc = "Design e código do site da irmã";
+                            t.category = "trabalho-irma";
+                        }
+                    } else if (weekNo >= 42) {
+                        // Tudo concluído
+                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
+                            t.title = "Foco Pessoal / Livre";
+                            t.desc = "Manutenção e estudos pessoais";
+                            t.category = "trabalho-pessoal";
+                        }
+                    }
+                    return t;
+                });
+            }
+            return weekSchedule;
+        }
+
+        // Variáveis globais do estado semanal
+        let weeklySchedule = {};
+        let weeklyProjects = {};
+        let selectedWeekDate = new Date();
+        let selectedWeekKey = getWeekKey(selectedWeekDate);
+        let projects = [];
+        let agendaViewMode = 'daily';
+
+        function getPreviousWeekKey(weekKey) {
+            const match = weekKey.match(/^(\d{4})-W(\d{2})$/);
+            if (!match) return weekKey;
+            const year = parseInt(match[1], 10);
+            const week = parseInt(match[2], 10);
+            
+            if (week === 1) {
+                return `${year - 1}-W52`;
+            } else {
+                return `${year}-W${String(week - 1).padStart(2, '0')}`;
+            }
+        }
+
+        function ensureWeekExists(weekKey) {
+            if (!weeklySchedule[weekKey]) {
+                weeklySchedule[weekKey] = generateInitialScheduleForWeek(weekKey);
+            }
+            if (!weeklyProjects[weekKey]) {
+                const prevWeekKey = getPreviousWeekKey(weekKey);
+                if (weeklyProjects[prevWeekKey]) {
+                    // Copia o estado dos projetos da semana anterior cronologicamente para propagação contínua
+                    weeklyProjects[weekKey] = JSON.parse(JSON.stringify(weeklyProjects[prevWeekKey]));
+                } else {
+                    weeklyProjects[weekKey] = generateInitialProjectsForWeek(weekKey);
+                }
+            }
+            projects = weeklyProjects[weekKey];
+        }
+
+        // Recuperação e Migração segura do localStorage
+        function loadWeeklyDataFromStorage() {
+            let migrated = false;
+            
+            // 1. Carrega Agenda
+            try {
+                const storedSchedule = JSON.parse(safeGetItem('my_weekly_schedule'));
+                if (storedSchedule && typeof storedSchedule === 'object') {
+                    const keys = Object.keys(storedSchedule);
+                    const isWeekly = keys.some(key => key.match(/^\d{4}-W\d{2}$/));
+                    if (isWeekly) {
+                        weeklySchedule = storedSchedule;
+                    } else if (keys.length > 0) {
+                        // Migra agenda antiga de formato plano
+                        const currentWeek = getWeekKey(new Date());
+                        weeklySchedule[currentWeek] = storedSchedule;
+                        migrated = true;
+                    }
+                }
+            } catch (e) {
+                console.warn("Erro ao ler agenda:", e);
+            }
+
+            // 2. Carrega Projetos
+            try {
+                const storedWeeklyProjects = JSON.parse(safeGetItem('my_weekly_projects'));
+                if (storedWeeklyProjects && typeof storedWeeklyProjects === 'object') {
+                    weeklyProjects = storedWeeklyProjects;
+                } else {
+                    const oldProjects = JSON.parse(safeGetItem('my_projects'));
+                    if (Array.isArray(oldProjects) && oldProjects.length > 0) {
+                        // Migra projetos antigos de formato plano
+                        const currentWeek = getWeekKey(new Date());
+                        weeklyProjects[currentWeek] = oldProjects;
+                        migrated = true;
+                    }
+                }
+            } catch (e) {
+                console.warn("Erro ao ler projetos:", e);
+            }
+
+            ensureWeekExists(selectedWeekKey);
+            
+            if (migrated) {
+                saveData();
+            }
+        }
+
+        loadWeeklyDataFromStorage();
+
+        const daysOrder = [1, 2, 3, 4, 5, 6, 0];
+        const daysNames = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+        const daysNamesFull = {
+            1: "Segunda-Feira", 2: "Terça-Feira", 3: "Quarta-Feira",
+            4: "Quinta-Feira", 5: "Sexta-Feira", 6: "Sábado", 0: "Domingo"
+        };
+
+        // Instâncias Globais dos Gráficos
+        let doughnutChartInst = null;
+        let barChartInst = null;
+
+        // Função de migração de dados antigos com máxima segurança contra propriedades undefined
+        function migrateScheduleData() {
+            let migrated = false;
+            for (let weekKey in weeklySchedule) {
+                const weekData = weeklySchedule[weekKey];
+                if (!weekData || typeof weekData !== 'object') continue;
+                
+                for (let day in weekData) {
+                    if (!Array.isArray(weekData[day])) {
+                        weekData[day] = [];
+                        continue;
+                    }
+                    weekData[day] = weekData[day].map(task => {
+                        if (!task || typeof task !== 'object') {
+                            return {
+                                id: "custom-" + Date.now() + Math.random(),
+                                time: "08:00",
+                                timeEnd: "09:00",
+                                title: "Tarefa sem nome",
+                                desc: "",
+                                done: false,
+                                status: "pending",
+                                category: "trabalho-pessoal",
+                                justification: "",
+                                completion: "nao",
+                                difficulty: "",
+                                notes: ""
+                            };
+                        }
+                        let updated = false;
+                        // Mapeia done: true para status: 'success'
+                        if (task.status === undefined) {
+                            task.status = task.done ? 'success' : 'pending';
+                            updated = true;
+                        }
+                        if (task.justification === undefined) {
+                            task.justification = "";
+                            updated = true;
+                        }
+                        if (task.completion === undefined) {
+                            task.completion = task.status === 'success' ? 'sim' : 'nao';
+                            updated = true;
+                        }
+                        if (task.difficulty === undefined) {
+                            task.difficulty = "";
+                            updated = true;
+                        }
+                        if (task.notes === undefined) {
+                            task.notes = "";
+                            updated = true;
+                        }
+                        if (!task.timeEnd) {
+                            // Calcula um horário de término padrão (ex: +30 minutos ou baseado na descrição)
+                            const parts = (task.time || "08:00").split(':');
+                            let h = parseInt(parts[0], 10);
+                            let m = parseInt(parts[1], 10);
+                            let duration = 60; // default 1 hora
+
+                            const title = (task.title || "").toLowerCase();
+                            const desc = (task.desc || "").toLowerCase();
+
+                            if (desc.includes('40 min') || title.includes('40 min')) duration = 40;
+                            else if (desc.includes('30 min') || title.includes('30 min')) duration = 30;
+                            else if (title.includes('inglês') || title.includes('ingles')) duration = 30;
+                            else if (title.includes('descanso')) duration = 180;
+                            else if (title.includes('academia') || title.includes('jiu-jitsu') || title.includes('jiu jitsu')) duration = 90;
+                            else if (title.includes('lixo') || title.includes('louça') || title.includes('louca')) duration = 30;
+                            
+                            m += duration;
+                            if (m >= 60) {
+                                h += Math.floor(m / 60);
+                                m = m % 60;
+                            }
+                            if (h >= 24) {
+                                h = h % 24;
+                            }
+                            
+                            const hStr = String(h).padStart(2, '0');
+                            const mStr = String(m).padStart(2, '0');
+                            task.timeEnd = `${hStr}:${mStr}`;
+                            updated = true;
+                        }
+                        if (!task.category) {
+                            const title = (task.title || "").toLowerCase();
+                            const desc = (task.desc || "").toLowerCase();
+                            if (title.includes('curso') || title.includes('inglês') || title.includes('escrita') || title.includes('estudo')) {
+                                task.category = 'educacao';
+                            } else if (title.includes('cozinhar') || title.includes('limpar') || title.includes('mofo') || title.includes('aspirador') || title.includes('roupa') || title.includes('lavar') || title.includes('banheiro')) {
+                                task.category = 'domestico';
+                            } else if (title.includes('jiu-jitsu') || title.includes('academia') || title.includes('treino') || title.includes('corrida')) {
+                                task.category = 'exercicio';
+                            } else if (title.includes('esposa') || desc.includes('esposa')) {
+                                task.category = 'trabalho-esposa';
+                            } else if (title.includes('mãe') || desc.includes('mãe') || title.includes('pai') || desc.includes('pai')) {
+                                task.category = 'trabalho-pai';
+                            } else {
+                                task.category = 'trabalho-pessoal';
+                            }
+                            updated = true;
+                        }
+                        if (updated) migrated = true;
+                        return task;
+                    });
+                }
+            }
+            if (migrated) {
+                saveData();
+            }
+        }
+
+        function updateWeekRangeLabel() {
+            const el = document.getElementById('currentWeekRangeLabel');
+            if (el) {
+                el.innerText = getWeekRangeString(selectedWeekDate);
+            }
+        }
+
+        function changeWeek(offset) {
+            selectedWeekDate.setDate(selectedWeekDate.getDate() + (offset * 7));
+            selectedWeekKey = getWeekKey(selectedWeekDate);
+            ensureWeekExists(selectedWeekKey);
+            updateWeekRangeLabel();
+            loadProjects();
+            refreshAgendaView();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Executa a migração no início
+            migrateScheduleData();
+
+            // Ajuste específico solicitado pelo usuário para Sexta-Feira na Semana 28:
+            if (selectedWeekKey === '2026-W28' && weeklySchedule['2026-W28'] && weeklySchedule['2026-W28'][5]) {
+                // 1. Procurar a tarefa "Lavar o Banheiro" e marcá-la como falha (Adiado para semana que vem)
+                let bathroomTask = weeklySchedule['2026-W28'][5].find(t => t.title === "Lavar o Banheiro" || t.id === "s5-6");
+                if (bathroomTask && bathroomTask.status !== "failed" && !bathroomTask.done) {
+                    bathroomTask.status = "failed";
+                    bathroomTask.done = false;
+                    bathroomTask.justification = "Adiado para a semana que vem";
+                    bathroomTask.completion = "nao";
+                }
+
+                // 2. Adicionar a tarefa "Retirar o lixo e lavar a louça" se ela ainda não existir
+                let trashTaskExists = weeklySchedule['2026-W28'][5].some(t => t.title.toLowerCase().includes("retirar o lixo"));
+                if (!trashTaskExists) {
+                    weeklySchedule['2026-W28'][5].push({
+                        id: "custom-trash-" + Date.now(),
+                        time: "18:30",
+                        timeEnd: "19:00",
+                        title: "Retirar o lixo e lavar a louça",
+                        desc: "Tarefa doméstica diária",
+                        done: false,
+                        status: "pending",
+                        category: "domestico",
+                        justification: "",
+                        completion: "nao",
+                        difficulty: "",
+                        notes: ""
+                    });
+                }
+                saveData();
+            }
+
+            const today = new Date().getDay(); // 0=Dom, 1=Seg...
+            document.getElementById('daySelector').value = today;
+            
+            updateWeekRangeLabel();
+            loadProjects();
+            loadDaySchedule();
+            startNotificationTimer();
+
+            // Ativa notificações por padrão se a permissão for default ou já concedida
+            if (Notification.permission === "default") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        const btn = document.getElementById('btnNotif');
+                        if (btn) {
+                            btn.innerText = "🔔 Notificações Ativas";
+                            btn.disabled = true;
+                        }
+                    }
+                });
+            } else if (Notification.permission === "granted") {
+                const btn = document.getElementById('btnNotif');
+                if (btn) {
+                    btn.innerText = "🔔 Notificações Ativas";
+                    btn.disabled = true;
+                }
+            }
+        });
+
+        // ================= ABA NAVEGAÇÃO =================
+        function switchTab(tabName) {
+            const tabAgenda = document.getElementById('tab-agenda');
+            const tabAnalise = document.getElementById('tab-analise');
+            const btnAgenda = document.getElementById('tabBtn-agenda');
+            const btnAnalise = document.getElementById('tabBtn-analise');
+
+            if (tabName === 'agenda') {
+                tabAgenda.classList.remove('hidden');
+                tabAgenda.classList.add('grid');
+                tabAnalise.classList.add('hidden');
+                
+                btnAgenda.className = "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition";
+                btnAnalise.className = "text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition";
+            } else {
+                tabAgenda.classList.add('hidden');
+                tabAgenda.classList.remove('grid');
+                tabAnalise.classList.remove('hidden');
+                tabAnalise.classList.add('grid');
+
+                btnAgenda.className = "text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition";
+                btnAnalise.className = "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition";
+
+                renderChartsAndInsights();
+            }
+        }
+
+        // ================= MANIPULAÇÃO DO PAINEL DE PROJETOS =================
+        function loadProjects() {
+            const listAndamento = document.getElementById('listAndamento');
+            const listFila = document.getElementById('listFila');
+
+            listAndamento.innerHTML = '';
+            listFila.innerHTML = '';
+
+            projects.forEach(project => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "flex items-start justify-between gap-2 p-2 hover:bg-gray-50 rounded transition group text-sm";
+                
+                const isAndamento = project.status === "andamento";
+                const actionButton = isAndamento 
+                    ? `<button onclick="changeProjectStatus(${project.id}, 'fila')" title="Mover para a fila" class="text-xs text-gray-400 hover:text-amber-500 transition">⏸️</button>`
+                    : `<button onclick="changeProjectStatus(${project.id}, 'andamento')" title="Iniciar Projeto" class="text-xs text-gray-400 hover:text-emerald-500 transition">🚀</button>`;
+
+                itemDiv.innerHTML = `
+                    <div class="flex items-start gap-2 max-w-[80%]">
+                        <input type="checkbox" id="proj-${project.id}" ${project.done ? 'checked' : ''} onchange="toggleProject(${project.id})" class="mt-1 h-3.5 w-3.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                        <label for="proj-${project.id}" class="${project.done ? 'line-through text-gray-400' : 'text-gray-700 font-medium'} cursor-pointer select-none leading-snug">${project.text}</label>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        ${actionButton}
+                        <button onclick="deleteProject(${project.id})" title="Excluir" class="text-gray-300 hover:text-red-500 text-xs hidden group-hover:block transition">🗑️</button>
+                    </div>
+                `;
+
+                if (isAndamento) {
+                    listAndamento.appendChild(itemDiv);
+                } else {
+                    listFila.appendChild(itemDiv);
+                }
+            });
+        }
+
+        function propagateProjectChangeToFutureWeeks(projectId, field, value) {
+            const currentWeekNo = getWeekNumber(selectedWeekKey);
+            for (let weekKey in weeklyProjects) {
+                const weekNo = getWeekNumber(weekKey);
+                if (weekNo > currentWeekNo) {
+                    weeklyProjects[weekKey] = weeklyProjects[weekKey].map(p => {
+                        if (p.id === projectId) {
+                            return { ...p, [field]: value };
+                        }
+                        return p;
+                    });
+                }
+            }
+        }
+
+        function propagateProjectDeletionToFutureWeeks(projectId) {
+            const currentWeekNo = getWeekNumber(selectedWeekKey);
+            for (let weekKey in weeklyProjects) {
+                const weekNo = getWeekNumber(weekKey);
+                if (weekNo > currentWeekNo) {
+                    weeklyProjects[weekKey] = weeklyProjects[weekKey].filter(p => p.id !== projectId);
+                }
+            }
+        }
+
+        function propagateProjectAdditionToFutureWeeks(newProject) {
+            const currentWeekNo = getWeekNumber(selectedWeekKey);
+            for (let weekKey in weeklyProjects) {
+                const weekNo = getWeekNumber(weekKey);
+                if (weekNo > currentWeekNo) {
+                    if (!weeklyProjects[weekKey].some(p => p.id === newProject.id)) {
+                        weeklyProjects[weekKey].push(JSON.parse(JSON.stringify(newProject)));
+                    }
+                }
+            }
+        }
+
+        function addProjectItem() {
+            const input = document.getElementById('newProjectInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const newProject = {
+                id: Date.now(),
+                text: text,
+                done: false,
+                status: "andamento"
+            };
+
+            weeklyProjects[selectedWeekKey].push(newProject);
+            projects = weeklyProjects[selectedWeekKey];
+            propagateProjectAdditionToFutureWeeks(newProject);
+            saveData();
+            input.value = '';
+            loadProjects();
+        }
+
+        function toggleProject(id) {
+            weeklyProjects[selectedWeekKey] = weeklyProjects[selectedWeekKey].map(p => p.id === id ? { ...p, done: !p.done } : p);
+            projects = weeklyProjects[selectedWeekKey];
+            
+            const targetProj = projects.find(p => p.id === id);
+            if (targetProj) {
+                propagateProjectChangeToFutureWeeks(id, 'done', targetProj.done);
+            }
+            
+            saveData();
+            loadProjects();
+        }
+
+        function changeProjectStatus(id, newStatus) {
+            weeklyProjects[selectedWeekKey] = weeklyProjects[selectedWeekKey].map(p => p.id === id ? { ...p, status: newStatus } : p);
+            projects = weeklyProjects[selectedWeekKey];
+            
+            const targetProj = projects.find(p => p.id === id);
+            if (targetProj) {
+                propagateProjectChangeToFutureWeeks(id, 'status', targetProj.status);
+            }
+            
+            saveData();
+            loadProjects();
+        }
+
+        function deleteProject(id) {
+            weeklyProjects[selectedWeekKey] = weeklyProjects[selectedWeekKey].filter(p => p.id !== id);
+            projects = weeklyProjects[selectedWeekKey];
+            propagateProjectDeletionToFutureWeeks(id);
+            saveData();
+            loadProjects();
+        }
+
+        function switchAgendaView(mode) {
+            agendaViewMode = mode;
+            const isDaily = mode === 'daily';
+
+            document.getElementById('agendaTitle').innerText = isDaily ? '📅 Agenda do Dia' : '📆 Visão Semanal';
+            document.getElementById('daySelector').classList.toggle('hidden', !isDaily);
+            document.getElementById('weeklyStatusFilter').classList.toggle('hidden', isDaily);
+            document.getElementById('weeklySearchFilter').classList.toggle('hidden', isDaily);
+            document.getElementById('addTaskDetails').classList.toggle('hidden', !isDaily);
+            document.getElementById('scheduleTimeline').classList.toggle('hidden', !isDaily);
+            document.getElementById('weeklyTimeline').classList.toggle('hidden', isDaily);
+
+            document.getElementById('viewBtn-daily').className = isDaily
+                ? "bg-white text-indigo-700 shadow-sm px-3 py-1.5 rounded-md text-sm font-semibold transition"
+                : "text-gray-600 hover:text-gray-800 px-3 py-1.5 rounded-md text-sm font-semibold transition";
+            document.getElementById('viewBtn-weekly').className = isDaily
+                ? "text-gray-600 hover:text-gray-800 px-3 py-1.5 rounded-md text-sm font-semibold transition"
+                : "bg-white text-indigo-700 shadow-sm px-3 py-1.5 rounded-md text-sm font-semibold transition";
+
+            if (isDaily) {
+                loadDaySchedule();
+            } else {
+                loadWeeklySchedule();
+            }
+        }
+
+        function refreshAgendaView() {
+            if (agendaViewMode === 'weekly') {
+                loadWeeklySchedule();
+            } else {
+                loadDaySchedule();
+            }
+        }
+
+        function filterWeeklyTasks(tasks) {
+            const statusFilter = document.getElementById('weeklyStatusFilter').value;
+            const searchTerm = document.getElementById('weeklySearchFilter').value.trim().toLowerCase();
+
+            return tasks.filter(task => {
+                if (statusFilter === 'pending' && task.done) return false;
+                if (statusFilter === 'completed' && !task.done) return false;
+                if (searchTerm) {
+                    const haystack = `${task.title} ${task.desc} ${task.time}`.toLowerCase();
+                    if (!haystack.includes(searchTerm)) return false;
+                }
+                return true;
+            });
+        }
+
+        function renderTaskCard(day, task) {
+            const cat = taskCategories[task.category] || taskCategories['trabalho-pessoal'];
+            
+            // Determina a estilização do card com base no status
+            let cardBg = "bg-white border-indigo-500";
+            let textMuted = "";
+            let titleColor = "text-gray-800";
+            
+            if (task.status === 'success') {
+                cardBg = "bg-emerald-50/40 border-emerald-500";
+                textMuted = "line-through text-gray-400 font-normal";
+                titleColor = "text-emerald-800";
+            } else if (task.status === 'failed') {
+                cardBg = "bg-rose-50/40 border-rose-500";
+                textMuted = "line-through text-gray-400 font-normal";
+                titleColor = "text-rose-800";
+            }
+
+            const card = document.createElement('div');
+            card.className = `flex flex-col p-3 rounded-lg border-l-4 shadow-sm transition ${cardBg}`;
+            
+            const displayTime = task.timeEnd && task.timeEnd !== task.time ? `${task.time} - ${task.timeEnd}` : task.time;
+
+            // HTML do card com botões de status e painel de comentários
+            card.innerHTML = `
+                <div class="flex justify-between items-start gap-3 min-w-0">
+                    <div class="flex gap-2.5 items-start min-w-0 flex-1">
+                        <!-- Botões de Ação de Status -->
+                        <div class="flex gap-1 shrink-0 mt-0.5">
+                            <button onclick="updateTaskStatus('${day}', '${task.id}', 'success')" class="w-6 h-6 flex items-center justify-center text-xs rounded-full font-bold border transition ${task.status === 'success' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-600 border-emerald-300 hover:bg-emerald-50'}" title="Sim, consegui!">
+                                ✓
+                            </button>
+                            <button onclick="updateTaskStatus('${day}', '${task.id}', 'failed')" class="w-6 h-6 flex items-center justify-center text-xs rounded-full font-bold border transition ${task.status === 'failed' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-600 border-rose-300 hover:bg-rose-50'}" title="Não, não consegui fazer.">
+                                ✗
+                            </button>
+                        </div>
+                        
+                        <!-- Conteúdo de texto -->
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span id="card-time-${task.id}" class="font-bold text-xs ${task.status === 'success' ? 'text-emerald-600' : task.status === 'failed' ? 'text-rose-600' : 'text-indigo-655'}">${displayTime}</span>
+                                <span id="card-badge-${task.id}" class="px-1.5 py-0.5 text-[9px] font-bold rounded-full ${cat.bg} border shrink-0">${cat.label}</span>
+                                ${task.status === 'failed' && task.justification ? `<span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[9px] font-bold border border-amber-200">⚠️ Justificado</span>` : ''}
+                            </div>
+                            <h4 id="card-title-${task.id}" class="font-bold text-sm md:text-base ${titleColor} ${textMuted} mt-0.5 truncate">${task.title}</h4>
+                            <p id="card-desc-${task.id}" class="text-xs ${task.status === 'success' ? 'text-emerald-600/70' : task.status === 'failed' ? 'text-rose-600/70' : 'text-gray-500'} truncate">${task.desc}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Botões da Direita (Delete e Detalhes) -->
+                    <div class="flex gap-2 items-center shrink-0">
+                        <button onclick="toggleTaskDetailsPanel('${task.id}')" class="text-[10px] text-indigo-655 hover:text-indigo-850 font-semibold px-2 py-1 rounded bg-indigo-50 border border-indigo-250 hover:bg-indigo-100 transition flex items-center gap-0.5">
+                            💬 Notas <span id="chevron-${task.id}">▼</span>
+                        </button>
+                        <button onclick="duplicateDailyTask('${day}', '${task.id}')" title="Duplicar Tarefa" class="text-gray-400 hover:text-indigo-600 text-sm transition px-1">📋</button>
+                        <button onclick="deleteDailyTask('${day}', '${task.id}')" title="Excluir" class="text-gray-400 hover:text-red-500 text-sm transition px-1">🗑️</button>
+                    </div>
+                </div>
+
+                <!-- Painel de Comentários / Detalhes (Collapsible) -->
+                <div id="details-${task.id}" class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700 hidden slide-fade">
+                    
+                    <!-- Edição rápida dos campos principais -->
+                    <div class="mb-3.5 p-2.5 bg-indigo-50/40 border border-indigo-100 rounded-lg">
+                        <span class="block font-bold text-indigo-700 mb-2">✏️ Editar Campos da Tarefa</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 mb-2">
+                            <div>
+                                <label class="block font-semibold text-gray-600 mb-0.5">Horário Início:</label>
+                                <input type="time" value="${task.time || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'time', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-gray-600 mb-0.5">Horário Fim:</label>
+                                <input type="time" value="${task.timeEnd || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'timeEnd', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-gray-600 mb-0.5">Título:</label>
+                                <input type="text" value="${task.title || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-gray-600 mb-0.5">Segmento (Categoria):</label>
+                                <select onchange="saveTaskDetails('${day}', '${task.id}', 'category', this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                                    <option value="domestico" ${task.category === 'domestico' ? 'selected' : ''}>🧹 Serviços Domésticos</option>
+                                    <option value="educacao" ${task.category === 'educacao' ? 'selected' : ''}>📚 Educação Contínua</option>
+                                    <option value="exercicio" ${task.category === 'exercicio' ? 'selected' : ''}>💪 Exercício Físico</option>
+                                    <option value="trabalho-esposa" ${task.category === 'trabalho-esposa' ? 'selected' : ''}>💼 Trabalho (Esposa)</option>
+                                    <option value="trabalho-pai" ${task.category === 'trabalho-pai' ? 'selected' : ''}>💼 Trabalho (Pai)</option>
+                                    <option value="trabalho-mae" ${task.category === 'trabalho-mae' ? 'selected' : ''}>💼 Trabalho (Mãe)</option>
+                                    <option value="trabalho-irma" ${task.category === 'trabalho-irma' ? 'selected' : ''}>💼 Trabalho (Irmã)</option>
+                                    <option value="trabalho-pessoal" ${task.category === 'trabalho-pessoal' ? 'selected' : ''}>👤 Trabalho (Pessoal)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-600 mb-0.5">Descrição:</label>
+                            <input type="text" value="${task.desc || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                        </div>
+                    </div>
+
+                    <!-- Justificativa -->
+                    <div class="mb-3">
+                        <label class="block font-bold text-gray-655 mb-1">Justificativa (Por que não foi possível realizar?):</label>
+                        <input type="text" id="justif-${task.id}" value="${task.justification || ''}" onblur="saveTaskDetails('${day}', '${task.id}', 'justification', this.value)" placeholder="Descreva o motivo ou impedimento..." class="w-full bg-gray-50 border border-gray-300 rounded px-2.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+
+                    <!-- Progresso e Dificuldade -->
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block font-bold text-gray-655 mb-1">Terminei 100% da tarefa?</label>
+                            <select onchange="saveTaskDetails('${day}', '${task.id}', 'completion', this.value)" class="w-full bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:bg-white transition">
+                                <option value="sim" ${task.completion === 'sim' ? 'selected' : ''}>Sim (100% concluída)</option>
+                                <option value="parcial" ${task.completion === 'parcial' ? 'selected' : ''}>Parcialmente</option>
+                                <option value="nao" ${task.completion === 'nao' ? 'selected' : ''}>Não (0% concluída)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-655 mb-1">Nível de Dificuldade:</label>
+                            <select onchange="saveTaskDetails('${day}', '${task.id}', 'difficulty', this.value)" class="w-full bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:bg-white transition">
+                                <option value="">Selecione...</option>
+                                <option value="facil" ${task.difficulty === 'facil' ? 'selected' : ''}>Fácil</option>
+                                <option value="medio" ${task.difficulty === 'medio' ? 'selected' : ''}>Médio</option>
+                                <option value="dificil" ${task.difficulty === 'dificil' ? 'selected' : ''}>Difícil</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Caixa de Comentários / Anotações -->
+                    <div>
+                        <label class="block font-bold text-gray-655 mb-1">Comentários (O que estava fazendo, onde parei e próximos passos):</label>
+                        <textarea id="notes-${task.id}" rows="2" onblur="saveTaskDetails('${day}', '${task.id}', 'notes', this.value)" placeholder="O que eu estava fazendo? Onde parei? O que preciso para continuar?..." class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition h-20 resize-y">${task.notes || ''}</textarea>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function toggleTaskDetailsPanel(id, forceState) {
+            const panel = document.getElementById(`details-${id}`);
+            const chevron = document.getElementById(`chevron-${id}`);
+            if (!panel || !chevron) return;
+            const isHidden = panel.classList.contains('hidden');
+            const shouldHide = forceState !== undefined ? !forceState : !isHidden;
+            if (shouldHide) {
+                panel.classList.add('hidden');
+                chevron.innerText = "▼";
+            } else {
+                panel.classList.remove('hidden');
+                chevron.innerText = "▲";
+            }
+        }
+
+        function duplicateDailyTask(day, id) {
+            const index = weeklySchedule[selectedWeekKey][day].findIndex(t => t.id === id);
+            if (index === -1) return;
+            const taskToClone = weeklySchedule[selectedWeekKey][day][index];
+            const clonedTask = {
+                ...taskToClone,
+                id: "custom-" + Date.now() + Math.random(),
+                title: taskToClone.title + " (Cópia)",
+                done: false,
+                status: "pending",
+                justification: "",
+                completion: "nao",
+                difficulty: "",
+                notes: ""
+            };
+            weeklySchedule[selectedWeekKey][day].splice(index + 1, 0, clonedTask);
+            saveData();
+            refreshAgendaView();
+        }
+
+        document.addEventListener('click', (event) => {
+            const openPanels = document.querySelectorAll('[id^="details-"]:not(.hidden)');
+            openPanels.forEach(panel => {
+                const taskId = panel.id.replace('details-', '');
+                const cardElement = panel.closest('.flex.flex-col.p-3');
+                if (cardElement && !cardElement.contains(event.target)) {
+                    toggleTaskDetailsPanel(taskId, false);
+                }
+            });
+        });
+
+        function updateTaskStatus(day, id, newStatus) {
+            weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task => {
+                if (task.id === id) {
+                    const nextStatus = task.status === newStatus ? 'pending' : newStatus;
+                    
+                    if (nextStatus === 'failed') {
+                        setTimeout(() => {
+                            const panel = document.getElementById(`details-${id}`);
+                            if (panel && panel.classList.contains('hidden')) {
+                                toggleTaskDetailsPanel(id);
+                            }
+                            const justifInput = document.getElementById(`justif-${id}`);
+                            if (justifInput) justifInput.focus();
+                        }, 100);
+                    }
+                    
+                    return { 
+                        ...task, 
+                        status: nextStatus,
+                        done: nextStatus === 'success'
+                    };
+                }
+                return task;
+            });
+            saveData();
+            refreshAgendaView();
+        }
+
+        function saveTaskDetails(day, id, field, value) {
+            weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task => {
+                if (task.id === id) {
+                    return {
+                        ...task,
+                        [field]: value
+                    };
+                }
+                return task;
+            });
+            saveData();
+
+            // Atualiza os elementos do card no DOM em tempo real
+            if (field === 'time' || field === 'timeEnd') {
+                const task = weeklySchedule[selectedWeekKey][day].find(t => t.id === id);
+                if (task) {
+                    const timeText = task.timeEnd && task.timeEnd !== task.time ? `${task.time} - ${task.timeEnd}` : task.time;
+                    const el = document.getElementById(`card-time-${id}`);
+                    if (el) el.innerText = timeText;
+                }
+            } else if (field === 'title') {
+                const el = document.getElementById(`card-title-${id}`);
+                if (el) el.innerText = value;
+            } else if (field === 'desc') {
+                const el = document.getElementById(`card-desc-${id}`);
+                if (el) el.innerText = value;
+            } else if (field === 'category') {
+                const el = document.getElementById(`card-badge-${id}`);
+                if (el) {
+                    const cat = taskCategories[value] || taskCategories['trabalho-pessoal'];
+                    el.innerText = cat.label;
+                    el.className = `px-1.5 py-0.5 text-[9px] font-bold rounded-full ${cat.bg} border shrink-0`;
+                }
+            }
+        }
+
+        function loadWeeklySchedule() {
+            const container = document.getElementById('weeklyTimeline');
+            container.innerHTML = '';
+
+            const statusFilter = document.getElementById('weeklyStatusFilter').value;
+            const searchTerm = document.getElementById('weeklySearchFilter').value.trim();
+            let totalFiltered = 0;
+            let totalAll = 0;
+
+            daysOrder.forEach(day => {
+                const allTasks = weeklySchedule[selectedWeekKey][day] || [];
+                totalAll += allTasks.length;
+                const tasks = filterWeeklyTasks([...allTasks].sort((a, b) => a.time.localeCompare(b.time)));
+                totalFiltered += tasks.length;
+
+                const daySection = document.createElement('div');
+                daySection.className = "border border-gray-200 rounded-xl overflow-hidden";
+
+                const today = new Date().getDay();
+                const isToday = String(day) === String(today);
+                const doneCount = allTasks.filter(t => t.done).length;
+
+                daySection.innerHTML = `
+                    <div class="flex justify-between items-center px-4 py-3 ${isToday ? 'bg-indigo-50 border-b border-indigo-100' : 'bg-gray-50 border-b border-gray-200'}">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-sm ${isToday ? 'text-indigo-700' : 'text-gray-800'}">${daysNamesFull[day]}</h3>
+                            ${isToday ? '<span class="text-[10px] uppercase tracking-wider bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">Hoje</span>' : ''}
+                        </div>
+                        <span class="text-xs text-gray-500 font-medium">${doneCount}/${allTasks.length} concluídas</span>
+                    </div>
+                `;
+
+                const tasksContainer = document.createElement('div');
+                tasksContainer.className = "p-3 space-y-2";
+
+                if (tasks.length === 0) {
+                    const emptyMsg = allTasks.length === 0
+                        ? '<p class="text-gray-400 text-xs italic px-1">Nenhuma tarefa agendada.</p>'
+                        : '<p class="text-gray-400 text-xs italic px-1">Nenhuma tarefa corresponde ao filtro.</p>';
+                    tasksContainer.innerHTML = emptyMsg;
+                } else {
+                    tasks.forEach(task => tasksContainer.appendChild(renderTaskCard(day, task)));
+                }
+
+                daySection.appendChild(tasksContainer);
+                container.appendChild(daySection);
+            });
+
+            const summary = document.createElement('p');
+            summary.className = "text-xs text-gray-500 text-center pt-2";
+            const filterActive = statusFilter !== 'all' || searchTerm;
+            summary.innerText = filterActive
+                ? `Exibindo ${totalFiltered} de ${totalAll} tarefas da semana`
+                : `${totalAll} tarefas na semana`;
+            container.appendChild(summary);
+        }
+
+        // ================= MANIPULAÇÃO DA AGENDA DO DIA =================
+        function loadDaySchedule() {
+            const selectedDay = document.getElementById('daySelector').value;
+            const timeline = document.getElementById('scheduleTimeline');
+            timeline.innerHTML = '';
+
+            const tasks = (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][selectedDay]) || [];
+            tasks.sort((a, b) => a.time.localeCompare(b.time));
+
+            if (tasks.length === 0) {
+                timeline.innerHTML = '<p class="text-gray-500 text-sm">Sem compromissos fixos agendados para este dia.</p>';
+                return;
+            }
+
+            tasks.forEach(task => {
+                timeline.appendChild(renderTaskCard(selectedDay, task));
+            });
+        }
+
+        function addDailyTask() {
+            const selectedDay = document.getElementById('daySelector').value;
+            const time = document.getElementById('newTaskTime').value;
+            const timeEnd = document.getElementById('newTaskTimeEnd').value || time;
+            const title = document.getElementById('newTaskTitle').value.trim();
+            const desc = document.getElementById('newTaskDesc').value.trim() || "Sem descrição";
+            const category = document.getElementById('newTaskCategory').value;
+
+            if (!time || !title) {
+                alert("Por favor, preencha pelo menos o horário e o título da tarefa.");
+                return;
+            }
+
+            const newTask = {
+                id: "custom-" + Date.now(),
+                time: time,
+                timeEnd: timeEnd,
+                title: title,
+                desc: desc,
+                done: false,
+                status: "pending",
+                category: category,
+                justification: "",
+                completion: "nao",
+                difficulty: "",
+                notes: ""
+            };
+
+            if (!weeklySchedule[selectedWeekKey][selectedDay]) {
+                weeklySchedule[selectedWeekKey][selectedDay] = [];
+            }
+            weeklySchedule[selectedWeekKey][selectedDay].push(newTask);
+            saveData();
+            refreshAgendaView();
+
+            document.getElementById('newTaskTime').value = '';
+            document.getElementById('newTaskTimeEnd').value = '';
+            document.getElementById('newTaskTitle').value = '';
+            document.getElementById('newTaskDesc').value = '';
+            document.getElementById('newTaskCategory').value = 'trabalho-pessoal';
+            document.getElementById('addTaskDetails').open = false; 
+        }
+
+        function toggleDailyTask(day, id) {
+            weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task => 
+                task.id === id ? { ...task, done: !task.done } : task
+            );
+            saveData();
+            refreshAgendaView();
+        }
+
+        function deleteDailyTask(day, id) {
+            if (confirm("Deseja realmente remover esta tarefa da agenda?")) {
+                weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].filter(task => task.id !== id);
+                saveData();
+                refreshAgendaView();
+            }
+        }
+
+        function resetWeeklyChecks() {
+            if (confirm("Isso irá desmarcar todas as tarefas diárias concluídas para recomeçar a semana. Continuar?")) {
+                const weekData = weeklySchedule[selectedWeekKey] || {};
+                for (let day in weekData) {
+                    weekData[day] = weekData[day].map(task => ({ 
+                        ...task, 
+                        done: false,
+                        status: "pending",
+                        justification: "",
+                        completion: "nao",
+                        difficulty: "",
+                        notes: ""
+                    }));
+                }
+                saveData();
+                refreshAgendaView();
+            }
+        }
+
+        // ================= SISTEMA DE IMPORTAÇÃO / EXPORTAÇÃO =================
+        function toggleModalIO() {
+            const modal = document.getElementById('modalIO');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+            document.getElementById('ioTextarea').value = '';
+        }
+
+        function exportData() {
+            const dataToExport = {
+                weeklySchedule: weeklySchedule,
+                weeklyProjects: weeklyProjects
+            };
+            document.getElementById('ioTextarea').value = JSON.stringify(dataToExport, null, 2);
+        }
+
+        function importData() {
+            const rawData = document.getElementById('ioTextarea').value.trim();
+            if (!rawData) return;
+
+            try {
+                const parsed = JSON.parse(rawData);
+                
+                if (parsed.weeklySchedule && parsed.weeklyProjects) {
+                    weeklySchedule = parsed.weeklySchedule;
+                    weeklyProjects = parsed.weeklyProjects;
+                    ensureWeekExists(selectedWeekKey);
+                } else if (parsed.weeklySchedule && parsed.projects) {
+                    // Retrocompatibilidade se importarem JSON de formato plano antigo
+                    weeklySchedule = parsed.weeklySchedule;
+                    const keys = Object.keys(weeklySchedule);
+                    const isWeekly = keys.some(key => key.match(/^\d{4}-W\d{2}$/));
+                    if (!isWeekly) {
+                        const currentWeek = getWeekKey(new Date());
+                        const oldSchedule = { ...weeklySchedule };
+                        weeklySchedule = {};
+                        weeklySchedule[currentWeek] = oldSchedule;
+                    }
+                    
+                    weeklyProjects = {};
+                    const currentWeek = getWeekKey(new Date());
+                    weeklyProjects[currentWeek] = Array.isArray(parsed.projects) ? parsed.projects : defaultProjects;
+                    ensureWeekExists(selectedWeekKey);
+                } else {
+                    throw new Error("Formato inválido");
+                }
+
+                saveData();
+                loadProjects();
+                refreshAgendaView();
+                alert("Dados integrados com sucesso!");
+                toggleModalIO();
+            } catch (error) {
+                alert("Ocorreu um erro ao importar. Verifique se o código copiado da IA está correto.");
+            }
+        }
+
+        function downloadBackup() {
+            const dataToExport = {
+                weeklySchedule: weeklySchedule,
+                weeklyProjects: weeklyProjects
+            };
+            const jsonString = JSON.stringify(dataToExport, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.href = url;
+            downloadAnchor.download = "historico_rotina.json";
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            
+            // Limpa recursos
+            document.body.removeChild(downloadAnchor);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyTextareaContent() {
+            const textarea = document.getElementById('ioTextarea');
+            const val = textarea.value.trim();
+            if (!val) {
+                alert("Nenhum conteúdo para copiar. Escolha 'Dados JSON' ou 'Código HTML do App' primeiro!");
+                return;
+            }
+            navigator.clipboard.writeText(val)
+                .then(() => {
+                    alert("Conteúdo copiado com sucesso para a área de transferência!");
+                })
+                .catch(err => {
+                    alert("Erro ao copiar conteúdo: " + err);
+                });
+        }
+
+        async function viewAppHTML() {
+            try {
+                let htmlContent = "";
+                try {
+                    const response = await fetch(window.location.href);
+                    htmlContent = await response.text();
+                } catch (e) {
+                    htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+                }
+                document.getElementById('ioTextarea').value = htmlContent;
+                document.getElementById('ioTextarea').placeholder = "Código HTML do aplicativo...";
+            } catch (err) {
+                alert("Erro ao carregar o código HTML: " + err);
+            }
+        }
+
+        function openResetAllModal() {
+            document.getElementById('modalResetAll').classList.remove('hidden');
+            document.getElementById('modalResetAll').classList.add('flex');
+            document.getElementById('resetAllConfirmInput').value = '';
+            document.getElementById('btnConfirmResetAll').disabled = true;
+        }
+
+        function closeResetAllModal() {
+            document.getElementById('modalResetAll').classList.add('hidden');
+            document.getElementById('modalResetAll').classList.remove('flex');
+        }
+
+        function checkResetAllConfirmation() {
+            const val = document.getElementById('resetAllConfirmInput').value.trim();
+            const btn = document.getElementById('btnConfirmResetAll');
+            if (val === 'DELETAR') {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        function executeResetAll() {
+            const val = document.getElementById('resetAllConfirmInput').value.trim();
+            if (val !== 'DELETAR') return;
+            
+            safeRemoveItem('my_weekly_schedule');
+            safeRemoveItem('my_weekly_projects');
+            safeRemoveItem('my_projects');
+            safeRemoveItem('last_notif_time');
+            
+            weeklySchedule = {};
+            weeklyProjects = {};
+            
+            ensureWeekExists(selectedWeekKey);
+            
+            saveData();
+            loadProjects();
+            refreshAgendaView();
+            closeResetAllModal();
+            alert("Todas as tarefas e projetos foram resetados com sucesso para os padrões originais!");
+        }
+
+        // ================= DESEMPENHO E GRÁFICOS (TAB 2) =================
+        function renderChartsAndInsights() {
+            let totalTasks = 0;
+            let completedTasks = 0;
+            let failedTasks = 0;
+            let pendingTasks = 0;
+
+            const completionRatesByDay = [];
+
+            daysOrder.forEach(day => {
+                const tasks = (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][day]) || [];
+                const dayTotal = tasks.length;
+                const dayDone = tasks.filter(t => t.status === 'success' || (t.status === undefined && t.done)).length;
+                const dayFailed = tasks.filter(t => t.status === 'failed').length;
+                const dayPending = tasks.filter(t => t.status === 'pending' || (t.status === undefined && !t.done)).length;
+
+                totalTasks += dayTotal;
+                completedTasks += dayDone;
+                failedTasks += dayFailed;
+                pendingTasks += dayPending;
+
+                const percentage = dayTotal > 0 ? Math.round((dayDone / dayTotal) * 100) : 0;
+                completionRatesByDay.push(percentage);
+            });
+
+            const totalProjects = projects.length;
+            const completedProjects = projects.filter(p => p.done).length;
+            const rateProjects = totalProjects > 0 ? Math.round((completedProjects / totalProjects) * 100) : 0;
+
+            // Renderizar Gráfico de Rosca (Doughnut) com 3 fatias
+            if (doughnutChartInst) doughnutChartInst.destroy();
+            const ctxDoughnut = document.getElementById('completionDoughnutChart').getContext('2d');
+            doughnutChartInst = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Realizadas', 'Não Realizadas', 'Pendentes'],
+                    datasets: [{
+                        data: [completedTasks, failedTasks, pendingTasks],
+                        backgroundColor: ['#10b981', '#f43f5e', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Renderizar Gráfico de Barras (Bar)
+            if (barChartInst) barChartInst.destroy();
+            const ctxBar = document.getElementById('weeklyBarChart').getContext('2d');
+            barChartInst = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: daysNames,
+                    datasets: [{
+                        label: 'Conclusão (%)',
+                        data: completionRatesByDay,
+                        backgroundColor: '#10b981',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100 }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Insights Inteligentes
+            const insightsContainer = document.getElementById('insightsContainer');
+            insightsContainer.innerHTML = '';
+
+            let highestDayIndex = completionRatesByDay.indexOf(Math.max(...completionRatesByDay));
+            let highestDay = daysNames[highestDayIndex];
+            let maxPercent = Math.max(...completionRatesByDay);
+
+            let insight1 = `<div class="p-3 bg-indigo-50 border-l-4 border-indigo-500 rounded text-xs flex flex-col gap-1">
+                <strong>📈 Foco Atual:</strong>
+                <span>Você completou <strong>${completedTasks}</strong> tarefas com sucesso nesta semana.</span>
+                <span>Tarefas não realizadas: <strong class="text-rose-600">${failedTasks}</strong>. Pendentes: <strong>${pendingTasks}</strong>.</span>
+            </div>`;
+
+            let insight2 = `<div class="p-3 bg-emerald-50 border-l-4 border-emerald-500 rounded text-xs">
+                <strong>🌟 Pico de Produtividade:</strong> O dia com maior taxa de tarefas realizadas é a <strong>${highestDay}</strong> (${maxPercent}% de conclusão).
+            </div>`;
+
+            let insight3 = `<div class="p-3 bg-amber-50 border-l-4 border-amber-500 rounded text-xs">
+                <strong>📁 Projetos Concluídos:</strong> Você concluiu <strong>${completedProjects} de ${totalProjects}</strong> projetos listados (${rateProjects}% do Backlog).
+            </div>`;
+
+            let insight4 = `<div class="p-3 bg-gray-100 border-l-4 border-gray-400 rounded text-xs">
+                <strong>🛡️ Equilíbrio de Rotina:</strong> Seu final de semana está estruturado para descanso. Lembre-se de realizar o planejamento às 21:00 de domingo para começar a próxima semana com tranquilidade.
+            </div>`;
+
+            insightsContainer.innerHTML = insight1 + insight2 + insight3 + insight4;
+
+            // ================= MENSURAÇÃO E DISTRIBUIÇÃO DE TEMPO =================
+            const timeByCategory = {
+                'domestico': 0,
+                'educacao': 0,
+                'exercicio': 0,
+                'trabalho-esposa': 0,
+                'trabalho-pai': 0,
+                'trabalho-mae': 0,
+                'trabalho-irma': 0,
+                'trabalho-pessoal': 0
+            };
+
+            for (let day in weeklySchedule) {
+                const tasks = weeklySchedule[day] || [];
+                tasks.forEach(task => {
+                    if (task.status === 'success') {
+                        const start = task.time || "00:00";
+                        const end = task.timeEnd || start;
+                        
+                        const startParts = start.split(':');
+                        const endParts = end.split(':');
+                        
+                        const startMin = parseInt(startParts[0], 10) * 60 + parseInt(startParts[1], 10);
+                        const endMin = parseInt(endParts[0], 10) * 60 + parseInt(endParts[1], 10);
+                        
+                        let diff = endMin - startMin;
+                        if (diff < 0) {
+                            diff += 24 * 60; // Se passou de meia-noite
+                        }
+                        
+                        // Default de 30 min se não houver faixa de horário (fim igual início)
+                        if (diff === 0) {
+                            diff = 30;
+                        }
+                        
+                        const catKey = task.category || 'trabalho-pessoal';
+                        if (timeByCategory[catKey] !== undefined) {
+                            timeByCategory[catKey] += diff;
+                        }
+                    }
+                });
+            }
+
+            const timeContainer = document.getElementById('timeDistributionContainer');
+            if (timeContainer) {
+                timeContainer.innerHTML = '';
+                const totalMinutes = Object.values(timeByCategory).reduce((a, b) => a + b, 0);
+                
+                const categoryBarColors = {
+                    'domestico': 'bg-blue-500',
+                    'educacao': 'bg-purple-500',
+                    'exercicio': 'bg-teal-500',
+                    'trabalho-esposa': 'bg-emerald-500',
+                    'trabalho-pai': 'bg-amber-500',
+                    'trabalho-mae': 'bg-orange-500',
+                    'trabalho-irma': 'bg-pink-500',
+                    'trabalho-pessoal': 'bg-gray-500'
+                };
+
+                let hasTimeData = false;
+
+                Object.keys(timeByCategory).forEach(catKey => {
+                    const minsTotal = timeByCategory[catKey];
+                    if (minsTotal > 0) {
+                        hasTimeData = true;
+                        const cat = taskCategories[catKey] || taskCategories['trabalho-pessoal'];
+                        const barColor = categoryBarColors[catKey] || 'bg-indigo-500';
+                        
+                        const hrs = Math.floor(minsTotal / 60);
+                        const mins = minsTotal % 60;
+                        const timeStr = hrs > 0 ? `${hrs}h ${mins}min` : `${mins}min`;
+                        
+                        const pct = totalMinutes > 0 ? Math.round((minsTotal / totalMinutes) * 100) : 0;
+                        
+                        const row = document.createElement('div');
+                        row.className = "flex flex-col md:flex-row md:items-center gap-2";
+                        row.innerHTML = `
+                            <div class="w-full md:w-1/3 flex justify-between items-center text-xs">
+                                <span class="font-bold text-gray-700">${cat.label}</span>
+                                <span class="font-semibold text-gray-500 mr-2">${timeStr}</span>
+                            </div>
+                            <div class="flex-1 bg-gray-100 h-3.5 rounded-full overflow-hidden flex items-center relative border border-gray-200/50 shadow-inner">
+                                <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                                <span class="absolute right-2.5 text-[9px] font-extrabold text-gray-700">${pct}%</span>
+                            </div>
+                        `;
+                        timeContainer.appendChild(row);
+                    }
+                });
+
+                if (!hasTimeData) {
+                    timeContainer.innerHTML = '<p class="text-xs text-gray-400 italic">Nenhuma tarefa concluída com tempo contabilizado ainda.</p>';
+                }
+            }
+        }
+
+        // ================= SISTEMA DE NOTIFICAÇÃO & PERSISTÊNCIA =================
+        function saveData() {
+            safeSetItem('my_weekly_schedule', JSON.stringify(weeklySchedule));
+            safeSetItem('my_weekly_projects', JSON.stringify(weeklyProjects));
+        }
+
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("Notificações não suportadas.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    document.getElementById('btnNotif').innerText = "🔔 Notificações Ativas";
+                    document.getElementById('btnNotif').disabled = true;
+                    new Notification("Tudo Pronto!", { body: "Bússola está conectado e enviará notificações de tarefas." });
+                }
+            });
+        }
+
+        function startNotificationTimer() {
+            setInterval(() => {
+                const now = new Date();
+                const currentDay = now.getDay(); 
+                const weekKey = getWeekKey(now);
+                
+                if (weeklySchedule[weekKey] && weeklySchedule[weekKey][currentDay]) {
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const currentTimeString = `${hours}:${minutes}`;
+
+                    const currentTask = weeklySchedule[weekKey][currentDay].find(task => task.time === currentTimeString);
+
+                    if (currentTask && currentTask.status !== 'success' && currentTask.status !== 'failed') {
+                        const lastNotif = safeGetItem('last_notif_time');
+                        const uniqueId = `${weekKey}-${currentDay}-${currentTimeString}`;
+                        
+                        if (lastNotif !== uniqueId) {
+                            triggerNotification(currentTask);
+                            safeSetItem('last_notif_time', uniqueId);
+                        }
+                    }
+                }
+            }, 10000); // Verifica a cada 10 segundos contra throttling de background
+        }
+
+        function playNotificationChime() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Nota 1 (C5 - Dó)
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+                gain1.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.3);
+                osc1.start(audioCtx.currentTime);
+                osc1.stop(audioCtx.currentTime + 0.3);
+
+                // Nota 2 (E5 - Mi) tocada 150ms depois
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); 
+                    gain2.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.4);
+                    osc2.start(audioCtx.currentTime);
+                    osc2.stop(audioCtx.currentTime + 0.4);
+                }, 150);
+            } catch (e) {
+                console.log("AudioContext bloqueado ou não suportado:", e);
+            }
+        }
+
+        function triggerNotification(task) {
+            // 1. Notificação do Windows
+            if (Notification.permission === "granted") {
+                new Notification(`🧭 Bússola: Início de Tarefa!`, {
+                    body: `Está na hora de: ${task.title}\n(${task.time})`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png"
+                });
+            }
+
+            // 2. Pop-up no App (Modal)
+            showTaskAlertModal(task);
+
+            // 3. Som de notificação
+            playNotificationChime();
+        }
+
+        function showTaskAlertModal(task) {
+            const modal = document.getElementById('modalTaskAlert');
+            if (!modal) return;
+
+            const cat = taskCategories[task.category] || taskCategories['trabalho-pessoal'];
+
+            const badge = document.getElementById('alertTaskCategory');
+            badge.innerText = cat.label;
+            badge.className = `text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold mb-2 ${cat.bg} border`;
+
+            document.getElementById('alertTaskTitle').innerText = task.title;
+            document.getElementById('alertTaskTime').innerText = task.time;
+            document.getElementById('alertTaskDesc').innerText = task.desc || "Sem descrição";
+
+            // Exibe modal com transição suave
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            }, 10);
+        }
+
+        function acknowledgeTaskAlert() {
+            const modal = document.getElementById('modalTaskAlert');
+            if (!modal) return;
+
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+
+    </script>
+</body>
+</html>
