@@ -32,7 +32,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen pb-12">
+<body class="bg-indigo-950 text-gray-800 font-sans min-h-screen m-0 p-0 overflow-x-hidden">
 
     <!-- Landing Page Inicial (Pré-Login) -->
     <div id="landingPage" class="hidden min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden">
@@ -108,40 +108,8 @@
         </div>
     </div>
 
-    <!-- Conteúdo Principal do App (Apenas para usuários autenticados) -->
-    <div id="appMainContent">
-        <header class="bg-indigo-600 text-white py-6 shadow-md mb-8">
-        <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-            <div class="flex flex-col items-center md:items-start">
-                <h1 class="text-2xl font-bold flex items-center gap-2">🧭 Bússola</h1>
-                <p class="text-indigo-200 text-sm">Foco, produtividade e fins de semana livres</p>
-            </div>
-            
-            <!-- Navegação entre Abas (Esquerda) -->
-            <div class="flex bg-indigo-800 p-1 rounded-lg shrink-0">
-                <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition">
-                    📅 Agenda e Projetos
-                </button>
-                <button onclick="switchTab('analise')" id="tabBtn-analise" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
-                    📊 Análise de Produtividade
-                </button>
-                <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
-                    ⚙️ Configurações
-                </button>
-            </div>
-
-            <!-- Botão de Usuário/Login (Último elemento à direita) -->
-            <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
-                <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white transition shadow-sm">
-                    <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Kevin Admin</span>
-                    <button onclick="openAuthModal()" title="Gerenciar Conta / Sair" class="ml-1 text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2 py-0.5 rounded-lg text-indigo-100 font-extrabold transition">Trocar / Sair</button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Modal de Autenticação / Login Individual (2-Etapas com E-mail) -->
-    <div id="modalAuth" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs hidden justify-center items-center p-4 z-50">
+    <!-- Modal de Autenticação / Login Individual (Acessível na LP e no App) -->
+    <div id="modalAuth" class="fixed inset-0 bg-gray-900/70 backdrop-blur-xs hidden justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
             <!-- Header do Modal -->
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
@@ -238,6 +206,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Conteúdo Principal do App (Apenas para usuários autenticados) -->
+    <div id="appMainContent" class="hidden bg-gray-50 min-h-screen pb-12">
+        <header class="bg-indigo-600 text-white py-6 shadow-md mb-8">
+        <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <div class="flex flex-col items-center md:items-start">
+                <h1 class="text-2xl font-bold flex items-center gap-2">🧭 Bússola</h1>
+                <p class="text-indigo-200 text-sm">Foco, produtividade e fins de semana livres</p>
+            </div>
+            
+            <!-- Navegação entre Abas (Esquerda) -->
+            <div class="flex bg-indigo-800 p-1 rounded-lg shrink-0">
+                <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition">
+                    📅 Agenda e Projetos
+                </button>
+                <button onclick="switchTab('analise')" id="tabBtn-analise" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
+                    📊 Análise de Produtividade
+                </button>
+                <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
+                    ⚙️ Configurações
+                </button>
+            </div>
+
+            <!-- Botão de Usuário/Login (Último elemento à direita) -->
+            <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
+                <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white transition shadow-sm">
+                    <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Kevin Admin</span>
+                    <button onclick="openAuthModal()" title="Gerenciar Conta / Sair" class="ml-1 text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2 py-0.5 rounded-lg text-indigo-100 font-extrabold transition">Trocar / Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
 
     <!-- Modal de Gerenciamento de Segmentos (Categorias) -->
     <div id="modalSegments" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
