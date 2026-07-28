@@ -15,3 +15,7 @@ build/
 .system_generated/
 .gemini/security_report.json
 *.log
+
+# Deployment build caches
+.wrangler/
+.firebase/
