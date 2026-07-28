@@ -1,0 +1,9 @@
+.git
+.gitignore
+.firebase
+.gemini
+*.log
+node_modules
+firebase.json
+bussola_limpa.html
+historico_rotina.json
