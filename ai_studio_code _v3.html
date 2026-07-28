@@ -562,21 +562,8 @@
             1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: []
         };
 
-        // Estrutura de Projetos Unificada
-        const defaultProjects = [
-            { id: 1, text: "Curso de PM Google (3x semana)", done: false, status: "andamento" },
-            { id: 2, text: "Prática de Inglês (3x semana)", done: false, status: "andamento" },
-            { id: 3, text: "Prática de Escrita / LinkedIn (2x semana)", done: false, status: "andamento" },
-            { id: 4, text: "Projeto Wellness/Filosofia Instagram", done: false, status: "andamento" },
-            { id: 5, text: "Editar vídeos para imobiliária da mãe", done: false, status: "andamento" },
-            { id: 6, text: "Criar posts no Instagram (Mãe e Pai)", done: false, status: "andamento" },
-            { id: 7, text: "Finalizar o site da Esposa (Dentista)", done: false, status: "andamento" },
-            { id: 8, text: "Implantar CRM dos pacientes da Esposa", done: false, status: "andamento" },
-            { id: 9, text: "Desenvolvimento da IA de Agendamento da Esposa", done: false, status: "andamento" },
-            { id: 10, text: "Criar site da imobiliária da Mãe", done: true, status: "fila" },
-            { id: 11, text: "Criar site do Pai", done: false, status: "fila" },
-            { id: 12, text: "Criar site da Irmã", done: false, status: "fila" }
-        ];
+        // Estrutura de Projetos Unificada (Inicia vazia para novos usuários)
+        const defaultProjects = [];
 
         // Definição das Categorias/Segmentos e estilos de cores (bg light e dark)
         const defaultTaskCategories = {
@@ -615,15 +602,7 @@
             maxEdu: 1,
             maxCar: 1,
             maxDom: 2,
-            routines: [
-                { id: "r1", title: "Cozinhar", days: [1, 3], time: "11:00", duration: 60, category: "domestico", desc: "Preparação de refeições saudáveis" },
-                { id: "r2", title: "Lavar a louça", days: [1, 2, 3, 4, 5], time: "13:30", duration: 30, category: "domestico", desc: "Manutenção pós-almoço" },
-                { id: "r3", title: "Lavar a roupa (máquina)", days: [3], time: "14:00", duration: 30, category: "domestico", desc: "Iniciar ciclo de lavagem" },
-                { id: "r4", title: "Lavar o Banheiro", days: [3], time: "14:30", duration: 60, category: "domestico", desc: "Limpeza quinzenal (semana ímpar)", oddWeeksOnly: true },
-                { id: "r5", title: "Estender a roupa", days: [3], time: "15:30", duration: 30, category: "domestico", desc: "Colocar no varal" },
-                { id: "r6", title: "Passar aspirador", days: [2, 5], time: "14:00", duration: 30, category: "domestico", desc: "Aspiração da casa" },
-                { id: "r7", title: "Guardar Roupa", days: [4], time: "14:00", duration: 30, category: "domestico", desc: "Recolher e organizar no armário" }
-            ]
+            routines: []
         };
 
         let productivityRules = {};
@@ -726,43 +705,8 @@
             return match ? parseInt(match[1], 10) : 28;
         }
 
-        // Geradores dinâmicos de cronograma de 3 meses (13 semanas)
         function generateInitialProjectsForWeek(weekKey) {
-            const weekNo = getWeekNumber(weekKey);
-            
-            // Deep copy defaultProjects
-            const weekProjects = JSON.parse(JSON.stringify(defaultProjects));
-            
-            weekProjects.forEach(proj => {
-                // Configuração base de status e done
-                if (proj.id === 7 || proj.id === 8) { // Site Esposa e CRM
-                    if (weekNo >= 33) {
-                        proj.done = true;
-                    }
-                } else if (proj.id === 10) { // Site Mãe
-                    if (weekNo >= 33 && weekNo <= 36) {
-                        proj.status = "andamento";
-                    } else if (weekNo >= 37) {
-                        proj.status = "andamento";
-                        proj.done = true;
-                    }
-                } else if (proj.id === 11) { // Site Pai
-                    if (weekNo === 37) {
-                        proj.status = "andamento";
-                    } else if (weekNo >= 38) {
-                        proj.status = "andamento";
-                        proj.done = true;
-                    }
-                } else if (proj.id === 12) { // Site Irmã
-                    if (weekNo >= 38 && weekNo <= 41) {
-                        proj.status = "andamento";
-                    } else if (weekNo >= 42) {
-                        proj.status = "andamento";
-                        proj.done = true;
-                    }
-                }
-            });
-            return weekProjects;
+            return [];
         }
 
         function generateInitialScheduleForWeek(weekKey) {
@@ -4148,6 +4092,15 @@
                 await auth.signOut();
             }
             currentUser = null;
+            
+            // Limpa o estado em memória para o próximo usuário
+            const currentWeekKey = getWeekKey(new Date());
+            weeklySchedule = {};
+            weeklySchedule[currentWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+            weeklyProjects = {};
+            weeklyProjects[currentWeekKey] = [];
+            productivityRules = { maxWork: 2, maxEdu: 1, maxCar: 1, maxDom: 2, routines: [] };
+
             updateUserHeaderUI();
             enforceAuthGate();
             refreshAgendaView();
