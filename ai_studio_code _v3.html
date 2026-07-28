@@ -76,7 +76,7 @@
                         <span class="text-[10px] text-gray-500 font-semibold">Acesso Individual de Usuários</span>
                     </div>
                 </div>
-                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600 text-sm font-bold p-1">✕</button>
+                <button id="authCloseBtn" onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600 text-sm font-bold p-1">✕</button>
             </div>
 
             <!-- Abas Login / Cadastro -->
@@ -3927,7 +3927,10 @@
         let currentUser = null;
 
         function initFirebaseAuthListener() {
-            if (!auth) return;
+            if (!auth) {
+                enforceAuthGate();
+                return;
+            }
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
@@ -3938,12 +3941,24 @@
                         verified: user.emailVerified
                     };
                     updateUserHeaderUI();
+                    enforceAuthGate();
                     await syncUserDataFromCloud(user.uid);
                 } else {
                     currentUser = null;
                     updateUserHeaderUI();
+                    enforceAuthGate();
                 }
             });
+        }
+
+        function enforceAuthGate() {
+            const closeBtn = document.getElementById('authCloseBtn');
+            if (!currentUser) {
+                openAuthModal();
+                if (closeBtn) closeBtn.classList.add('hidden');
+            } else {
+                if (closeBtn) closeBtn.classList.remove('hidden');
+            }
         }
 
         function updateUserHeaderUI() {
@@ -3976,6 +3991,10 @@
         }
 
         function closeAuthModal() {
+            if (!currentUser) {
+                // Se não estiver logado, bloqueia o fechamento do modal
+                return;
+            }
             const modal = document.getElementById('modalAuth');
             if (modal) {
                 modal.classList.add('hidden');
@@ -4058,13 +4077,19 @@
 
         async function loginWithGoogle() {
             if (!auth) return;
+
+            if (window.location.protocol === 'file:') {
+                alert("ℹ️ O login com o Google exige que o aplicativo esteja sendo executado via HTTP ou HTTPS.\n\nPara testar no seu computador local, utilize o login por E-mail e Senha, ou acesse a versão online no Cloudflare Pages!");
+                return;
+            }
+
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
                 await auth.signInWithPopup(provider);
                 closeAuthModal();
                 refreshAgendaView();
             } catch (err) {
-                alert("Erro ao fazer login com Google: " + err.message);
+                alert("Erro ao fazer login com o Google: " + err.message);
             }
         }
 
@@ -4124,7 +4149,7 @@
             }
             currentUser = null;
             updateUserHeaderUI();
-            closeAuthModal();
+            enforceAuthGate();
             refreshAgendaView();
         }
 
@@ -4143,13 +4168,25 @@
                     saveData();
                     refreshAgendaView();
                 } else {
-                    // Novo usuário: salva dados locais para a nuvem
+                    // NOVO USUÁRIO: Inicializa 100% limpo ("Do Zero") sem herdar projetos de outros
+                    const freshSchedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+                    const freshProjects = {};
+                    const freshWeekKey = getWeekKey(new Date());
+                    freshProjects[freshWeekKey] = [];
+
+                    weeklySchedule = {};
+                    weeklySchedule[freshWeekKey] = freshSchedule;
+                    weeklyProjects = freshProjects;
+
                     await docRef.set({
                         weeklySchedule: weeklySchedule,
                         weeklyProjects: weeklyProjects,
                         productivityRules: productivityRules,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+                    });
+
+                    saveData();
+                    refreshAgendaView();
                 }
             } catch (e) {
                 console.warn("Erro ao sincronizar Firestore:", e);
