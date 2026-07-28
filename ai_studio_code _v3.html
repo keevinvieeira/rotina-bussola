@@ -136,8 +136,16 @@
                     <input type="email" id="loginEmail" placeholder="seu@email.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Senha</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider">Senha</label>
+                        <button type="button" onclick="sendPasswordResetEmail()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold transition">Esqueci minha senha</button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="button" onclick="togglePasswordVisibility('loginPassword', 'loginPasswordEye')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm p-1 select-none focus:outline-none" title="Mostrar/Ocultar Senha">
+                            <span id="loginPasswordEye">👁️</span>
+                        </button>
+                    </div>
                 </div>
                 <div id="loginAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg"></div>
                 <button onclick="handleLoginSubmit()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition mt-2">Entrar na Bússola</button>
@@ -155,7 +163,12 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Senha</label>
-                    <input type="password" id="regPassword" placeholder="Crie uma senha forte (mín. 6 caracteres)" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="relative">
+                        <input type="password" id="regPassword" placeholder="Crie uma senha forte (mín. 6 caracteres)" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="button" onclick="togglePasswordVisibility('regPassword', 'regPasswordEye')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm p-1 select-none focus:outline-none" title="Mostrar/Ocultar Senha">
+                            <span id="regPasswordEye">👁️</span>
+                        </button>
+                    </div>
                 </div>
                 <div id="regAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg"></div>
                 <button onclick="startRegistrationStep1()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition mt-2">Criar Conta e Enviar E-mail de Confirmação ➔</button>
@@ -775,7 +788,20 @@
             sunday.setDate(monday.getDate() + 6);
             
             const pad = (n) => String(n).padStart(2, '0');
-            return `Semana ${getWeekKey(date).split('-W')[1]} / ${date.getFullYear()} (${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}/${monday.getFullYear()} a ${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}/${sunday.getFullYear()})`;
+            const targetWeekKey = getWeekKey(date);
+            const realCurrentWeekKey = getWeekKey(new Date());
+
+            const isCurrentWeek = (targetWeekKey === realCurrentWeekKey);
+            const badge = isCurrentWeek 
+                ? `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">✨ (Semana Atual)</span>` 
+                : `<button onclick="goToCurrentWeek()" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-300 transition shadow-xs">📅 Ir para Semana Atual</button>`;
+
+            return `Semana ${targetWeekKey.split('-W')[1]} / ${date.getFullYear()} (${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}/${monday.getFullYear()} a ${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}/${sunday.getFullYear()}) ${badge}`;
+        }
+
+        function goToCurrentWeek() {
+            autoDetectCurrentWeek();
+            refreshAgendaView();
         }
 
         function getWeekNumber(weekKey) {
@@ -1174,7 +1200,7 @@
         function updateWeekRangeLabel() {
             const el = document.getElementById('currentWeekRangeLabel');
             if (el) {
-                el.innerText = getWeekRangeString(selectedWeekDate);
+                el.innerHTML = getWeekRangeString(selectedWeekDate);
             }
         }
 
@@ -3243,10 +3269,12 @@
             // Limpa inputs
             nameInput.value = '';
             
-            renderSegmentsList();
+            if (typeof renderSegmentsList === 'function') renderSegmentsList();
             updateCategoryDropdowns();
+            loadConfiguracoesUI();
             refreshAgendaView();
-            alert("Segmento criado com sucesso!");
+            if (typeof renderChartsAndInsights === 'function') renderChartsAndInsights();
+            alert(`🎉 Segmento "${name}" criado com sucesso!`);
         }
 
         function deleteSegment(id) {
@@ -3277,9 +3305,11 @@
                 }
                 
                 saveData();
-                renderSegmentsList();
+                if (typeof renderSegmentsList === 'function') renderSegmentsList();
                 updateCategoryDropdowns();
+                loadConfiguracoesUI();
                 refreshAgendaView();
+                if (typeof renderChartsAndInsights === 'function') renderChartsAndInsights();
             }
         }
 
@@ -4153,17 +4183,21 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            const regTabBtn = document.getElementById('authTabBtn-register');
+            const tabsNav = document.getElementById('authTabsNav');
+            const authTitle = document.getElementById('authModalTitle');
 
             if (currentUser && currentUser.verified) {
-                // Quando o usuário está logado e clica em "Trocar Conta", esconde a aba "Novo Cadastro"
-                if (regTabBtn) regTabBtn.classList.add('hidden');
-                switchAuthTab('login');
+                // Quando o usuário está logado e clica em "Trocar Conta", esconde totalmente a barra de abas de cadastro!
+                if (tabsNav) tabsNav.classList.add('hidden');
+                if (authTitle) authTitle.innerText = "Entrar com Outra Conta";
+                switchAuthView('login');
             } else if (currentUser && !currentUser.verified) {
-                if (regTabBtn) regTabBtn.classList.add('hidden');
+                if (tabsNav) tabsNav.classList.add('hidden');
+                if (authTitle) authTitle.innerText = "Verificação de E-mail";
                 switchAuthView('2fa');
             } else {
-                if (regTabBtn) regTabBtn.classList.remove('hidden');
+                if (tabsNav) tabsNav.classList.remove('hidden');
+                if (authTitle) authTitle.innerText = "Acesso Individual de Usuários";
                 switchAuthTab('login');
             }
         }
@@ -4410,10 +4444,14 @@
         }
 
         async function logoutUser() {
+            if (!confirm("🚪 Tem certeza de que deseja encerrar a sua sessão e sair da Bússola?")) {
+                return;
+            }
             if (auth) {
                 await auth.signOut();
             }
             currentUser = null;
+            try { localStorage.removeItem('bussola_user_logged_in'); } catch(e) {}
             
             const currentWeekKey = getWeekKey(new Date());
             weeklySchedule = {};
@@ -4425,6 +4463,43 @@
             updateUserHeaderUI();
             enforceAuthGate();
             refreshAgendaView();
+            closeAuthModal();
+        }
+
+        function togglePasswordVisibility(inputId, eyeId) {
+            const input = document.getElementById(inputId);
+            const eye = document.getElementById(eyeId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (eye) eye.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                if (eye) eye.textContent = '👁️';
+            }
+        }
+
+        async function sendPasswordResetEmail() {
+            const emailInput = document.getElementById('loginEmail');
+            let email = emailInput ? emailInput.value.trim() : '';
+
+            if (!email) {
+                email = prompt("📧 Digite o seu e-mail de cadastro para redefinir a senha:");
+                if (!email) return;
+                email = email.trim();
+            }
+
+            if (!auth) {
+                alert("Sistema de autenticação indisponível no momento.");
+                return;
+            }
+
+            try {
+                await auth.sendPasswordResetEmail(email);
+                alert(`📧 E-mail de redefinição enviado com sucesso para:\n${email}\n\nAbra sua caixa de entrada (ou caixa de spam) e clique no link oficial enviado pelo Firebase para criar uma nova senha!`);
+            } catch (err) {
+                alert("Erro ao enviar e-mail de redefinição: " + getFirebaseErrorMessage(err.code));
+            }
         }
 
         // Sincronização Cloud Firestore por Usuário
