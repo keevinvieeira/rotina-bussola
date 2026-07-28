@@ -109,7 +109,7 @@
     </div>
 
     <!-- Modal de Autenticação / Login Individual (Acessível na LP e no App) -->
-    <div id="modalAuth" class="fixed inset-0 bg-gray-900/70 backdrop-blur-xs hidden justify-center items-center p-4 z-50">
+    <div id="modalAuth" class="fixed inset-0 bg-gray-900/70 backdrop-blur-xs hidden justify-center items-center p-4 z-50" onclick="handleModalBackdropClick(event)">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
             <!-- Header do Modal -->
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
@@ -4001,7 +4001,8 @@
             if (!currentUser) {
                 if (landingPage) landingPage.classList.remove('hidden');
                 if (appMainContent) appMainContent.classList.add('hidden');
-                if (closeBtn) closeBtn.classList.add('hidden');
+                // Na LP, o X de fechar fica visível (usuário pode desistir do login e voltar à LP)
+                if (closeBtn) closeBtn.classList.remove('hidden');
             } else {
                 if (landingPage) landingPage.classList.add('hidden');
                 if (appMainContent) appMainContent.classList.remove('hidden');
@@ -4039,16 +4040,34 @@
         }
 
         function closeAuthModal() {
-            if (!currentUser) {
-                // Se não estiver logado, bloqueia o fechamento do modal
+            const landingPage = document.getElementById('landingPage');
+            const isLPVisible = landingPage && !landingPage.classList.contains('hidden');
+
+            // Permite fechar se estiver logado OU se a LP estiver visível (usuário pode desistir do login)
+            if (!currentUser && !isLPVisible) {
                 return;
             }
+
             const modal = document.getElementById('modalAuth');
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }
         }
+
+        function handleModalBackdropClick(event) {
+            // Fecha o modal apenas se clicar no overlay escuro (fora do card branco)
+            if (event.target === document.getElementById('modalAuth')) {
+                closeAuthModal();
+            }
+        }
+
+        // Fecha o modal ao pressionar ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAuthModal();
+            }
+        });
 
         function switchAuthTab(tab) {
             const btnLogin = document.getElementById('authTabBtn-login');
