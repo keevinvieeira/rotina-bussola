@@ -103,8 +103,12 @@
         </div>
 
         <!-- Footer -->
-        <div class="max-w-6xl w-full mx-auto text-center z-10 pt-6 border-t border-white/10">
-            <p class="text-xs text-slate-400">© Bússola da Rotina • Todos os direitos reservados.</p>
+        <div class="max-w-6xl w-full mx-auto text-center z-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p class="text-xs text-slate-400">© 2026 Bússola da Rotina • Todos os direitos reservados.</p>
+            <div class="flex gap-4 text-xs">
+                <a href="/politica-de-privacidade.html" target="_blank" class="text-indigo-300 hover:text-white underline transition">Política de Privacidade</a>
+                <a href="/termos-de-servico.html" target="_blank" class="text-indigo-300 hover:text-white underline transition">Termos de Serviço</a>
+            </div>
         </div>
     </div>
 
@@ -4344,9 +4348,46 @@
             }
         };
 
-        // Inicializa o ouvinte de autenticação Firebase na carga da página
+        // Gerenciamento do Banner de Consentimento de Dados (LGPD/GDPR)
+        function checkCookieConsent() {
+            const accepted = localStorage.getItem('cookie_consent_accepted');
+            const banner = document.getElementById('cookieConsentBanner');
+            if (!accepted && banner) {
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            }
+        }
+
+        function acceptCookieConsent() {
+            localStorage.setItem('cookie_consent_accepted', 'true');
+            const banner = document.getElementById('cookieConsentBanner');
+            if (banner) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+            }
+        }
+
+        // Inicializa o ouvinte de autenticação Firebase e verificação de privacidade
         initFirebaseAuthListener();
+        checkCookieConsent();
 
     </script>
+
+    <!-- Banner de Consentimento de Dados / Cookies (LGPD & GDPR) -->
+    <div id="cookieConsentBanner" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 max-w-md bg-slate-900/95 border border-indigo-500/30 backdrop-blur-md rounded-2xl p-4 shadow-2xl z-50 text-white hidden flex-col gap-3">
+        <div class="flex items-start gap-3">
+            <div class="text-2xl shrink-0">🍪</div>
+            <div class="text-xs leading-relaxed text-slate-300">
+                <strong class="text-white block font-bold mb-0.5">Sua privacidade importa!</strong>
+                Utilizamos cookies e armazenamento local apenas para manter sua sessão ativa e sincronizar sua rotina. Saiba mais em nossa 
+                <a href="/politica-de-privacidade.html" target="_blank" class="text-indigo-300 underline font-semibold hover:text-white">Política de Privacidade</a>.
+            </div>
+        </div>
+        <div class="flex justify-end gap-2">
+            <button onclick="acceptCookieConsent()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-4 py-1.5 rounded-xl text-xs shadow-md transition">
+                Aceitar e Continuar
+            </button>
+        </div>
+    </div>
 </body>
 </html>
