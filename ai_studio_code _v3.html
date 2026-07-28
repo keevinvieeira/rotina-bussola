@@ -37,7 +37,7 @@
                 <p class="text-indigo-200 text-sm">Foco, produtividade e fins de semana livres</p>
             </div>
             
-            <!-- Navegação entre Abas -->
+            <!-- Navegação entre Abas (Esquerda) -->
             <div class="flex bg-indigo-800 p-1 rounded-lg shrink-0">
                 <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition">
                     📅 Agenda e Projetos
@@ -45,26 +45,17 @@
                 <button onclick="switchTab('analise')" id="tabBtn-analise" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
                     📊 Análise de Produtividade
                 </button>
+                <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" class="text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition">
+                    ⚙️ Configurações
+                </button>
             </div>
 
+            <!-- Botão de Usuário/Login (Último elemento à direita) -->
             <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
-                <!-- Badge de Usuário Autenticado -->
-                <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition">
+                <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white transition shadow-sm">
                     <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Kevin Admin</span>
-                    <button onclick="openAuthModal()" title="Gerenciar Conta / Sair" class="ml-1 text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2 py-0.5 rounded text-indigo-100 font-extrabold transition">Trocar</button>
+                    <button onclick="openAuthModal()" title="Gerenciar Conta / Sair" class="ml-1 text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2 py-0.5 rounded-lg text-indigo-100 font-extrabold transition">Trocar / Sair</button>
                 </div>
-                <button onclick="toggleModalSegments()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs font-semibold transition">
-                    🗂️ Segmentos
-                </button>
-                <button onclick="resetWeeklyChecks()" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-2 rounded-lg text-xs font-semibold transition">
-                    Reiniciar Semana
-                </button>
-                <button onclick="openResetAllModal()" class="bg-rose-700 hover:bg-rose-800 px-3 py-2 rounded-lg text-xs font-semibold transition">
-                    🚨 Resetar Tudo
-                </button>
-                <button id="btnNotif" onclick="requestNotificationPermission()" class="bg-indigo-900 hover:bg-black px-3 py-2 rounded-lg text-xs font-semibold transition">
-                    🔔 Notificações
-                </button>
             </div>
         </div>
     </header>
@@ -305,57 +296,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Regras de Produtividade -->
-            <div class="border-t border-gray-150 pt-5">
-                <details class="group bg-gray-50 rounded-xl border border-gray-200 overflow-hidden" open>
-                    <summary class="flex justify-between items-center p-3 text-xs font-bold text-gray-900 cursor-pointer select-none bg-gray-100 hover:bg-gray-200 transition">
-                        <span class="flex items-center gap-1.5">📋 Regras de Produtividade</span>
-                        <span class="text-[10px] text-indigo-600 font-semibold group-open:hidden">Editar</span>
-                        <span class="text-[10px] text-indigo-600 font-semibold hidden group-open:inline">Recolher</span>
-                    </summary>
-                    <div class="p-3 space-y-3.5">
-                        <div class="space-y-1.5">
-                            <span class="block text-[11px] font-bold text-gray-700">Limites Diários por Segmento:</span>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div>
-                                    <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">💼 Trab.</label>
-                                    <input type="number" id="ruleMaxWork" min="0" max="10" onchange="updateRule('maxWork', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-center font-bold text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">📚 Edu.</label>
-                                    <input type="number" id="ruleMaxEdu" min="0" max="10" onchange="updateRule('maxEdu', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-center font-bold text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">🚀 Carreira</label>
-                                    <input type="number" id="ruleMaxCar" min="0" max="10" onchange="updateRule('maxCar', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-center font-bold text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">🧹 Domés.</label>
-                                    <input type="number" id="ruleMaxDom" min="0" max="10" onchange="updateRule('maxDom', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-center font-bold text-xs">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rotinas Semanais Dinâmicas -->
-                        <div class="space-y-2 pt-2 border-t border-gray-200">
-                            <span class="block text-[11px] font-bold text-gray-700 font-extrabold text-indigo-900">🔄 Rotinas Semanais Fixas:</span>
-                            <div id="dynamicRoutinesContainer" class="space-y-3 max-h-96 overflow-y-auto pr-0.5">
-                                <!-- JS Dinâmico -->
-                            </div>
-                            <button onclick="addNewRoutine()" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] py-1.5 rounded font-extrabold border border-emerald-200 transition flex items-center justify-center gap-1 mt-2.5 shadow-sm">
-                                ➕ Adicionar Nova Rotina
-                            </button>
-                        </div>
-                        
-                        <div class="pt-1.5">
-                            <button onclick="reorganizeActiveWeek()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] py-2 rounded font-extrabold transition flex items-center justify-center gap-1 shadow-md">
-                                ✨ Reorganizar Rotina com as Regras
-                            </button>
-                        </div>
-                    </div>
-                </details>
-            </div>
         </div>
 
         <!-- Coluna da Agenda Diária -->
@@ -505,6 +445,86 @@
         </div>
     </main>
 
+    <!-- ABA 3: CONFIGURAÇÕES GERAIS DO APP -->
+    <main id="tab-configuracoes" class="max-w-[1400px] mx-auto px-4 hidden grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        
+        <!-- Bloco 1: Gerenciamento de Segmentos (Categorias) -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4">
+            <div class="flex justify-between items-center pb-3 border-b">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">🗂️ Segmentos (Categorias)</h2>
+                    <p class="text-xs text-gray-500">Personalize os segmentos de tarefas e suas cores de identificação.</p>
+                </div>
+                <button onclick="toggleModalSegments()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">+ Gerenciar</button>
+            </div>
+            
+            <div class="space-y-3 max-h-96 overflow-y-auto pr-1" id="configSegmentsListContainer">
+                <!-- Preenchido dinamicamente via JS -->
+            </div>
+        </div>
+
+        <!-- Bloco 2: Regras de Produtividade & Rotinas (100% FUNCIONAL E IDENTICO) -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-6">
+            <div>
+                <h2 class="text-lg font-bold text-gray-900 pb-2 border-b flex items-center gap-2">📋 Regras de Produtividade & Rotinas Fixas</h2>
+                <p class="text-xs text-gray-500 mt-1 mb-4">Defina limites diários por categoria e ajuste suas rotinas semanais dinâmicas.</p>
+                
+                <!-- Limites Diários -->
+                <div class="space-y-1.5 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <span class="block text-xs font-bold text-gray-700 mb-2">📊 Limites Diários por Segmento:</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">💼 Trab.</label>
+                            <input type="number" id="ruleMaxWork" min="0" max="10" onchange="updateRule('maxWork', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2 py-1 text-center font-bold text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">📚 Edu.</label>
+                            <input type="number" id="ruleMaxEdu" min="0" max="10" onchange="updateRule('maxEdu', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2 py-1 text-center font-bold text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">🚀 Carreira</label>
+                            <input type="number" id="ruleMaxCar" min="0" max="10" onchange="updateRule('maxCar', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2 py-1 text-center font-bold text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-tight">🧹 Domés.</label>
+                            <input type="number" id="ruleMaxDom" min="0" max="10" onchange="updateRule('maxDom', this.value)" class="w-full bg-white border border-gray-300 rounded-lg px-2 py-1 text-center font-bold text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rotinas Semanais Dinâmicas -->
+                <div class="space-y-3 pt-2">
+                    <div class="flex justify-between items-center">
+                        <span class="block text-xs font-extrabold text-indigo-900 uppercase tracking-wider">🔄 Rotinas Semanais Fixas:</span>
+                        <button onclick="addNewRoutine()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-lg font-extrabold border border-emerald-200 transition flex items-center gap-1 shadow-xs">
+                            ➕ Adicionar Nova Rotina
+                        </button>
+                    </div>
+                    
+                    <div id="dynamicRoutinesContainer" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                        <!-- JS Dinâmico via loadRulesToUI() -->
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-100">
+                        <button onclick="reorganizeActiveWeek()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2.5 rounded-xl font-extrabold transition flex items-center justify-center gap-1.5 shadow-md">
+                            ✨ Reorganizar Rotina com as Regras
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco 3: Manutenção do Sistema -->
+            <div class="border-t border-gray-200 pt-5">
+                <h3 class="font-bold text-xs uppercase tracking-wider text-gray-700 mb-3">🛠️ Manutenção & Ações Gerais</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="resetWeeklyChecks()" class="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex-1">Reiniciar Semana</button>
+                    <button onclick="openResetAllModal()" class="bg-rose-700 hover:bg-rose-800 text-white px-3 py-2 rounded-lg text-xs font-bold transition flex-1">🚨 Resetar Tudo</button>
+                    <button id="cfgBtnNotif" onclick="requestNotificationPermission()" class="bg-indigo-900 hover:bg-black text-white px-3 py-2 rounded-lg text-xs font-bold transition flex-1">🔔 Notificações</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
     <!-- MODAL DE INÍCIO DE TAREFA (POPUP DE AVISO) -->
     <div id="modalTaskAlert" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-all duration-300 opacity-0">
         <div class="bg-white rounded-2xl shadow-2xl border border-indigo-100 max-w-md w-full p-6 transform scale-95 transition-all duration-300 flex flex-col items-center text-center">
@@ -530,65 +550,9 @@
 
     <script>
         // Estrutura de Agenda Diária Padrão
+        // Estrutura de Agenda Diária Limpa (sem tarefas hardcoded ou regras implícitas)
         const defaultSchedule = {
-            1: [ // Segunda
-                { id: "s1-1", time: "08:00", timeEnd: "08:40", title: "Curso PM Google", desc: "Estudo - 40 min", done: false, category: "educacao" },
-                { id: "s1-2", time: "08:40", timeEnd: "09:10", title: "Prática de Inglês", desc: "Estudo - 30 min", done: false, category: "educacao" },
-                { id: "s1-3", time: "09:10", timeEnd: "10:40", title: "Cozinhar", desc: "Almoço para Seg, Ter e Qua", done: false, category: "domestico" },
-                { id: "s1-4", time: "10:40", timeEnd: "12:00", title: "Foco Alto", desc: "Desenvolvimento do site da Esposa", done: false, category: "trabalho-esposa" },
-                { id: "s1-5", time: "12:00", timeEnd: "13:30", title: "Jiu-Jitsu / Almoço", desc: "[Opção 1] Jiu-jitsu ou almoçar", done: false, category: "exercicio" },
-                { id: "s1-6", time: "14:00", timeEnd: "16:30", title: "Foco Médio: CRM Esposa", desc: "Configuração e implantação", done: false, category: "trabalho-esposa" },
-                { id: "s1-7", time: "16:30", timeEnd: "18:00", title: "Projeto Wellness/Filosofia", desc: "Planejamento de conteúdo", done: false, category: "trabalho-pessoal" },
-                { id: "s1-8", time: "19:00", timeEnd: "20:30", title: "Jiu-Jitsu / Jantar", desc: "[Opção 2] Jiu-jitsu ou jantar", done: false, category: "exercicio" }
-            ],
-            2: [ // Terça
-                { id: "s2-1", time: "08:00", timeEnd: "08:45", title: "Prática de Escrita", desc: "Post LinkedIn sobre trabalho", done: false, category: "educacao" },
-                { id: "s2-2", time: "08:45", timeEnd: "12:00", title: "Foco Alto", desc: "Desenvolvimento do site da Esposa", done: false, category: "trabalho-esposa" },
-                { id: "s2-3", time: "13:00", timeEnd: "14:00", title: "Almoço", desc: "Refeição + Lavar Louça", done: false, category: "domestico" },
-                { id: "s2-4", time: "14:00", timeEnd: "16:30", title: "Foco Médio: IA de Agendamento", desc: "Pesquisa e arquitetura (Esposa)", done: false, category: "trabalho-esposa" },
-                { id: "s2-5", time: "16:30", timeEnd: "18:00", title: "Tirar mofo dos tetos", desc: "Tarefa doméstica pontual", done: false, category: "domestico" },
-                { id: "s2-6", time: "18:00", timeEnd: "19:00", title: "Passar aspirador", desc: "Manutenção rápida da casa", done: false, category: "domestico" },
-                { id: "s2-7", time: "20:00", timeEnd: "21:30", title: "Academia", desc: "Treino", done: false, category: "exercicio" }
-            ],
-            3: [ // Quarta
-                { id: "s3-1", time: "08:00", timeEnd: "08:40", title: "Curso PM Google", desc: "Estudo - 40 min", done: false, category: "educacao" },
-                { id: "s3-2", time: "08:40", timeEnd: "09:10", title: "Prática de Inglês", desc: "Estudo - 30 min", done: false, category: "educacao" },
-                { id: "s3-3", time: "09:10", timeEnd: "12:00", title: "Foco Alto", desc: "Desenvolvimento do site da Esposa", done: false, category: "trabalho-esposa" },
-                { id: "s3-4", time: "12:00", timeEnd: "13:30", title: "Jiu-Jitsu / Almoço", desc: "[Opção 1] Jiu-jitsu ou almoçar", done: false, category: "exercicio" },
-                { id: "s3-5", time: "14:00", timeEnd: "16:00", title: "Marketing Instagram", desc: "Criar posts para Mãe e Pai", done: false, category: "trabalho-pai" },
-                { id: "s3-6", time: "16:00", timeEnd: "17:00", title: "Foco Médio: CRM Esposa", desc: "Testes no CRM", done: false, category: "trabalho-esposa" },
-                { id: "s3-bathroom", time: "17:00", timeEnd: "18:00", title: "Lavar o Banheiro", desc: "Tarefa doméstica quinzenal", done: false, category: "domestico" },
-                { id: "s3-7", time: "18:00", timeEnd: "19:00", title: "Lavar Roupa", desc: "Colocar máquina para lavar + Estender", done: false, category: "domestico" },
-                { id: "s3-8", time: "19:00", timeEnd: "20:30", title: "Jiu-Jitsu / Jantar", desc: "[Opção 2] Jiu-jitsu ou jantar", done: false, category: "exercicio" }
-            ],
-            4: [ // Quinta
-                { id: "s4-1", time: "08:00", timeEnd: "09:30", title: "Cozinhar", desc: "Almoço para Qui e Sex", done: false, category: "domestico" },
-                { id: "s4-2", time: "09:30", timeEnd: "12:00", title: "Foco Alto", desc: "IA de Agendamento (Esposa)", done: false, category: "trabalho-esposa" },
-                { id: "s4-3", time: "13:00", timeEnd: "14:00", title: "Almoço", desc: "Refeição + Lavar Louça", done: false, category: "domestico" },
-                { id: "s4-4", time: "14:00", timeEnd: "14:45", title: "Prática de Escrita", desc: "Post LinkedIn sobre trabalho", done: false, category: "educacao" },
-                { id: "s4-5", time: "14:45", timeEnd: "16:00", title: "Projeto Wellness/Filosofia", desc: "Criação de posts/pesquisa", done: false, category: "trabalho-pessoal" },
-                { id: "s4-6", time: "16:00", timeEnd: "16:40", title: "Editar Vídeos", desc: "Vídeos para imobiliária da Mãe", done: false, category: "trabalho-mae" },
-                { id: "s4-7", time: "16:40", timeEnd: "18:00", title: "Foco Médio: IA", desc: "Desenvolvimento da IA de Agendamento", done: false, category: "trabalho-esposa" },
-                { id: "s4-8", time: "18:00", timeEnd: "18:30", title: "Guardar Roupa", desc: "Recolher e guardar", done: false, category: "domestico" },
-                { id: "s4-9", time: "20:30", timeEnd: "22:00", title: "Academia", desc: "Treino", done: false, category: "exercicio" }
-            ],
-            5: [ // Sexta
-                { id: "s5-1", time: "08:00", timeEnd: "08:40", title: "Curso PM Google", desc: "Estudo - 40 min", done: false, category: "educacao" },
-                { id: "s5-2", time: "08:40", timeEnd: "09:10", title: "Prática de Inglês", desc: "Estudo - 30 min", done: false, category: "educacao" },
-                { id: "s5-3", time: "09:10", timeEnd: "12:00", title: "Foco Alto", desc: "Programação da IA de Agendamento (Esposa)", done: false, category: "trabalho-esposa" },
-                { id: "s5-4", time: "12:00", timeEnd: "13:30", title: "Jiu-Jitsu / Almoço", desc: "[Opção 1] Jiu-jitsu ou almoçar", done: false, category: "exercicio" },
-                { id: "s5-5", time: "14:00", timeEnd: "16:00", title: "Foco Médio", desc: "Revisão de pendências / Alinhamento do site", done: false, category: "trabalho-esposa" },
-                { id: "s5-founderpm", time: "16:00", timeEnd: "17:00", title: "Curso FounderPM", desc: "Estudo - 40 min", done: false, category: "educacao" },
-                { id: "s5-7", time: "18:30", timeEnd: "19:00", title: "Retirar o lixo e lavar a louça", desc: "Tarefa doméstica diária", done: false, category: "domestico" },
-                { id: "s5-8", time: "19:00", timeEnd: "20:30", title: "Jiu-Jitsu / Jantar", desc: "[Opção 2] Jiu-jitsu ou jantar", done: false, category: "exercicio" }
-            ],
-            6: [ // Sábado
-                { id: "s6-1", time: "09:00", timeEnd: "12:00", title: "Manhã de Descanso", desc: "Aproveitar o início do fim de semana com a esposa", done: false, category: "trabalho-pessoal" }
-            ],
-            0: [ // Domingo
-                { id: "s0-1", time: "12:00", timeEnd: "13:30", title: "Academia", desc: "Treino dominical fixo", done: false, category: "exercicio" },
-                { id: "s0-2", time: "21:00", timeEnd: "22:00", title: "Planejamento Semanal", desc: "Revisar tarefas da semana / segunda-feira", done: false, category: "trabalho-pessoal" }
-            ]
+            1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: []
         };
 
         // Estrutura de Projetos Unificada
@@ -795,49 +759,42 @@
         }
 
         function generateInitialScheduleForWeek(weekKey) {
-            const weekNo = getWeekNumber(weekKey);
-            const weekSchedule = JSON.parse(JSON.stringify(defaultSchedule));
+            const weekSchedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
             
-            for (let day in weekSchedule) {
-                weekSchedule[day] = weekSchedule[day].map(task => {
-                    let t = { ...task };
-                    if (33 <= weekNo && weekNo <= 36) {
-                        // Foco na imobiliária/site da Mãe
-                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
-                            t.title = t.title.replace("site da Esposa", "site da Mãe (Imobiliária)").replace("CRM Esposa", "Design do site da Mãe").replace("IA de Agendamento", "Ajustes do site da Mãe");
-                            t.desc = t.desc.replace("site da Esposa", "site da Mãe").replace("CRM", "Design").replace("IA", "Upload de Imóveis");
-                            t.category = "trabalho-mae";
-                        }
-                        if (t.title.includes("IA")) {
-                            t.title = "Foco Médio: Upload fotos imobiliária";
-                            t.desc = "Trabalho mãe";
-                            t.category = "trabalho-mae";
-                        }
-                    } else if (weekNo === 37) {
-                        // Foco no site do Pai
-                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
-                            t.title = "Foco: Desenvolvimento do site do Pai";
-                            t.desc = "Implementação e estrutura do site";
-                            t.category = "trabalho-pai";
-                        }
-                    } else if (38 <= weekNo && weekNo <= 41) {
-                        // Foco no site da Irmã
-                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
-                            t.title = "Foco: Desenvolvimento do site da Irmã";
-                            t.desc = "Design e código do site da irmã";
-                            t.category = "trabalho-irma";
-                        }
-                    } else if (weekNo >= 42) {
-                        // Tudo concluído
-                        if (t.title.includes("site da Esposa") || t.title.includes("CRM Esposa") || t.title.includes("IA de Agendamento") || t.title.includes("IA")) {
-                            t.title = "Foco Pessoal / Livre";
-                            t.desc = "Manutenção e estudos pessoais";
-                            t.category = "trabalho-pessoal";
-                        }
-                    }
-                    return t;
+            // Popula estritamente com as rotinas recorrentes cadastradas no painel pelo usuário
+            const weekNo = getWeekNumber(weekKey);
+            const isOddWeek = weekNo % 2 !== 0;
+
+            const routines = (productivityRules && productivityRules.routines) ? productivityRules.routines : [];
+            routines.forEach(r => {
+                if (r.oddWeeksOnly && !isOddWeek) return;
+
+                const days = r.days || [1];
+                days.forEach(d => {
+                    const durationMins = r.duration || 30;
+                    if (!weekSchedule[d]) weekSchedule[d] = [];
+                    weekSchedule[d].push({
+                        id: "rot-" + r.id + "-" + d + "-" + Math.random().toString(36).substring(2, 5),
+                        time: r.time || "08:00",
+                        timeEnd: addMinutesToTime(r.time || "08:00", durationMins),
+                        duration: durationMins,
+                        title: r.title,
+                        desc: r.desc || "Rotina recorrente",
+                        done: false,
+                        status: "pending",
+                        category: r.category || "domestico",
+                        justification: "",
+                        completion: "nao",
+                        difficulty: "",
+                        notes: ""
+                    });
                 });
+            });
+
+            for (let d in weekSchedule) {
+                recalculateDayTimes(weekSchedule[d]);
             }
+
             return weekSchedule;
         }
 
@@ -935,9 +892,68 @@
             }
 
             ensureWeekExists(selectedWeekKey);
+            purgeImplicitTasks();
             
             if (migrated) {
                 saveData();
+            }
+        }
+
+        function purgeImplicitTasks() {
+            let changed = false;
+            const implicitKeywords = [
+                "foco alto", "foco médio", "foco medio", "crm esposa", 
+                "ia de agendamento", "tirar mofo", "jiu-jitsu / almoço", "jiu-jitsu / jantar"
+            ];
+
+            for (let weekKey in weeklySchedule) {
+                const weekData = weeklySchedule[weekKey];
+                if (!weekData || typeof weekData !== 'object') continue;
+
+                for (let day in weekData) {
+                    if (Array.isArray(weekData[day])) {
+                        const origLen = weekData[day].length;
+                        weekData[day] = weekData[day].filter(task => {
+                            if (!task || !task.title) return true;
+                            const tLower = task.title.toLowerCase();
+                            const isGhost = implicitKeywords.some(kw => tLower.includes(kw));
+                            return !isGhost;
+                        });
+                        if (weekData[day].length !== origLen) {
+                            recalculateDayTimes(weekData[day]);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+
+            cleanNonActiveProjectTasks();
+
+            if (changed) {
+                saveData();
+            }
+        }
+
+        function loadConfiguracoesUI() {
+            // 1. Carrega as Regras e Rotinas no contêiner principal com todas as funções interativas
+            loadRulesToUI();
+
+            // 2. Renderiza Segmentos em Configurações
+            const segContainer = document.getElementById('configSegmentsListContainer');
+            if (segContainer) {
+                segContainer.innerHTML = '';
+                Object.keys(taskCategories).forEach(key => {
+                    const cat = taskCategories[key];
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-xl";
+                    item.innerHTML = `
+                        <div class="flex items-center gap-2.5">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${cat.bg} border shrink-0">${cat.label}</span>
+                            <span class="text-xs text-gray-500 font-mono">(${key})</span>
+                        </div>
+                    `;
+                    segContainer.appendChild(item);
+                });
             }
         }
 
@@ -1293,26 +1309,44 @@
         function switchTab(tabName) {
             const tabAgenda = document.getElementById('tab-agenda');
             const tabAnalise = document.getElementById('tab-analise');
+            const tabConfig = document.getElementById('tab-configuracoes');
+
             const btnAgenda = document.getElementById('tabBtn-agenda');
             const btnAnalise = document.getElementById('tabBtn-analise');
+            const btnConfig = document.getElementById('tabBtn-configuracoes');
+
+            const activeClass = "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition";
+            const inactiveClass = "text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition";
 
             if (tabName === 'agenda') {
-                tabAgenda.classList.remove('hidden');
-                tabAgenda.classList.add('grid');
-                tabAnalise.classList.add('hidden');
-                
-                btnAgenda.className = "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition";
-                btnAnalise.className = "text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition";
-            } else {
-                tabAgenda.classList.add('hidden');
-                tabAgenda.classList.remove('grid');
-                tabAnalise.classList.remove('hidden');
-                tabAnalise.classList.add('grid');
+                if (tabAgenda) { tabAgenda.classList.remove('hidden'); tabAgenda.classList.add('grid'); }
+                if (tabAnalise) { tabAnalise.classList.add('hidden'); tabAnalise.classList.remove('grid'); }
+                if (tabConfig) { tabConfig.classList.add('hidden'); tabConfig.classList.remove('grid'); }
 
-                btnAgenda.className = "text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition";
-                btnAnalise.className = "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition";
+                if (btnAgenda) btnAgenda.className = activeClass;
+                if (btnAnalise) btnAnalise.className = inactiveClass;
+                if (btnConfig) btnConfig.className = inactiveClass;
+                refreshAgendaView();
+            } else if (tabName === 'analise') {
+                if (tabAgenda) { tabAgenda.classList.add('hidden'); tabAgenda.classList.remove('grid'); }
+                if (tabAnalise) { tabAnalise.classList.remove('hidden'); tabAnalise.classList.add('grid'); }
+                if (tabConfig) { tabConfig.classList.add('hidden'); tabConfig.classList.remove('grid'); }
+
+                if (btnAgenda) btnAgenda.className = inactiveClass;
+                if (btnAnalise) btnAnalise.className = activeClass;
+                if (btnConfig) btnConfig.className = inactiveClass;
 
                 renderChartsAndInsights();
+            } else if (tabName === 'configuracoes') {
+                if (tabAgenda) { tabAgenda.classList.add('hidden'); tabAgenda.classList.remove('grid'); }
+                if (tabAnalise) { tabAnalise.classList.add('hidden'); tabAnalise.classList.remove('grid'); }
+                if (tabConfig) { tabConfig.classList.remove('hidden'); tabConfig.classList.add('grid'); }
+
+                if (btnAgenda) btnAgenda.className = inactiveClass;
+                if (btnAnalise) btnAnalise.className = inactiveClass;
+                if (btnConfig) btnConfig.className = activeClass;
+
+                loadConfiguracoesUI();
             }
         }
 
