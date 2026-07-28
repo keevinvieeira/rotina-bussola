@@ -3887,6 +3887,18 @@
                 return;
             }
 
+            // Captura o resultado do redirecionamento do Google Auth (imune a bloqueios de popup e COOP no Cloudflare)
+            auth.getRedirectResult().then((result) => {
+                if (result && result.user) {
+                    closeAuthModal();
+                    refreshAgendaView();
+                }
+            }).catch((err) => {
+                if (err && err.code) {
+                    console.warn("Aviso no Redirect Auth:", err);
+                }
+            });
+
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     currentUser = {
@@ -4040,14 +4052,11 @@
 
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
-                await auth.signInWithPopup(provider);
-                closeAuthModal();
-                refreshAgendaView();
+                // Utiliza redirecionamento direto, 100% imune a erros de popup e COOP no Cloudflare
+                await auth.signInWithRedirect(provider);
             } catch (err) {
                 console.error("Erro Google Auth:", err);
-                if (err.code === 'auth/popup-blocked') {
-                    await auth.signInWithRedirect(provider);
-                } else if (err.code === 'auth/operation-not-allowed') {
+                if (err.code === 'auth/operation-not-allowed') {
                     alert("⚠️ O login com o Google ainda não foi ativado no Firebase Console.\n\nAcesse: Firebase Console -> Authentication -> Provedores de login -> Clique em Google e ative.");
                 } else if (err.code === 'auth/unauthorized-domain') {
                     alert(`⚠️ O domínio '${window.location.hostname}' precisa ser adicionado nos Domínios Autorizados do Firebase!\n\nAcesse: Firebase Console -> Authentication -> Configurações -> Domínios autorizados -> Adicionar '${window.location.hostname}'.`);
