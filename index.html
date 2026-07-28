@@ -4033,7 +4033,16 @@
                 closeAuthModal();
                 refreshAgendaView();
             } catch (err) {
-                alert("Erro ao fazer login com o Google: " + err.message);
+                console.error("Erro Google Auth:", err);
+                if (err.code === 'auth/popup-blocked') {
+                    await auth.signInWithRedirect(provider);
+                } else if (err.code === 'auth/operation-not-allowed') {
+                    alert("⚠️ O login com o Google ainda não foi ativado no Firebase Console.\n\nAcesse: Firebase Console -> Authentication -> Provedores de login -> Clique em Google e ative.");
+                } else if (err.code === 'auth/unauthorized-domain') {
+                    alert(`⚠️ O domínio '${window.location.hostname}' precisa ser adicionado nos Domínios Autorizados do Firebase!\n\nAcesse: Firebase Console -> Authentication -> Configurações -> Domínios autorizados -> Adicionar '${window.location.hostname}'.`);
+                } else {
+                    alert(`Aviso do Firebase (${err.code}): ${err.message}`);
+                }
             }
         }
 
@@ -4119,17 +4128,27 @@
                     if (cloudData.productivityRules) productivityRules = cloudData.productivityRules;
                     
                     saveData();
+                    loadConfiguracoesUI();
                     refreshAgendaView();
                 } else {
-                    // NOVO USUÁRIO: Inicializa 100% limpo ("Do Zero") sem herdar projetos de outros
+                    // NOVO USUÁRIO: Inicializa 100% limpo ("Do Zero") sem herdar nada
                     const freshSchedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
                     const freshProjects = {};
                     const freshWeekKey = getWeekKey(new Date());
                     freshProjects[freshWeekKey] = [];
+                    const freshProductivityRules = { maxWork: 2, maxEdu: 1, maxCar: 1, maxDom: 2, routines: [] };
 
                     weeklySchedule = {};
                     weeklySchedule[freshWeekKey] = freshSchedule;
                     weeklyProjects = freshProjects;
+                    productivityRules = freshProductivityRules;
+
+                    // Limpa resíduos de localStorage antigo do navegador
+                    try {
+                        localStorage.removeItem('my_weekly_schedule');
+                        localStorage.removeItem('my_weekly_projects');
+                        localStorage.removeItem('my_productivity_rules');
+                    } catch(e) {}
 
                     await docRef.set({
                         weeklySchedule: weeklySchedule,
@@ -4139,6 +4158,7 @@
                     });
 
                     saveData();
+                    loadConfiguracoesUI();
                     refreshAgendaView();
                 }
             } catch (e) {
