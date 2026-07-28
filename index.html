@@ -629,16 +629,12 @@
         // Estrutura de Projetos Unificada (Inicia vazia para novos usuários)
         const defaultProjects = [];
 
-        // Definição das Categorias/Segmentos e estilos de cores (bg light e dark)
+        // Definição das Categorias/Segmentos de exemplo universais e estilos de cores
         const defaultTaskCategories = {
-            'domestico': { label: '🧹 Serviços Domésticos', bg: 'bg-blue-100 text-blue-800 border-blue-200', darkBg: 'bg-blue-900/30 border-blue-500/30 text-blue-300' },
-            'educacao': { label: '📚 Educação Contínua', bg: 'bg-purple-100 text-purple-800 border-purple-200', darkBg: 'bg-purple-900/30 border-purple-500/30 text-purple-300' },
-            'exercicio': { label: '💪 Exercício Físico', bg: 'bg-teal-100 text-teal-800 border-teal-200', darkBg: 'bg-teal-900/30 border-teal-500/30 text-teal-300' },
-            'trabalho-esposa': { label: '💼 Trabalho (Esposa)', bg: 'bg-emerald-100 text-emerald-800 border-emerald-200', darkBg: 'bg-emerald-900/30 border-emerald-500/30 text-emerald-300' },
-            'trabalho-pai': { label: '💼 Trabalho (Pai)', bg: 'bg-amber-100 text-amber-800 border-amber-200', darkBg: 'bg-amber-900/30 border-amber-500/30 text-amber-300' },
-            'trabalho-mae': { label: '💼 Trabalho (Mãe)', bg: 'bg-orange-100 text-orange-800 border-orange-200', darkBg: 'bg-orange-900/30 border-orange-500/30 text-orange-300' },
-            'trabalho-irma': { label: '💼 Trabalho (Irmã)', bg: 'bg-pink-105 text-pink-805 border-pink-200', darkBg: 'bg-pink-900/30 border-pink-500/30 text-pink-300' },
-            'trabalho-pessoal': { label: '👤 Trabalho (Pessoal)', bg: 'bg-gray-100 text-gray-800 border-gray-200', darkBg: 'bg-white/10 border-white/20 text-white/90' }
+            'trabalho': { label: '💼 Trabalho', bg: 'bg-indigo-100 text-indigo-800 border-indigo-200', darkBg: 'bg-indigo-900/30 border-indigo-500/30 text-indigo-300' },
+            'estudo': { label: '📚 Estudo', bg: 'bg-purple-100 text-purple-800 border-purple-200', darkBg: 'bg-purple-900/30 border-purple-500/30 text-purple-300' },
+            'exercicio': { label: '💪 Exercício', bg: 'bg-teal-100 text-teal-800 border-teal-200', darkBg: 'bg-teal-900/30 border-teal-500/30 text-teal-300' },
+            'domestico': { label: '🧹 Serviços Domésticos', bg: 'bg-blue-100 text-blue-800 border-blue-200', darkBg: 'bg-blue-900/30 border-blue-500/30 text-blue-300' }
         };
 
         let taskCategories = {};
@@ -658,6 +654,11 @@
                 localStorage.setItem('my_task_categories', JSON.stringify(taskCategories));
             } catch (e) {
                 console.warn("Erro ao salvar categorias no localStorage", e);
+            }
+            if (currentUser && db) {
+                db.collection('users').doc(currentUser.uid).set({
+                    taskCategories: taskCategories
+                }, { merge: true }).catch(err => console.warn("Erro ao salvar categorias no Firestore:", err));
             }
         }
 
@@ -3416,12 +3417,24 @@
                 routines: []
             };
 
+            taskCategories = JSON.parse(JSON.stringify(defaultTaskCategories));
+            saveTaskCategories();
+
+            if (currentUser && db) {
+                db.collection('users').doc(currentUser.uid).set({
+                    weeklySchedule: weeklySchedule,
+                    weeklyProjects: weeklyProjects,
+                    productivityRules: productivityRules,
+                    taskCategories: taskCategories
+                }).catch(err => console.warn("Erro ao resetar no Firestore:", err));
+            }
+
             saveData();
             loadConfiguracoesUI();
             renderProjects();
             refreshAgendaView();
             closeResetAllModal();
-            alert("🚨 Todo o sistema foi resetado com sucesso! Todos os projetos, rotinas e tarefas foram completamente zerados.");
+            alert("🚨 Todo o sistema foi resetado com sucesso! Todos os projetos, rotinas e categorias foram restaurados para os padrões iniciais.");
         }
 
         // ================= DESEMPENHO E GRÁFICOS (TAB 2) =================
@@ -4280,38 +4293,47 @@
                     if (cloudData.weeklySchedule) weeklySchedule = cloudData.weeklySchedule;
                     if (cloudData.weeklyProjects) weeklyProjects = cloudData.weeklyProjects;
                     if (cloudData.productivityRules) productivityRules = cloudData.productivityRules;
+                    if (cloudData.taskCategories) taskCategories = cloudData.taskCategories;
+                    else taskCategories = JSON.parse(JSON.stringify(defaultTaskCategories));
                     
                     saveData();
+                    saveTaskCategories();
                     loadConfiguracoesUI();
                     refreshAgendaView();
                 } else {
-                    // NOVO USUÁRIO: Inicializa 100% limpo ("Do Zero") sem herdar nada
+                    // NOVO USUÁRIO: Inicializa 100% limpo ("Do Zero") com categorias padrão de exemplo
                     const freshSchedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
                     const freshProjects = {};
                     const freshWeekKey = getWeekKey(new Date());
                     freshProjects[freshWeekKey] = [];
                     const freshProductivityRules = { maxWork: 2, maxEdu: 1, maxCar: 1, maxDom: 2, routines: [] };
+                    const freshCategories = JSON.parse(JSON.stringify(defaultTaskCategories));
 
                     weeklySchedule = {};
                     weeklySchedule[freshWeekKey] = freshSchedule;
                     weeklyProjects = freshProjects;
                     productivityRules = freshProductivityRules;
+                    taskCategories = freshCategories;
 
                     // Limpa resíduos de localStorage antigo do navegador
                     try {
                         localStorage.removeItem('my_weekly_schedule');
                         localStorage.removeItem('my_weekly_projects');
                         localStorage.removeItem('my_productivity_rules');
+                        localStorage.removeItem('my_task_categories');
+                        localStorage.removeItem('my_projects');
                     } catch(e) {}
 
                     await docRef.set({
                         weeklySchedule: weeklySchedule,
                         weeklyProjects: weeklyProjects,
                         productivityRules: productivityRules,
+                        taskCategories: taskCategories,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
                     saveData();
+                    saveTaskCategories();
                     loadConfiguracoesUI();
                     refreshAgendaView();
                 }
@@ -4328,7 +4350,8 @@
                 db.collection('users').doc(currentUser.uid).set({
                     weeklySchedule: weeklySchedule,
                     weeklyProjects: weeklyProjects,
-                    productivityRules: productivityRules
+                    productivityRules: productivityRules,
+                    taskCategories: taskCategories
                 }, { merge: true }).catch(err => console.warn("Erro ao salvar no Firestore:", err));
             }
         };
