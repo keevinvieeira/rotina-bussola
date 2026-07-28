@@ -2560,7 +2560,7 @@
                         <!-- Conteúdo de texto -->
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5 flex-wrap">
-                                <span id="card-time-${task.id}" class="font-bold text-xs ${task.status === 'success' ? 'text-emerald-600' : task.status === 'failed' ? 'text-rose-600' : 'text-indigo-600'}">${displayTime}</span>
+                                <span id="card-time-${task.id}" class="font-extrabold text-xs px-2 py-0.5 rounded border ${task.status === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : task.status === 'failed' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}">⏱️ ${getTaskDurationHours(task)}h (${task.time})</span>
                                 <span id="card-badge-${task.id}" class="px-1.5 py-0.5 text-[9px] font-bold rounded-full ${cat.bg} border shrink-0">${cat.label}</span>
                                 ${task.status === 'failed' && task.justification ? `<span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[9px] font-bold border border-amber-200">⚠️ Justificado</span>` : ''}
                             </div>
@@ -2587,13 +2587,18 @@
                     <div class="mb-3.5 p-2.5 bg-indigo-50/40 border border-indigo-100 rounded-lg">
                         <span class="block font-bold text-indigo-700 mb-2">✏️ Editar Campos da Tarefa</span>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 mb-2">
-                            <div>
-                                <label class="block font-semibold text-gray-600 mb-0.5">Horário Início:</label>
-                                <input type="time" value="${task.time || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'time', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-gray-600 mb-0.5">Horário Fim:</label>
-                                <input type="time" value="${task.timeEnd || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'timeEnd', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                            <div class="sm:col-span-2">
+                                <label class="block font-bold text-gray-700 mb-0.5">⏱️ Duração (Tempo de Foco):</label>
+                                <select onchange="saveTaskDetails('${day}', '${task.id}', 'duration', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-1 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                                    <option value="30" ${getTaskDurationMinutes(task) === 30 ? 'selected' : ''}>0,5 hora (30 min)</option>
+                                    <option value="60" ${getTaskDurationMinutes(task) === 60 ? 'selected' : ''}>1,0 hora (60 min)</option>
+                                    <option value="90" ${getTaskDurationMinutes(task) === 90 ? 'selected' : ''}>1,5 hora (90 min)</option>
+                                    <option value="120" ${getTaskDurationMinutes(task) === 120 ? 'selected' : ''}>2,0 horas (120 min)</option>
+                                    <option value="150" ${getTaskDurationMinutes(task) === 150 ? 'selected' : ''}>2,5 horas (150 min)</option>
+                                    <option value="180" ${getTaskDurationMinutes(task) === 180 ? 'selected' : ''}>3,0 horas (180 min)</option>
+                                    <option value="210" ${getTaskDurationMinutes(task) === 210 ? 'selected' : ''}>3,5 horas (210 min)</option>
+                                    <option value="240" ${getTaskDurationMinutes(task) === 240 ? 'selected' : ''}>4,0 horas (240 min)</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block font-semibold text-gray-600 mb-0.5">Título:</label>
@@ -2761,6 +2766,23 @@
         function saveTaskDetails(day, id, field, value) {
             const taskObj = weeklySchedule[selectedWeekKey][day].find(t => t.id === id);
             const taskTitle = taskObj ? taskObj.title : "";
+
+            if (field === 'duration') {
+                const durMins = parseInt(value, 10) || 30;
+                weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task => {
+                    if (task.id === id) {
+                        return {
+                            ...task,
+                            duration: durMins
+                        };
+                    }
+                    return task;
+                });
+                recalculateDayTimes(weeklySchedule[selectedWeekKey][day]);
+                saveData();
+                refreshAgendaView();
+                return;
+            }
 
             if (field === 'time' || field === 'timeEnd') {
                 const newStart = field === 'time' ? value : (taskObj ? taskObj.time : "");
@@ -3843,6 +3865,221 @@
             }, 300);
         }
 
+        // ================= SISTEMA DE AUTENTICAÇÃO INDIVIDUAL (BÚSSOLA ID) =================
+        const DEFAULT_ADMIN_USER = {
+            name: "Kevin Admin",
+            email: "kevin@bussola.com",
+            password: "Bussola2026!Admin",
+            verified: true,
+            role: "admin"
+        };
+
+        let registeredUsers = [];
+        let currentUser = null;
+        let pendingRegistration = null;
+
+        function loadAuthSystem() {
+            try {
+                const savedUsers = safeGetItem('bussola_users');
+                if (savedUsers) {
+                    registeredUsers = JSON.parse(savedUsers);
+                }
+            } catch (e) {
+                registeredUsers = [];
+            }
+
+            // Garante que o usuário Kevin Admin sempre existe
+            const adminExists = registeredUsers.some(u => u.email === DEFAULT_ADMIN_USER.email);
+            if (!adminExists) {
+                registeredUsers.push(DEFAULT_ADMIN_USER);
+                saveRegisteredUsers();
+            }
+
+            try {
+                const savedActiveUser = safeGetItem('bussola_current_user');
+                if (savedActiveUser) {
+                    currentUser = JSON.parse(savedActiveUser);
+                } else {
+                    currentUser = DEFAULT_ADMIN_USER;
+                    safeSetItem('bussola_current_user', JSON.stringify(currentUser));
+                }
+            } catch (e) {
+                currentUser = DEFAULT_ADMIN_USER;
+            }
+
+            updateUserHeaderUI();
+        }
+
+        function saveRegisteredUsers() {
+            try {
+                safeSetItem('bussola_users', JSON.stringify(registeredUsers));
+            } catch (e) {
+                console.warn("Erro ao salvar usuários:", e);
+            }
+        }
+
+        function updateUserHeaderUI() {
+            const headerNameEl = document.getElementById('userHeaderName');
+            const activeNameEl = document.getElementById('activeUserName');
+            const activeEmailEl = document.getElementById('activeUserEmail');
+
+            if (currentUser) {
+                if (headerNameEl) headerNameEl.innerHTML = `👤 ${currentUser.name}`;
+                if (activeNameEl) activeNameEl.innerText = currentUser.name;
+                if (activeEmailEl) activeEmailEl.innerText = currentUser.email;
+            }
+        }
+
+        function openAuthModal() {
+            const modal = document.getElementById('modalAuth');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            if (currentUser) {
+                switchAuthView('current');
+            } else {
+                switchAuthView('login');
+            }
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('modalAuth');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function switchAuthTab(tab) {
+            const btnLogin = document.getElementById('authTabBtn-login');
+            const btnRegister = document.getElementById('authTabBtn-register');
+
+            if (tab === 'login') {
+                btnLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-xs transition";
+                btnRegister.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-800 transition";
+                switchAuthView('login');
+            } else {
+                btnRegister.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-xs transition";
+                btnLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-800 transition";
+                switchAuthView('register');
+            }
+        }
+
+        function switchAuthView(viewName) {
+            const views = ['login', 'register', '2fa', 'current'];
+            views.forEach(v => {
+                const el = document.getElementById(`authView-${v}`);
+                if (el) {
+                    if (v === viewName) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                }
+            });
+        }
+
+        function handleLoginSubmit() {
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            const alertEl = document.getElementById('loginAlert');
+
+            if (!email || !password) {
+                alertEl.innerText = "Por favor, preencha o e-mail e a senha.";
+                alertEl.classList.remove('hidden');
+                return;
+            }
+
+            const foundUser = registeredUsers.find(u => u.email.toLowerCase() === email && u.password === password);
+            if (!foundUser) {
+                alertEl.innerText = "E-mail ou senha incorretos!";
+                alertEl.classList.remove('hidden');
+                return;
+            }
+
+            alertEl.classList.add('hidden');
+            currentUser = foundUser;
+            safeSetItem('bussola_current_user', JSON.stringify(currentUser));
+            updateUserHeaderUI();
+            closeAuthModal();
+            refreshAgendaView();
+        }
+
+        function startRegistrationStep1() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
+            const alertEl = document.getElementById('regAlert');
+
+            if (!name || !email || !password) {
+                alertEl.innerText = "Preencha todos os campos para se cadastrar.";
+                alertEl.classList.remove('hidden');
+                return;
+            }
+
+            if (registeredUsers.some(u => u.email.toLowerCase() === email)) {
+                alertEl.innerText = "Este e-mail já possui um cadastro na Bússola!";
+                alertEl.classList.remove('hidden');
+                return;
+            }
+
+            alertEl.classList.add('hidden');
+            
+            // Gera código de 6 dígitos para o 2FA
+            const code2FA = String(Math.floor(100000 + Math.random() * 900000));
+            pendingRegistration = { name, email, password, code2FA };
+
+            document.getElementById('verifyEmailDisplay').innerText = email;
+            document.getElementById('demoCodeDisplay').innerText = code2FA;
+            document.getElementById('verify2FACodeInput').value = '';
+
+            switchAuthView('2fa');
+        }
+
+        function confirmRegistration2FA() {
+            const enteredCode = document.getElementById('verify2FACodeInput').value.trim();
+            const alertEl = document.getElementById('twoFAAlert');
+
+            if (!pendingRegistration) return;
+
+            if (enteredCode !== pendingRegistration.code2FA) {
+                alertEl.innerText = "Código de verificação incorreto! Tente novamente.";
+                alertEl.classList.remove('hidden');
+                return;
+            }
+
+            alertEl.classList.add('hidden');
+
+            const newUser = {
+                name: pendingRegistration.name,
+                email: pendingRegistration.email,
+                password: pendingRegistration.password,
+                verified: true,
+                role: "user"
+            };
+
+            registeredUsers.push(newUser);
+            saveRegisteredUsers();
+
+            currentUser = newUser;
+            safeSetItem('bussola_current_user', JSON.stringify(currentUser));
+
+            pendingRegistration = null;
+            updateUserHeaderUI();
+            closeAuthModal();
+            refreshAgendaView();
+
+            alert(`🎉 Cadastro concluído com sucesso!\nBem-vindo(a) à Bússola, ${newUser.name}!`);
+        }
+
+        function handleLogoutSubmit() {
+            currentUser = DEFAULT_ADMIN_USER;
+            safeSetItem('bussola_current_user', JSON.stringify(currentUser));
+            updateUserHeaderUI();
+            closeAuthModal();
+            refreshAgendaView();
+        }
+
+        // Inicializa o módulo de autenticação na carga da página
+        loadAuthSystem();
 
     </script>
 </body>

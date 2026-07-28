@@ -1,8 +1,8 @@
 {
   "summary": {
-    "scanned_files": 4,
+    "scanned_files": 5,
     "secrets_found": 0,
-    "vulns_found": 34,
+    "vulns_found": 36,
     "config_issues": 0
   },
   "findings": [
@@ -20,7 +20,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 1073,
+      "line": 1152,
       "snippet": "progressBar.innerHTML = '<div class=\"h-full bg-gray-300 w-full rounded-full\"></div>';",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -29,7 +29,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 1075,
+      "line": 1154,
       "snippet": "legendContainer.innerHTML = '<span class=\"text-[10px] text-gray-400 italic\">Nenhum esfor\u00e7o planejado para hoje.</span>';",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -38,7 +38,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 1285,
+      "line": 1364,
       "snippet": "card.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -47,7 +47,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 1528,
+      "line": 1607,
       "snippet": "itemDiv.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -56,7 +56,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 2468,
+      "line": 2547,
       "snippet": "card.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -65,7 +65,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 2790,
+      "line": 2891,
       "snippet": "daySection.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -74,7 +74,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 2806,
+      "line": 2907,
       "snippet": "tasksContainer.innerHTML = emptyMsg;",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -83,7 +83,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 2834,
+      "line": 2935,
       "snippet": "timeline.innerHTML = '<p class=\"text-gray-500 text-sm\">Sem compromissos fixos agendados para este dia.</p>';",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -92,7 +92,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 2997,
+      "line": 3098,
       "snippet": "row.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -101,7 +101,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 3533,
+      "line": 3634,
       "snippet": "insightsContainer.innerHTML = balanceInsightHTML + insight1 + insight2 + insight3 + insight4;",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -110,7 +110,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 3614,
+      "line": 3715,
       "snippet": "row.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -119,8 +119,17 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "ai_studio_code _v3.html",
-      "line": 3629,
+      "line": 3730,
       "snippet": "timeContainer.innerHTML = '<p class=\"text-xs text-gray-400 italic\">Nenhuma tarefa conclu\u00edda com tempo contabilizado ainda.</p>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "ai_studio_code _v3.html",
+      "line": 3927,
+      "snippet": "if (headerNameEl) headerNameEl.innerHTML = `\ud83d\udc64 ${currentUser.name}`;",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
     {
@@ -209,7 +218,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 1073,
+      "line": 1152,
       "snippet": "progressBar.innerHTML = '<div class=\"h-full bg-gray-300 w-full rounded-full\"></div>';",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -218,7 +227,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 1075,
+      "line": 1154,
       "snippet": "legendContainer.innerHTML = '<span class=\"text-[10px] text-gray-400 italic\">Nenhum esfor\u00e7o planejado para hoje.</span>';",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -227,7 +236,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 1285,
+      "line": 1364,
       "snippet": "card.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -236,7 +245,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 1528,
+      "line": 1607,
       "snippet": "itemDiv.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -245,7 +254,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 2468,
+      "line": 2547,
       "snippet": "card.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -254,7 +263,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 2790,
+      "line": 2891,
       "snippet": "daySection.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -263,7 +272,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 2806,
+      "line": 2907,
       "snippet": "tasksContainer.innerHTML = emptyMsg;",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -272,7 +281,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 2834,
+      "line": 2935,
       "snippet": "timeline.innerHTML = '<p class=\"text-gray-500 text-sm\">Sem compromissos fixos agendados para este dia.</p>';",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -281,7 +290,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 2997,
+      "line": 3098,
       "snippet": "row.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -290,7 +299,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 3533,
+      "line": 3634,
       "snippet": "insightsContainer.innerHTML = balanceInsightHTML + insight1 + insight2 + insight3 + insight4;",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -299,7 +308,7 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 3614,
+      "line": 3715,
       "snippet": "row.innerHTML = `",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     },
@@ -308,8 +317,17 @@
       "title": "DOM XSS - Unsafe innerHTML assignment",
       "severity": "HIGH",
       "file": "index.html",
-      "line": 3629,
+      "line": 3730,
       "snippet": "timeContainer.innerHTML = '<p class=\"text-xs text-gray-400 italic\">Nenhuma tarefa conclu\u00edda com tempo contabilizado ainda.</p>';",
+      "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
+    },
+    {
+      "category": "Code Vulnerability",
+      "title": "DOM XSS - Unsafe innerHTML assignment",
+      "severity": "HIGH",
+      "file": "index.html",
+      "line": 3927,
+      "snippet": "if (headerNameEl) headerNameEl.innerHTML = `\ud83d\udc64 ${currentUser.name}`;",
       "recommendation": "Refactor unsafe pattern. Use safe DOM API (textContent), parameterized queries, or sanitized input."
     }
   ]
