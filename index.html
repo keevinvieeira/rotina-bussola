@@ -4177,8 +4177,6 @@
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
 
-            // Com authDomain apontando para o próprio domínio Cloudflare (via proxy _redirects),
-            // o popup funciona normalmente pois tudo é same-origin.
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
@@ -4187,11 +4185,10 @@
                 }
             } catch (err) {
                 console.error('[Bussola] Erro Google Auth:', err.code, err.message);
-                if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
-                    // Popup bloqueado — fallback para redirect
+                if (['auth/popup-blocked', 'auth/cancelled-popup-request', 'auth/internal-error'].includes(err.code)) {
+                    // Se o popup falhar por bloqueio ou política de cookies do navegador, redireciona
                     await auth.signInWithRedirect(provider);
                 } else if (err.code === 'auth/popup-closed-by-user') {
-                    // Usuário fechou o popup — não mostrar erro
                     return;
                 } else {
                     const el = document.getElementById('loginAlert');
