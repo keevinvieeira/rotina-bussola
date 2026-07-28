@@ -295,10 +295,13 @@
 
     <!-- Modal de Reset Completo (Resetar Tudo) -->
     <div id="modalResetAll" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-lg border border-rose-100">
-            <div class="flex items-center gap-2.5 mb-3 text-rose-600">
-                <span class="text-2xl">🚨</span>
-                <h3 class="text-lg font-bold">Excluir Todas as Tarefas?</h3>
+        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-lg border border-rose-100 relative">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2.5 text-rose-600">
+                    <span class="text-2xl">🚨</span>
+                    <h3 class="text-lg font-bold">Excluir Todas as Tarefas?</h3>
+                </div>
+                <button onclick="closeResetAllModal()" class="text-gray-400 hover:text-gray-600 text-sm font-bold p-1 transition">✕</button>
             </div>
             <p class="text-xs text-gray-500 mb-4 leading-relaxed">
                 Esta ação apagará permanentemente **todas as suas tarefas, comentários e projetos** salvos localmente e restaurará a agenda aos padrões iniciais.
@@ -418,10 +421,14 @@
             <!-- Adicionar Tarefa Diária -->
             <details id="addTaskDetails" class="mb-6 bg-gray-50 rounded-lg border border-gray-200">
                 <summary class="p-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 rounded-lg">➕ Adicionar Nova Tarefa a este dia</summary>
-                <div class="p-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div class="p-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
                     <div>
-                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">⏱️ Duração (Tempo de Foco)</label>
-                        <select id="newTaskDuration" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">⏰ Início (Opcional)</label>
+                        <input type="time" id="newTaskTime" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">⏱️ Duração</label>
+                        <select id="newTaskDuration" class="w-full bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="30">0,5 hora (30 min)</option>
                             <option value="60" selected>1,0 hora (60 min)</option>
                             <option value="90">1,5 hora (90 min)</option>
@@ -446,7 +453,7 @@
                             <!-- JS Dinâmico -->
                         </select>
                     </div>
-                    <button onclick="addDailyTask()" class="md:col-span-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-semibold transition mt-2">Confirmar e Salvar</button>
+                    <button onclick="addDailyTask()" class="md:col-span-5 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-semibold transition mt-2">Confirmar e Salvar</button>
                 </div>
             </details>
 
@@ -1329,6 +1336,7 @@
 
         // ================= ABA NAVEGAÇÃO =================
         function switchTab(tabName) {
+            try { localStorage.setItem('my_active_tab', tabName); } catch(e) {}
             const tabAgenda = document.getElementById('tab-agenda');
             const tabAnalise = document.getElementById('tab-analise');
             const tabConfig = document.getElementById('tab-configuracoes');
@@ -3032,23 +3040,50 @@
 
         function addDailyTask() {
             const selectedDay = document.getElementById('daySelector').value;
-            const time = document.getElementById('newTaskTime').value;
-            const timeEnd = document.getElementById('newTaskTimeEnd').value || time;
-            const title = document.getElementById('newTaskTitle').value.trim();
-            const desc = document.getElementById('newTaskDesc').value.trim() || "Sem descrição";
-            const category = document.getElementById('newTaskCategory').value;
+            const timeEl = document.getElementById('newTaskTime');
+            const timeInput = timeEl ? timeEl.value.trim() : '';
+            const durationMinutes = parseInt(document.getElementById('newTaskDuration').value, 10) || 60;
+            const titleInput = document.getElementById('newTaskTitle');
+            const title = titleInput ? titleInput.value.trim() : '';
+            const descInput = document.getElementById('newTaskDesc');
+            const desc = (descInput && descInput.value.trim()) ? descInput.value.trim() : "Sem descrição";
+            const categorySelect = document.getElementById('newTaskCategory');
+            const category = (categorySelect && categorySelect.value) ? categorySelect.value : (Object.keys(taskCategories)[0] || 'trabalho');
 
-            if (!time || !title) {
-                alert("Por favor, preencha pelo menos o horário e o título da tarefa.");
+            if (!title) {
+                alert("Por favor, preencha o título da tarefa.");
                 return;
             }
 
-            checkTimeOverlaps(selectedDay, null, time, timeEnd);
+            let startTime = timeInput;
+            if (!startTime) {
+                const existing = (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][selectedDay]) || [];
+                if (existing.length > 0) {
+                    const lastTask = existing[existing.length - 1];
+                    startTime = lastTask.timeEnd || lastTask.time || "08:00";
+                } else {
+                    startTime = "08:00";
+                }
+            }
+
+            let endTime = startTime;
+            try {
+                const parts = startTime.split(':');
+                const h = parseInt(parts[0], 10) || 8;
+                const m = parseInt(parts[1], 10) || 0;
+                const totalMins = h * 60 + m + durationMinutes;
+                const endH = String(Math.floor(totalMins / 60) % 24).padStart(2, '0');
+                const endM = String(totalMins % 60).padStart(2, '0');
+                endTime = `${endH}:${endM}`;
+            } catch(e) {
+                endTime = startTime;
+            }
 
             const newTask = {
                 id: "custom-" + Date.now(),
-                time: time,
-                timeEnd: timeEnd,
+                time: startTime,
+                timeEnd: endTime,
+                duration: durationMinutes,
                 title: title,
                 desc: desc,
                 done: false,
@@ -3060,6 +3095,9 @@
                 notes: ""
             };
 
+            if (!weeklySchedule[selectedWeekKey]) {
+                weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+            }
             if (!weeklySchedule[selectedWeekKey][selectedDay]) {
                 weeklySchedule[selectedWeekKey][selectedDay] = [];
             }
@@ -3067,12 +3105,11 @@
             saveData();
             refreshAgendaView();
 
-            document.getElementById('newTaskTime').value = '';
-            document.getElementById('newTaskTimeEnd').value = '';
-            document.getElementById('newTaskTitle').value = '';
-            document.getElementById('newTaskDesc').value = '';
-            document.getElementById('newTaskCategory').value = 'trabalho-pessoal';
-            document.getElementById('addTaskDetails').open = false; 
+            if (timeEl) timeEl.value = '';
+            if (titleInput) titleInput.value = '';
+            if (descInput) descInput.value = '';
+            const detailsEl = document.getElementById('addTaskDetails');
+            if (detailsEl) detailsEl.open = false;
         }
 
         function toggleDailyTask(day, id) {
@@ -3440,7 +3477,9 @@
             renderProjects();
             refreshAgendaView();
             closeResetAllModal();
-            alert("🚨 Todo o sistema foi resetado com sucesso! Todos os projetos, rotinas e categorias foram restaurados para os padrões iniciais.");
+            setTimeout(() => {
+                alert("🚨 Todo o sistema foi resetado com sucesso! Todos os projetos, rotinas e categorias foram restaurados para os padrões iniciais.");
+            }, 100);
         }
 
         // ================= DESEMPENHO E GRÁFICOS (TAB 2) =================
@@ -4021,10 +4060,18 @@
                     enforceAuthGate();
 
                     if (isVerified) {
+                        try { localStorage.setItem('bussola_user_logged_in', 'true'); } catch(e) {}
                         await syncUserDataFromCloud(user.uid);
+                        const savedTab = localStorage.getItem('my_active_tab');
+                        if (savedTab && ['agenda', 'analise', 'configuracoes'].includes(savedTab)) {
+                            switchTab(savedTab);
+                        }
+                    } else {
+                        try { localStorage.removeItem('bussola_user_logged_in'); } catch(e) {}
                     }
                 } else {
                     currentUser = null;
+                    try { localStorage.removeItem('bussola_user_logged_in'); } catch(e) {}
                     updateUserHeaderUI();
                     enforceAuthGate();
                 }
@@ -4037,12 +4084,14 @@
             const closeBtn = document.getElementById('authCloseBtn');
             const modal = document.getElementById('modalAuth');
 
-            if (!currentUser) {
+            const wasLoggedIn = localStorage.getItem('bussola_user_logged_in') === 'true';
+
+            if (!currentUser && !wasLoggedIn) {
                 // Visitante não autenticado: mostra a Landing Page
                 if (landingPage) landingPage.classList.remove('hidden');
                 if (appMainContent) appMainContent.classList.add('hidden');
                 if (closeBtn) closeBtn.classList.remove('hidden');
-            } else if (!currentUser.verified) {
+            } else if (currentUser && !currentUser.verified) {
                 // Logado mas E-mail NÃO Verificado: Bloqueia totalmente o uso do App!
                 if (landingPage) landingPage.classList.add('hidden');
                 if (appMainContent) appMainContent.classList.add('hidden');
@@ -4051,14 +4100,13 @@
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
                 }
-                // Oculta o X de fechar para impedir pular a verificação!
                 if (closeBtn) closeBtn.classList.add('hidden');
 
                 switchAuthView('2fa');
                 const verifyDisplay = document.getElementById('verifyEmailDisplay');
                 if (verifyDisplay) verifyDisplay.innerText = currentUser.email;
             } else {
-                // Logado e E-mail Verificado: Libera o App!
+                // Logado e E-mail Verificado (ou sessão persistida): Libera o App!
                 if (landingPage) landingPage.classList.add('hidden');
                 if (appMainContent) appMainContent.classList.remove('hidden');
                 if (closeBtn) closeBtn.classList.remove('hidden');
