@@ -15,3 +15,9 @@ build/
 .system_generated/
 .gemini/security_report.json
 *.log
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
