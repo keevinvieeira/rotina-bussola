@@ -35,7 +35,7 @@
 <body class="bg-indigo-950 text-gray-800 font-sans min-h-screen m-0 p-0 overflow-x-hidden">
 
     <!-- Landing Page Inicial (Pré-Login) -->
-    <div id="landingPage" class="hidden min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden">
+    <div id="landingPage" class="min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden">
         <!-- Background Blur Accents -->
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full filter blur-3xl pointer-events-none"></div>
         <div class="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full filter blur-3xl pointer-events-none"></div>
@@ -4317,13 +4317,56 @@
             if (auth && auth.currentUser) {
                 await auth.currentUser.reload().catch(() => {});
                 if (auth.currentUser.emailVerified) {
-        async function handleLogoutSubmit() {
+                    currentUser = {
+                        uid: auth.currentUser.uid,
+                        name: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                        email: auth.currentUser.email,
+                        verified: true
+                    };
+                    updateUserHeaderUI();
+                    enforceAuthGate();
+                    await syncUserDataFromCloud(auth.currentUser.uid);
+                    closeAuthModal();
+                    alert("🎉 E-mail verificado com sucesso! Bem-vindo(a) à Bússola da Rotina!");
+                } else {
+                    const msg = `⚠️ O e-mail ainda não foi confirmado.\n\nEnviamos o link para: ${auth.currentUser.email}\nPor favor, acesse sua caixa de entrada (ou caixa de spam), clique no link e depois clique no botão abaixo novamente.`;
+                    if (alertEl) {
+                        alertEl.innerText = msg;
+                        alertEl.className = "text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg text-center";
+                        alertEl.classList.remove('hidden');
+                    } else {
+                        alert(msg);
+                    }
+                }
+            }
+        }
+
+        async function resendEmailVerificationLink() {
+            const user = auth ? auth.currentUser : null;
+            const alertEl = document.getElementById('twoFAAlert');
+            if (user) {
+                try {
+                    await user.sendEmailVerification();
+                    const msg = "📧 Reenviamos o e-mail de confirmação! Por favor verifique sua caixa de entrada.";
+                    if (alertEl) {
+                        alertEl.innerText = msg;
+                        alertEl.className = "text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg text-center";
+                        alertEl.classList.remove('hidden');
+                    } else {
+                        alert(msg);
+                    }
+                } catch(err) {
+                    alert("Erro ao reenviar e-mail: " + err.message);
+                }
+            }
+        }
+
+        async function logoutUser() {
             if (auth) {
                 await auth.signOut();
             }
             currentUser = null;
             
-            // Limpa o estado em memória para o próximo usuário
             const currentWeekKey = getWeekKey(new Date());
             weeklySchedule = {};
             weeklySchedule[currentWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
@@ -4431,7 +4474,11 @@
 
         // Inicializa o ouvinte de autenticação Firebase e verificação de privacidade
         initFirebaseAuthListener();
-        checkCookieConsent();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkCookieConsent);
+        } else {
+            setTimeout(checkCookieConsent, 100);
+        }
 
     </script>
 
