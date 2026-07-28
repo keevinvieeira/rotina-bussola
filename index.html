@@ -165,16 +165,18 @@
             <div id="authView-2fa" class="hidden space-y-4">
                 <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-center">
                     <div class="text-3xl mb-1">📧</div>
-                    <h4 class="text-sm font-extrabold text-indigo-900">E-mail de Confirmação Enviado!</h4>
-                    <p class="text-xs text-indigo-700 mt-1.5 leading-snug">Enviamos um e-mail de ativação oficial para:<br><strong id="verifyEmailDisplay" class="text-indigo-950 font-bold"></strong></p>
-                    <p class="text-[11px] text-gray-500 mt-3 bg-white p-2.5 rounded-lg border border-indigo-150">Abra sua caixa de entrada, clique no link de ativação enviado e depois clique no botão abaixo para concluir!</p>
+                    <h4 class="text-sm font-extrabold text-indigo-900">Confirmação de E-mail Obrigatória</h4>
+                    <p class="text-xs text-indigo-700 mt-1.5 leading-snug">Enviamos um link de confirmação para:<br><strong id="verifyEmailDisplay" class="text-indigo-950 font-bold"></strong></p>
+                    <p class="text-[11px] text-gray-500 mt-3 bg-white p-2.5 rounded-lg border border-indigo-150">Acesse sua caixa de entrada, clique no link de ativação enviado e depois clique no botão abaixo para liberar seu acesso à Bússola.</p>
                 </div>
 
                 <div id="twoFAAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg text-center"></div>
 
+                <button onclick="confirmRegistration2FA()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-xs shadow-md transition">🚀 Já confirmei meu e-mail (Verificar Agora)</button>
+                
                 <div class="flex gap-2">
-                    <button onclick="switchAuthTab('login')" class="flex-1 border border-gray-300 hover:bg-gray-100 font-bold py-2 rounded-xl text-xs text-gray-600 transition">Ir para Login</button>
-                    <button onclick="confirmRegistration2FA()" class="flex-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs shadow-md transition">Verificar e Entrar ✅</button>
+                    <button onclick="resendEmailVerificationLink()" class="flex-1 border border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-bold py-2 rounded-xl text-xs transition">📧 Reenviar E-mail</button>
+                    <button onclick="logoutUser()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">🚪 Sair / Outra Conta</button>
                 </div>
             </div>
 
@@ -221,8 +223,12 @@
             <!-- Botão de Usuário/Login (Último elemento à direita) -->
             <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
                 <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white transition shadow-sm">
-                    <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Kevin Admin</span>
-                    <button onclick="openAuthModal()" title="Gerenciar Conta / Sair" class="ml-1 text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2 py-0.5 rounded-lg text-indigo-100 font-extrabold transition">Trocar / Sair</button>
+                    <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Visitante</span>
+                    <div id="userHeaderActions" class="flex items-center gap-1.5 ml-1">
+                        <button onclick="openAuthModal()" title="Fazer Login" class="text-[10px] bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded-lg text-white font-extrabold transition flex items-center gap-1 shadow-sm">
+                            🔑 Entrar / Cadastrar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -4002,15 +4008,21 @@
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
+                    await user.reload().catch(() => {});
+                    const isVerified = user.emailVerified;
+
                     currentUser = {
                         uid: user.uid,
                         name: user.displayName || user.email.split('@')[0],
                         email: user.email,
-                        verified: user.emailVerified
+                        verified: isVerified
                     };
                     updateUserHeaderUI();
                     enforceAuthGate();
-                    await syncUserDataFromCloud(user.uid);
+
+                    if (isVerified) {
+                        await syncUserDataFromCloud(user.uid);
+                    }
                 } else {
                     currentUser = null;
                     updateUserHeaderUI();
@@ -4023,13 +4035,30 @@
             const landingPage = document.getElementById('landingPage');
             const appMainContent = document.getElementById('appMainContent');
             const closeBtn = document.getElementById('authCloseBtn');
+            const modal = document.getElementById('modalAuth');
 
             if (!currentUser) {
+                // Visitante não autenticado: mostra a Landing Page
                 if (landingPage) landingPage.classList.remove('hidden');
                 if (appMainContent) appMainContent.classList.add('hidden');
-                // Na LP, o X de fechar fica visível (usuário pode desistir do login e voltar à LP)
                 if (closeBtn) closeBtn.classList.remove('hidden');
+            } else if (!currentUser.verified) {
+                // Logado mas E-mail NÃO Verificado: Bloqueia totalmente o uso do App!
+                if (landingPage) landingPage.classList.add('hidden');
+                if (appMainContent) appMainContent.classList.add('hidden');
+
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+                // Oculta o X de fechar para impedir pular a verificação!
+                if (closeBtn) closeBtn.classList.add('hidden');
+
+                switchAuthView('2fa');
+                const verifyDisplay = document.getElementById('verifyEmailDisplay');
+                if (verifyDisplay) verifyDisplay.innerText = currentUser.email;
             } else {
+                // Logado e E-mail Verificado: Libera o App!
                 if (landingPage) landingPage.classList.add('hidden');
                 if (appMainContent) appMainContent.classList.remove('hidden');
                 if (closeBtn) closeBtn.classList.remove('hidden');
@@ -4040,15 +4069,33 @@
             const headerNameEl = document.getElementById('userHeaderName');
             const activeNameEl = document.getElementById('activeUserName');
             const activeEmailEl = document.getElementById('activeUserEmail');
+            const headerActionsEl = document.getElementById('userHeaderActions');
 
-            if (currentUser) {
+            if (currentUser && currentUser.verified) {
                 if (headerNameEl) headerNameEl.innerHTML = `👤 ${currentUser.name}`;
                 if (activeNameEl) activeNameEl.innerText = currentUser.name;
                 if (activeEmailEl) activeEmailEl.innerText = currentUser.email;
+                if (headerActionsEl) {
+                    headerActionsEl.innerHTML = `
+                        <button onclick="openAuthModal()" title="Trocar de Conta" class="text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2.5 py-1 rounded-lg text-indigo-100 font-extrabold transition flex items-center gap-1 shadow-sm">
+                            🔄 Trocar Conta
+                        </button>
+                        <button onclick="logoutUser()" title="Encerrar Sessão" class="text-[10px] bg-rose-700/90 hover:bg-rose-600 px-2.5 py-1 rounded-lg text-rose-100 font-extrabold transition flex items-center gap-1 shadow-sm">
+                            🚪 Sair
+                        </button>
+                    `;
+                }
             } else {
-                if (headerNameEl) headerNameEl.innerHTML = `👤 Entrar / Cadastrar`;
+                if (headerNameEl) headerNameEl.innerHTML = `👤 Visitante`;
                 if (activeNameEl) activeNameEl.innerText = "Visitante";
                 if (activeEmailEl) activeEmailEl.innerText = "Não autenticado";
+                if (headerActionsEl) {
+                    headerActionsEl.innerHTML = `
+                        <button onclick="openAuthModal()" title="Fazer Login" class="text-[10px] bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded-lg text-white font-extrabold transition flex items-center gap-1 shadow-sm">
+                            🔑 Entrar / Cadastrar
+                        </button>
+                    `;
+                }
             }
         }
 
@@ -4058,18 +4105,31 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            if (currentUser) {
-                switchAuthView('current');
+            const regTabBtn = document.getElementById('authTabBtn-register');
+
+            if (currentUser && currentUser.verified) {
+                // Quando o usuário está logado e clica em "Trocar Conta", esconde a aba "Novo Cadastro"
+                if (regTabBtn) regTabBtn.classList.add('hidden');
+                switchAuthTab('login');
+            } else if (currentUser && !currentUser.verified) {
+                if (regTabBtn) regTabBtn.classList.add('hidden');
+                switchAuthView('2fa');
             } else {
-                switchAuthView('login');
+                if (regTabBtn) regTabBtn.classList.remove('hidden');
+                switchAuthTab('login');
             }
         }
 
         function closeAuthModal() {
+            // NUNCA permite fechar o modal se o e-mail não estiver verificado!
+            if (currentUser && !currentUser.verified) {
+                alert("⚠️ Você precisa confirmar seu e-mail antes de acessar o aplicativo Bússola.");
+                return;
+            }
+
             const landingPage = document.getElementById('landingPage');
             const isLPVisible = landingPage && !landingPage.classList.contains('hidden');
 
-            // Permite fechar se estiver logado OU se a LP estiver visível (usuário pode desistir do login)
             if (!currentUser && !isLPVisible) {
                 return;
             }
@@ -4082,13 +4142,11 @@
         }
 
         function handleModalBackdropClick(event) {
-            // Fecha o modal apenas se clicar no overlay escuro (fora do card branco)
             if (event.target === document.getElementById('modalAuth')) {
                 closeAuthModal();
             }
         }
 
-        // Fecha o modal ao pressionar ESC
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeAuthModal();
@@ -4158,10 +4216,14 @@
             }
 
             try {
-                await auth.signInWithEmailAndPassword(email, password);
+                const userCred = await auth.signInWithEmailAndPassword(email, password);
                 alertEl.classList.add('hidden');
-                closeAuthModal();
-                refreshAgendaView();
+                if (userCred.user && !userCred.user.emailVerified) {
+                    enforceAuthGate();
+                } else {
+                    closeAuthModal();
+                    refreshAgendaView();
+                }
             } catch (err) {
                 alertEl.innerText = getFirebaseErrorMessage(err.code);
                 alertEl.classList.remove('hidden');
@@ -4241,7 +4303,7 @@
 
                 alertEl.classList.add('hidden');
                 document.getElementById('verifyEmailDisplay').innerText = email;
-                switchAuthView('2fa');
+                enforceAuthGate();
             } catch (err) {
                 alertEl.innerText = getFirebaseErrorMessage(err.code);
                 alertEl.classList.remove('hidden');
@@ -4249,20 +4311,12 @@
         }
 
         async function confirmRegistration2FA() {
-            if (auth && auth.currentUser) {
-                await auth.currentUser.reload();
-                if (auth.currentUser.emailVerified) {
-                    alert(`🎉 E-mail verificado com sucesso!\nBem-vindo(a) à Bússola!`);
-                    closeAuthModal();
-                    refreshAgendaView();
-                } else {
-                    alert(`Enviamos um e-mail de ativação oficial para:\n${auth.currentUser.email}\n\nPor favor, abra sua caixa de entrada, clique no link enviado e tente novamente!`);
-                }
-            } else {
-                closeAuthModal();
-            }
-        }
+            const alertEl = document.getElementById('twoFAAlert');
+            if (alertEl) alertEl.classList.add('hidden');
 
+            if (auth && auth.currentUser) {
+                await auth.currentUser.reload().catch(() => {});
+                if (auth.currentUser.emailVerified) {
         async function handleLogoutSubmit() {
             if (auth) {
                 await auth.signOut();
