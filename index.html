@@ -3021,21 +3021,16 @@
         }
 
         function resetWeeklyChecks() {
-            if (confirm("Isso irá desmarcar todas as tarefas diárias concluídas para recomeçar a semana. Continuar?")) {
-                const weekData = weeklySchedule[selectedWeekKey] || {};
-                for (let day in weekData) {
-                    weekData[day] = weekData[day].map(task => ({ 
-                        ...task, 
-                        done: false,
-                        status: "pending",
-                        justification: "",
-                        completion: "nao",
-                        difficulty: "",
-                        notes: ""
-                    }));
-                }
+            if (confirm("Tem certeza que deseja zerar a semana atual? Isso apagará todas as tarefas e projetos da semana selecionada.")) {
+                const currentWeek = selectedWeekKey || getWeekKey(new Date());
+                weeklySchedule[currentWeek] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+                weeklyProjects[currentWeek] = [];
+                projects = [];
+
                 saveData();
+                renderProjects();
                 refreshAgendaView();
+                alert("📅 A semana foi completamente zerada com sucesso!");
             }
         }
 
@@ -3332,21 +3327,37 @@
             const val = document.getElementById('resetAllConfirmInput').value.trim();
             if (val !== 'DELETAR') return;
             
-            safeRemoveItem('my_weekly_schedule');
-            safeRemoveItem('my_weekly_projects');
-            safeRemoveItem('my_projects');
-            safeRemoveItem('last_notif_time');
+            try {
+                safeRemoveItem('my_weekly_schedule');
+                safeRemoveItem('my_weekly_projects');
+                safeRemoveItem('my_productivity_rules');
+                safeRemoveItem('my_task_categories');
+                safeRemoveItem('my_projects');
+                safeRemoveItem('last_notif_time');
+            } catch(e) {}
             
+            const currentWeekKey = getWeekKey(new Date());
             weeklySchedule = {};
+            weeklySchedule[currentWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+            
             weeklyProjects = {};
+            weeklyProjects[currentWeekKey] = [];
+            projects = [];
             
-            ensureWeekExists(selectedWeekKey);
-            
+            productivityRules = {
+                maxWork: 2,
+                maxEdu: 1,
+                maxCar: 1,
+                maxDom: 2,
+                routines: []
+            };
+
             saveData();
-            loadProjects();
+            loadConfiguracoesUI();
+            renderProjects();
             refreshAgendaView();
             closeResetAllModal();
-            alert("Todas as tarefas e projetos foram resetados com sucesso para os padrões originais!");
+            alert("🚨 Todo o sistema foi resetado com sucesso! Todos os projetos, rotinas e tarefas foram completamente zerados.");
         }
 
         // ================= DESEMPENHO E GRÁFICOS (TAB 2) =================
