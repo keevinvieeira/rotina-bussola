@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#311b92"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+    <linearGradient id="needleNorth" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+    <linearGradient id="needleSouth" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0e7ff"/>
+      <stop offset="100%" stop-color="#a5b4fc"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  
+  <!-- Outer Compass Ring -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#ringGrad)" stroke-width="16" filter="url(#glow)"/>
+  <circle cx="256" cy="256" r="145" fill="none" stroke="#475569" stroke-width="3" stroke-dasharray="8 8"/>
+
+  <!-- Compass Cardinal Points Marks -->
+  <circle cx="256" cy="90" r="6" fill="#818cf8"/>
+  <circle cx="422" cy="256" r="6" fill="#818cf8"/>
+  <circle cx="256" cy="422" r="6" fill="#818cf8"/>
+  <circle cx="90" cy="256" r="6" fill="#818cf8"/>
+
+  <!-- Compass Needle (North - Red/Orange) -->
+  <polygon points="256,105 285,256 256,256" fill="url(#needleNorth)" filter="url(#glow)"/>
+  <polygon points="256,105 227,256 256,256" fill="#dc2626"/>
+
+  <!-- Compass Needle (South - White/Indigo) -->
+  <polygon points="256,407 285,256 256,256" fill="url(#needleSouth)"/>
+  <polygon points="256,407 227,256 256,256" fill="#818cf8"/>
+
+  <!-- Center Pivot Pin -->
+  <circle cx="256" cy="256" r="22" fill="#1e1b4b" stroke="#818cf8" stroke-width="6"/>
+  <circle cx="256" cy="256" r="8" fill="#ffffff"/>
+</svg>
