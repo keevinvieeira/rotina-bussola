@@ -3962,15 +3962,39 @@
                 return;
             }
 
-            // Captura o resultado do redirecionamento do Google Auth (imune a bloqueios de popup e COOP no Cloudflare)
+            // Captura o resultado do redirecionamento do Google Auth
             auth.getRedirectResult().then((result) => {
                 if (result && result.user) {
+                    // Login por redirecionamento bem sucedido!
                     closeAuthModal();
                     refreshAgendaView();
+                } else {
+                    // Verifica se a página voltou de um redirecionamento do Google (sem resultado = falha silenciosa)
+                    const url = new URL(window.location.href);
+                    const hasRedirectParams = url.searchParams.has('code') || url.searchParams.has('state') || document.referrer.includes('accounts.google.com');
+                    if (hasRedirectParams) {
+                        console.warn('[Bussola] Redirecionamento Google detectado mas sem resultado de login.');
+                    }
                 }
             }).catch((err) => {
                 if (err && err.code) {
-                    console.warn("Aviso no Redirect Auth:", err);
+                    console.error('[Bussola] Erro no Redirect Auth:', err.code, err.message);
+                    if (err.code === 'auth/unauthorized-domain') {
+                        const hostname = window.location.hostname;
+                        const el = document.getElementById('loginAlert');
+                        const msg = `⚠️ Domínio não autorizado: '${hostname}'. Acesse o Firebase Console → Authentication → Configurações → Domínios autorizados e adicione '${hostname}'.`;
+                        if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+                        else alert(msg);
+                        openAuthModal();
+                    } else if (err.code === 'auth/operation-not-allowed') {
+                        alert('⚠️ Login com Google não está ativado no Firebase Console.');
+                    } else {
+                        const el = document.getElementById('loginAlert');
+                        const msg = `Erro Google Auth (${err.code}): ${err.message}`;
+                        if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+                        else alert(msg);
+                        openAuthModal();
+                    }
                 }
             });
 
