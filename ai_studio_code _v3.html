@@ -47,10 +47,12 @@
                 </button>
             </div>
 
-            <div class="flex gap-2 flex-wrap justify-center md:justify-end">
-                <button onclick="toggleModalIO()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs font-semibold transition">
-                    Importar / Exportar
-                </button>
+            <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
+                <!-- Badge de Usuário Autenticado -->
+                <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition">
+                    <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Kevin Admin</span>
+                    <button onclick="openAuthModal()" title="Gerenciar Conta / Sair" class="ml-1 text-[10px] bg-indigo-700 hover:bg-indigo-600 px-2 py-0.5 rounded text-indigo-100 font-extrabold transition">Trocar</button>
+                </div>
                 <button onclick="toggleModalSegments()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs font-semibold transition">
                     🗂️ Segmentos
                 </button>
@@ -67,24 +69,98 @@
         </div>
     </header>
 
-    <!-- Modal de Importação / Exportação -->
-    <div id="modalIO" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-xl p-6 max-w-lg w-full shadow-lg">
-            <h3 class="text-lg font-bold mb-1">Sincronizar e Integração</h3>
-            <p class="text-xs text-gray-500 mb-4">Escolha visualizar os dados estruturados de backup ou o código fonte do aplicativo.</p>
-            
-            <div class="flex gap-2 mb-3">
-                <button onclick="exportData()" class="flex-1 py-1.5 px-2 text-xs font-bold rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition flex items-center justify-center gap-1">📦 Dados JSON</button>
-                <button onclick="viewAppHTML()" class="flex-1 py-1.5 px-2 text-xs font-bold rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition flex items-center justify-center gap-1">🌐 Código HTML do App</button>
+    <!-- Modal de Autenticação / Login Individual (2-Etapas com E-mail) -->
+    <div id="modalAuth" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs hidden justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
+            <!-- Header do Modal -->
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">🧭</div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-900 leading-none">Bússola ID</h3>
+                        <span class="text-[10px] text-gray-500 font-semibold">Acesso Individual de Usuários</span>
+                    </div>
+                </div>
+                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600 text-sm font-bold p-1">✕</button>
             </div>
 
-            <textarea id="ioTextarea" rows="8" placeholder="O conteúdo será exibido aqui..." class="w-full border border-gray-300 rounded-lg p-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"></textarea>
-            
-            <div class="flex justify-end gap-2 flex-wrap">
-                <button onclick="toggleModalIO()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-gray-100 transition">Fechar</button>
-                <button onclick="copyTextareaContent()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">📋 Copiar Conteúdo</button>
-                <button onclick="downloadBackup()" class="px-3 py-1.5 bg-emerald-650 hover:bg-emerald-750 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">📥 Baixar .json</button>
-                <button onclick="importData()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs transition font-bold">Importar Dados JSON</button>
+            <!-- Abas Login / Cadastro -->
+            <div class="flex bg-gray-100 p-1 rounded-xl mb-5" id="authTabsNav">
+                <button onclick="switchAuthTab('login')" id="authTabBtn-login" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-xs transition">Entrar</button>
+                <button onclick="switchAuthTab('register')" id="authTabBtn-register" class="flex-1 py-1.5 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-800 transition">Novo Cadastro (2-Etapas)</button>
+            </div>
+
+            <!-- Formulário de Login -->
+            <div id="authView-login" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">E-mail</label>
+                    <input type="email" id="loginEmail" value="kevin@bussola.com" placeholder="seu@email.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Senha</label>
+                    <input type="password" id="loginPassword" value="Bussola2026!Admin" placeholder="••••••••" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div id="loginAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg"></div>
+                <button onclick="handleLoginSubmit()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition mt-2">Entrar na Bússola</button>
+            </div>
+
+            <!-- Formulário de Cadastro (Etapa 1) -->
+            <div id="authView-register" class="hidden space-y-3">
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Nome Completo</label>
+                    <input type="text" id="regName" placeholder="Ex: Kevin Silva" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">E-mail</label>
+                    <input type="email" id="regEmail" placeholder="seu@email.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Senha</label>
+                    <input type="password" id="regPassword" placeholder="Crie uma senha forte" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div id="regAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg"></div>
+                <button onclick="startRegistrationStep1()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition mt-2">Prosseguir para Verificação (2FA) ➔</button>
+            </div>
+
+            <!-- Verificação em 2 Etapas (Etapa 2 - Código por E-mail) -->
+            <div id="authView-2fa" class="hidden space-y-4">
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-center">
+                    <div class="text-2xl mb-1">📧</div>
+                    <h4 class="text-xs font-extrabold text-indigo-900">Verificação de E-mail de 2 Etapas</h4>
+                    <p class="text-[11px] text-indigo-700 mt-1 leading-snug">Enviamos um código de segurança de 6 dígitos para <strong id="verifyEmailDisplay"></strong>.</p>
+                    <div class="mt-2.5 bg-white border border-indigo-300 rounded-lg p-2 text-center">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Código Gerado (Demonstração):</span>
+                        <span id="demoCodeDisplay" class="text-lg font-black text-indigo-600 font-mono tracking-widest"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1 text-center">Digite o Código de 6 dígitos</label>
+                    <input type="text" id="verify2FACodeInput" maxlength="6" placeholder="000000" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-center text-lg font-black font-mono tracking-widest text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div id="twoFAAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg text-center"></div>
+
+                <div class="flex gap-2">
+                    <button onclick="switchAuthTab('register')" class="flex-1 border border-gray-300 hover:bg-gray-100 font-bold py-2 rounded-xl text-xs text-gray-600 transition">Voltar</button>
+                    <button onclick="confirmRegistration2FA()" class="flex-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs shadow-md transition">Confirmar e Ativar Conta ✅</button>
+                </div>
+            </div>
+
+            <!-- Informações da Conta Atual (se logado) -->
+            <div id="authView-current" class="hidden space-y-4 pt-2">
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-extrabold text-base">👤</div>
+                    <div class="flex-1 min-w-0">
+                        <h4 id="activeUserName" class="text-sm font-bold text-gray-900 truncate">Kevin Admin</h4>
+                        <p id="activeUserEmail" class="text-xs text-gray-500 truncate">kevin@bussola.com</p>
+                        <span class="inline-block mt-1 px-2 py-0.5 text-[9px] font-extrabold bg-emerald-100 text-emerald-800 rounded-full uppercase tracking-wider">Conta Ativa</span>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="switchAuthTab('login')" class="flex-1 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2 rounded-xl text-xs transition">Trocar de Conta</button>
+                    <button onclick="handleLogoutSubmit()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">Sair (Logout)</button>
+                </div>
             </div>
         </div>
     </div>
@@ -325,15 +401,18 @@
             <details id="addTaskDetails" class="mb-6 bg-gray-50 rounded-lg border border-gray-200">
                 <summary class="p-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 rounded-lg">➕ Adicionar Nova Tarefa a este dia</summary>
                 <div class="p-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div class="flex gap-2">
-                        <div class="flex-1">
-                            <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Início</label>
-                            <input type="time" id="newTaskTime" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Fim</label>
-                            <input type="time" id="newTaskTimeEnd" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">⏱️ Duração (Tempo de Foco)</label>
+                        <select id="newTaskDuration" class="w-full bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="30">0,5 hora (30 min)</option>
+                            <option value="60" selected>1,0 hora (60 min)</option>
+                            <option value="90">1,5 hora (90 min)</option>
+                            <option value="120">2,0 horas (120 min)</option>
+                            <option value="150">2,5 horas (150 min)</option>
+                            <option value="180">3,0 horas (180 min)</option>
+                            <option value="210">3,5 horas (210 min)</option>
+                            <option value="240">4,0 horas (240 min)</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Título da Tarefa</label>
