@@ -4170,23 +4170,56 @@
             if (!auth) return;
 
             if (window.location.protocol === 'file:') {
-                alert("ℹ️ O login com o Google exige que o aplicativo esteja sendo executado via HTTP ou HTTPS.\n\nPara testar no seu computador local, utilize o login por E-mail e Senha, ou acesse a versão online no Cloudflare Pages!");
+                alert("ℹ️ O login com o Google exige HTTPS.\n\nUse login por E-mail e Senha localmente, ou acesse o site online!");
                 return;
             }
 
             const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+
+            // Tenta popup primeiro (mais rápido e sem dependência de cookies de sessão)
             try {
-                // Utiliza redirecionamento direto, 100% imune a erros de popup e COOP no Cloudflare
-                await auth.signInWithRedirect(provider);
-            } catch (err) {
-                console.error("Erro Google Auth:", err);
-                if (err.code === 'auth/operation-not-allowed') {
-                    alert("⚠️ O login com o Google ainda não foi ativado no Firebase Console.\n\nAcesse: Firebase Console -> Authentication -> Provedores de login -> Clique em Google e ative.");
-                } else if (err.code === 'auth/unauthorized-domain') {
-                    alert(`⚠️ O domínio '${window.location.hostname}' precisa ser adicionado nos Domínios Autorizados do Firebase!\n\nAcesse: Firebase Console -> Authentication -> Configurações -> Domínios autorizados -> Adicionar '${window.location.hostname}'.`);
-                } else {
-                    alert(`Aviso do Firebase (${err.code}): ${err.message}`);
+                const result = await auth.signInWithPopup(provider);
+                if (result && result.user) {
+                    closeAuthModal();
+                    refreshAgendaView();
                 }
+                return;
+            } catch (popupErr) {
+                // Se o popup foi bloqueado pelo navegador, tenta redirecionamento
+                if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
+                    try {
+                        await auth.signInWithRedirect(provider);
+                        return;
+                    } catch (redirectErr) {
+                        showGoogleAuthError(redirectErr);
+                    }
+                } else {
+                    showGoogleAuthError(popupErr);
+                }
+            }
+        }
+
+        function showGoogleAuthError(err) {
+            console.error('[Bussola] Erro Google Auth:', err.code, err.message);
+            const el = document.getElementById('loginAlert');
+
+            let msg = '';
+            if (err.code === 'auth/internal-error') {
+                msg = `⚠️ Erro interno do Google Auth. Verifique:\n\n` +
+                      `1. Google Cloud Console → APIs & Credenciais → OAuth 2.0 → adicione o domínio '${window.location.hostname}' nas Origens JavaScript autorizadas.\n\n` +
+                      `2. Firebase Console → Authentication → Configurações → Domínios autorizados → confirme que '${window.location.hostname}' está listado.`;
+                alert(msg);
+            } else if (err.code === 'auth/unauthorized-domain') {
+                msg = `⚠️ Domínio '${window.location.hostname}' não autorizado. Adicione em: Firebase Console → Authentication → Configurações → Domínios autorizados.`;
+                if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+                else alert(msg);
+            } else if (err.code === 'auth/operation-not-allowed') {
+                alert('⚠️ Login com Google não está ativado. Ative em: Firebase Console → Authentication → Método de login → Google.');
+            } else {
+                msg = `Erro Google Auth (${err.code}): ${err.message}`;
+                if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+                else alert(msg);
             }
         }
 
