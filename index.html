@@ -4184,18 +4184,35 @@
                     refreshAgendaView();
                 }
             } catch (err) {
-                console.error('[Bussola] Erro Google Auth:', err.code, err.message);
-                if (['auth/popup-blocked', 'auth/cancelled-popup-request', 'auth/internal-error'].includes(err.code)) {
-                    // Se o popup falhar por bloqueio ou política de cookies do navegador, redireciona
-                    await auth.signInWithRedirect(provider);
-                } else if (err.code === 'auth/popup-closed-by-user') {
+                console.error('[Bussola] Erro no signInWithPopup:', err);
+                if (err.code === 'auth/popup-closed-by-user') {
                     return;
-                } else {
-                    const el = document.getElementById('loginAlert');
-                    const msg = `Erro Google Auth (${err.code}): ${err.message}`;
-                    if (el) { el.textContent = msg; el.classList.remove('hidden'); }
-                    else alert(msg);
                 }
+                
+                // Tenta fallback com Redirect
+                try {
+                    await auth.signInWithRedirect(provider);
+                } catch (redirectErr) {
+                    console.error('[Bussola] Erro no signInWithRedirect:', redirectErr);
+                    showGoogleAuthError(redirectErr || err);
+                }
+            }
+        }
+
+        function showGoogleAuthError(err) {
+            const el = document.getElementById('loginAlert');
+            let msg = `Erro Google Auth (${err.code || 'erro'}): ${err.message || err}`;
+            
+            if (err.code === 'auth/internal-error') {
+                msg = "⚠️ Configuração pendente no Firebase Console!\n\n" +
+                      "Acesse: Firebase Console -> Authentication -> Provedores de login -> Clique em Google -> " +
+                      "Selecione seu E-mail no campo 'E-mail de suporte do projeto' e clique em Salvar.";
+                alert(msg);
+            }
+            
+            if (el) {
+                el.textContent = msg;
+                el.classList.remove('hidden');
             }
         }
 
