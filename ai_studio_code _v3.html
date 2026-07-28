@@ -4177,20 +4177,26 @@
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
 
-            // Tenta popup primeiro (mais rápido e sem dependência de cookies de sessão)
+            // Tenta popup primeiro. Se falhar por bloqueio COOP (Cloudflare) ou popup bloqueado,
+            // faz fallback automático para signInWithRedirect.
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result && result.user) {
                     closeAuthModal();
                     refreshAgendaView();
                 }
-                return;
             } catch (popupErr) {
-                // Se o popup foi bloqueado pelo navegador, tenta redirecionamento
-                if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
+                const couldFallback = [
+                    'auth/popup-blocked',
+                    'auth/popup-closed-by-user',
+                    'auth/internal-error',   // COOP headers do Cloudflare bloqueiam window.opener
+                    'auth/cancelled-popup-request'
+                ].includes(popupErr.code);
+
+                if (couldFallback) {
+                    // Usa redirecionamento direto — imune a COOP e bloqueadores de popup
                     try {
                         await auth.signInWithRedirect(provider);
-                        return;
                     } catch (redirectErr) {
                         showGoogleAuthError(redirectErr);
                     }
