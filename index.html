@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://www.gstatic.com https://*.firebaseio.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;">
     <title>Bússola - Meu Organizador de Rotina</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234f46e5' stroke='%23312e81' stroke-width='4'/><circle cx='50' cy='50' r='38' fill='none' stroke='white' stroke-width='2' stroke-dasharray='4 2'/><polygon points='50,15 62,50 50,85 38,50' fill='%23ef4444'/><polygon points='50,15 62,50 50,50' fill='%23f97316'/><polygon points='50,85 38,50 50,50' fill='%23e0e7ff'/><circle cx='50' cy='50' r='6' fill='%23312e81'/></svg>">
     <!-- Tailwind CSS -->
@@ -12,6 +12,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- DOMPurify para sanitização defensiva contra XSS -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
+    <!-- Firebase SDK v10 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <style>
         .slide-fade {
             animation: slideFadeIn 0.25s ease-out forwards;
@@ -85,14 +89,25 @@
             <div id="authView-login" class="space-y-3">
                 <div>
                     <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">E-mail</label>
-                    <input type="email" id="loginEmail" value="kevin@bussola.com" placeholder="seu@email.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="email" id="loginEmail" placeholder="seu@email.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div>
                     <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Senha</label>
-                    <input type="password" id="loginPassword" value="Bussola2026!Admin" placeholder="••••••••" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div id="loginAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg"></div>
                 <button onclick="handleLoginSubmit()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition mt-2">Entrar na Bússola</button>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase">ou</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                <button onclick="loginWithGoogle()" class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                    Entrar com o Google
+                </button>
             </div>
 
             <!-- Formulário de Cadastro (Etapa 1) -->
@@ -107,34 +122,26 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">Senha</label>
-                    <input type="password" id="regPassword" placeholder="Crie uma senha forte" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="password" id="regPassword" placeholder="Crie uma senha forte (mín. 6 caracteres)" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div id="regAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg"></div>
-                <button onclick="startRegistrationStep1()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition mt-2">Prosseguir para Verificação (2FA) ➔</button>
+                <button onclick="startRegistrationStep1()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition mt-2">Criar Conta e Enviar E-mail de Confirmação ➔</button>
             </div>
 
-            <!-- Verificação em 2 Etapas (Etapa 2 - Código por E-mail) -->
+            <!-- Verificação em 2 Etapas (E-mail Real de Confirmação enviado pelo Firebase) -->
             <div id="authView-2fa" class="hidden space-y-4">
-                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-center">
-                    <div class="text-2xl mb-1">📧</div>
-                    <h4 class="text-xs font-extrabold text-indigo-900">Verificação de E-mail de 2 Etapas</h4>
-                    <p class="text-[11px] text-indigo-700 mt-1 leading-snug">Enviamos um código de segurança de 6 dígitos para <strong id="verifyEmailDisplay"></strong>.</p>
-                    <div class="mt-2.5 bg-white border border-indigo-300 rounded-lg p-2 text-center">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Código Gerado (Demonstração):</span>
-                        <span id="demoCodeDisplay" class="text-lg font-black text-indigo-600 font-mono tracking-widest"></span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1 text-center">Digite o Código de 6 dígitos</label>
-                    <input type="text" id="verify2FACodeInput" maxlength="6" placeholder="000000" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-center text-lg font-black font-mono tracking-widest text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-center">
+                    <div class="text-3xl mb-1">📧</div>
+                    <h4 class="text-sm font-extrabold text-indigo-900">E-mail de Confirmação Enviado!</h4>
+                    <p class="text-xs text-indigo-700 mt-1.5 leading-snug">Enviamos um e-mail de ativação oficial para:<br><strong id="verifyEmailDisplay" class="text-indigo-950 font-bold"></strong></p>
+                    <p class="text-[11px] text-gray-500 mt-3 bg-white p-2.5 rounded-lg border border-indigo-150">Abra sua caixa de entrada, clique no link de ativação enviado e depois clique no botão abaixo para concluir!</p>
                 </div>
 
                 <div id="twoFAAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg text-center"></div>
 
                 <div class="flex gap-2">
-                    <button onclick="switchAuthTab('register')" class="flex-1 border border-gray-300 hover:bg-gray-100 font-bold py-2 rounded-xl text-xs text-gray-600 transition">Voltar</button>
-                    <button onclick="confirmRegistration2FA()" class="flex-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs shadow-md transition">Confirmar e Ativar Conta ✅</button>
+                    <button onclick="switchAuthTab('login')" class="flex-1 border border-gray-300 hover:bg-gray-100 font-bold py-2 rounded-xl text-xs text-gray-600 transition">Ir para Login</button>
+                    <button onclick="confirmRegistration2FA()" class="flex-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs shadow-md transition">Verificar e Entrar ✅</button>
                 </div>
             </div>
 
@@ -3899,57 +3906,44 @@
             }, 300);
         }
 
-        // ================= SISTEMA DE AUTENTICAÇÃO INDIVIDUAL (BÚSSOLA ID) =================
-        const DEFAULT_ADMIN_USER = {
-            name: "Kevin Admin",
-            email: "kevin@bussola.com",
-            password: "Bussola2026!Admin",
-            verified: true,
-            role: "admin"
+        // ================= SISTEMA DE AUTENTICAÇÃO REAL (FIREBASE AUTH & FIRESTORE) =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBuC_hEPjI-CT9O63AcqJKoHAtBxMoP6Ew",
+            authDomain: "bussula-da-rotina.firebaseapp.com",
+            projectId: "bussula-da-rotina",
+            storageBucket: "bussula-da-rotina.firebasestorage.app",
+            messagingSenderId: "535505405224",
+            appId: "1:535505405224:web:6ba9cae069a73c9554fc1d",
+            measurementId: "G-8469B56LXX"
         };
 
-        let registeredUsers = [];
-        let currentUser = null;
-        let pendingRegistration = null;
-
-        function loadAuthSystem() {
-            try {
-                const savedUsers = safeGetItem('bussola_users');
-                if (savedUsers) {
-                    registeredUsers = JSON.parse(savedUsers);
-                }
-            } catch (e) {
-                registeredUsers = [];
-            }
-
-            // Garante que o usuário Kevin Admin sempre existe
-            const adminExists = registeredUsers.some(u => u.email === DEFAULT_ADMIN_USER.email);
-            if (!adminExists) {
-                registeredUsers.push(DEFAULT_ADMIN_USER);
-                saveRegisteredUsers();
-            }
-
-            try {
-                const savedActiveUser = safeGetItem('bussola_current_user');
-                if (savedActiveUser) {
-                    currentUser = JSON.parse(savedActiveUser);
-                } else {
-                    currentUser = DEFAULT_ADMIN_USER;
-                    safeSetItem('bussola_current_user', JSON.stringify(currentUser));
-                }
-            } catch (e) {
-                currentUser = DEFAULT_ADMIN_USER;
-            }
-
-            updateUserHeaderUI();
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
 
-        function saveRegisteredUsers() {
-            try {
-                safeSetItem('bussola_users', JSON.stringify(registeredUsers));
-            } catch (e) {
-                console.warn("Erro ao salvar usuários:", e);
-            }
+        const auth = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth() : null;
+        const db = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null;
+
+        let currentUser = null;
+
+        function initFirebaseAuthListener() {
+            if (!auth) return;
+
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = {
+                        uid: user.uid,
+                        name: user.displayName || user.email.split('@')[0],
+                        email: user.email,
+                        verified: user.emailVerified
+                    };
+                    updateUserHeaderUI();
+                    await syncUserDataFromCloud(user.uid);
+                } else {
+                    currentUser = null;
+                    updateUserHeaderUI();
+                }
+            });
         }
 
         function updateUserHeaderUI() {
@@ -3961,6 +3955,10 @@
                 if (headerNameEl) headerNameEl.innerHTML = `👤 ${currentUser.name}`;
                 if (activeNameEl) activeNameEl.innerText = currentUser.name;
                 if (activeEmailEl) activeEmailEl.innerText = currentUser.email;
+            } else {
+                if (headerNameEl) headerNameEl.innerHTML = `👤 Entrar / Cadastrar`;
+                if (activeNameEl) activeNameEl.innerText = "Visitante";
+                if (activeEmailEl) activeEmailEl.innerText = "Não autenticado";
             }
         }
 
@@ -3990,12 +3988,12 @@
             const btnRegister = document.getElementById('authTabBtn-register');
 
             if (tab === 'login') {
-                btnLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-xs transition";
-                btnRegister.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-800 transition";
+                if (btnLogin) btnLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-xs transition";
+                if (btnRegister) btnRegister.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-800 transition";
                 switchAuthView('login');
             } else {
-                btnRegister.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-xs transition";
-                btnLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-800 transition";
+                if (btnRegister) btnRegister.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-xs transition";
+                if (btnLogin) btnLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-800 transition";
                 switchAuthView('register');
             }
         }
@@ -4011,8 +4009,27 @@
             });
         }
 
-        function handleLoginSubmit() {
-            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+        function getFirebaseErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'auth/invalid-email':
+                    return 'Endereço de e-mail inválido.';
+                case 'auth/user-disabled':
+                    return 'Esta conta de usuário foi desativada.';
+                case 'auth/user-not-found':
+                    return 'Nenhum usuário encontrado com este e-mail.';
+                case 'auth/wrong-password':
+                    return 'Senha incorreta. Tente novamente.';
+                case 'auth/email-already-in-use':
+                    return 'Este e-mail já está sendo utilizado por outra conta.';
+                case 'auth/weak-password':
+                    return 'A senha deve ter pelo menos 6 caracteres.';
+                default:
+                    return 'Ocorreu um erro na autenticação. Verifique os dados.';
+            }
+        }
+
+        async function handleLoginSubmit() {
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const alertEl = document.getElementById('loginAlert');
 
@@ -4022,22 +4039,36 @@
                 return;
             }
 
-            const foundUser = registeredUsers.find(u => u.email.toLowerCase() === email && u.password === password);
-            if (!foundUser) {
-                alertEl.innerText = "E-mail ou senha incorretos!";
+            if (!auth) {
+                alertEl.innerText = "Sistema de autenticação indisponível no momento.";
                 alertEl.classList.remove('hidden');
                 return;
             }
 
-            alertEl.classList.add('hidden');
-            currentUser = foundUser;
-            safeSetItem('bussola_current_user', JSON.stringify(currentUser));
-            updateUserHeaderUI();
-            closeAuthModal();
-            refreshAgendaView();
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                alertEl.classList.add('hidden');
+                closeAuthModal();
+                refreshAgendaView();
+            } catch (err) {
+                alertEl.innerText = getFirebaseErrorMessage(err.code);
+                alertEl.classList.remove('hidden');
+            }
         }
 
-        function startRegistrationStep1() {
+        async function loginWithGoogle() {
+            if (!auth) return;
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+                closeAuthModal();
+                refreshAgendaView();
+            } catch (err) {
+                alert("Erro ao fazer login com Google: " + err.message);
+            }
+        }
+
+        async function startRegistrationStep1() {
             const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim().toLowerCase();
             const password = document.getElementById('regPassword').value;
@@ -4049,71 +4080,97 @@
                 return;
             }
 
-            if (registeredUsers.some(u => u.email.toLowerCase() === email)) {
-                alertEl.innerText = "Este e-mail já possui um cadastro na Bússola!";
+            if (!auth) {
+                alertEl.innerText = "Sistema de autenticação indisponível.";
                 alertEl.classList.remove('hidden');
                 return;
             }
 
-            alertEl.classList.add('hidden');
-            
-            // Gera código de 6 dígitos para o 2FA
-            const code2FA = String(Math.floor(100000 + Math.random() * 900000));
-            pendingRegistration = { name, email, password, code2FA };
+            try {
+                const userCred = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCred.user;
+                await user.updateProfile({ displayName: name });
+                
+                // Envia e-mail oficial de verificação
+                await user.sendEmailVerification();
 
-            document.getElementById('verifyEmailDisplay').innerText = email;
-            document.getElementById('demoCodeDisplay').innerText = code2FA;
-            document.getElementById('verify2FACodeInput').value = '';
-
-            switchAuthView('2fa');
-        }
-
-        function confirmRegistration2FA() {
-            const enteredCode = document.getElementById('verify2FACodeInput').value.trim();
-            const alertEl = document.getElementById('twoFAAlert');
-
-            if (!pendingRegistration) return;
-
-            if (enteredCode !== pendingRegistration.code2FA) {
-                alertEl.innerText = "Código de verificação incorreto! Tente novamente.";
+                alertEl.classList.add('hidden');
+                document.getElementById('verifyEmailDisplay').innerText = email;
+                switchAuthView('2fa');
+            } catch (err) {
+                alertEl.innerText = getFirebaseErrorMessage(err.code);
                 alertEl.classList.remove('hidden');
-                return;
             }
-
-            alertEl.classList.add('hidden');
-
-            const newUser = {
-                name: pendingRegistration.name,
-                email: pendingRegistration.email,
-                password: pendingRegistration.password,
-                verified: true,
-                role: "user"
-            };
-
-            registeredUsers.push(newUser);
-            saveRegisteredUsers();
-
-            currentUser = newUser;
-            safeSetItem('bussola_current_user', JSON.stringify(currentUser));
-
-            pendingRegistration = null;
-            updateUserHeaderUI();
-            closeAuthModal();
-            refreshAgendaView();
-
-            alert(`🎉 Cadastro concluído com sucesso!\nBem-vindo(a) à Bússola, ${newUser.name}!`);
         }
 
-        function handleLogoutSubmit() {
-            currentUser = DEFAULT_ADMIN_USER;
-            safeSetItem('bussola_current_user', JSON.stringify(currentUser));
+        async function confirmRegistration2FA() {
+            if (auth && auth.currentUser) {
+                await auth.currentUser.reload();
+                if (auth.currentUser.emailVerified) {
+                    alert(`🎉 E-mail verificado com sucesso!\nBem-vindo(a) à Bússola!`);
+                    closeAuthModal();
+                    refreshAgendaView();
+                } else {
+                    alert(`Enviamos um e-mail de ativação oficial para:\n${auth.currentUser.email}\n\nPor favor, abra sua caixa de entrada, clique no link enviado e tente novamente!`);
+                }
+            } else {
+                closeAuthModal();
+            }
+        }
+
+        async function handleLogoutSubmit() {
+            if (auth) {
+                await auth.signOut();
+            }
+            currentUser = null;
             updateUserHeaderUI();
             closeAuthModal();
             refreshAgendaView();
         }
 
-        // Inicializa o módulo de autenticação na carga da página
-        loadAuthSystem();
+        // Sincronização Cloud Firestore por Usuário
+        async function syncUserDataFromCloud(uid) {
+            if (!db) return;
+            try {
+                const docRef = db.collection('users').doc(uid);
+                const docSnap = await docRef.get();
+                if (docSnap.exists) {
+                    const cloudData = docSnap.data();
+                    if (cloudData.weeklySchedule) weeklySchedule = cloudData.weeklySchedule;
+                    if (cloudData.weeklyProjects) weeklyProjects = cloudData.weeklyProjects;
+                    if (cloudData.productivityRules) productivityRules = cloudData.productivityRules;
+                    
+                    saveData();
+                    refreshAgendaView();
+                } else {
+                    // Novo usuário: salva dados locais para a nuvem
+                    await docRef.set({
+                        weeklySchedule: weeklySchedule,
+                        weeklyProjects: weeklyProjects,
+                        productivityRules: productivityRules,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+            } catch (e) {
+                console.warn("Erro ao sincronizar Firestore:", e);
+            }
+        }
+
+        // Atualização do saveData() para salvar no Firestore quando autenticado
+        const originalSaveData = saveData;
+        saveData = function() {
+            originalSaveData();
+            if (currentUser && db) {
+                db.collection('users').doc(currentUser.uid).set({
+                    weeklySchedule: weeklySchedule,
+                    weeklyProjects: weeklyProjects,
+                    productivityRules: productivityRules
+                }, { merge: true }).catch(err => console.warn("Erro ao salvar no Firestore:", err));
+            }
+        };
+
+        // Inicializa o ouvinte de autenticação Firebase na carga da página
+        initFirebaseAuthListener();
 
     </script>
 </body>
