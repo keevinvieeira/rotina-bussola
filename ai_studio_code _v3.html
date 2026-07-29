@@ -4447,6 +4447,10 @@
             if (!confirm("🚪 Tem certeza de que deseja encerrar a sua sessão e sair da Bússola?")) {
                 return;
             }
+            if (firestoreUnsubscribe) {
+                firestoreUnsubscribe();
+                firestoreUnsubscribe = null;
+            }
             if (auth) {
                 await auth.signOut();
             }
@@ -4502,25 +4506,22 @@
             }
         }
 
-        // Sincronização Cloud Firestore por Usuário
+        // Sincronização Cloud Firestore em Tempo Real por Usuário (Multi-Dispositivo)
+        let firestoreUnsubscribe = null;
+        let isSyncingFromRemote = false;
+
         async function syncUserDataFromCloud(uid) {
             if (!db) return;
-            try {
-                const docRef = db.collection('users').doc(uid);
-                const docSnap = await docRef.get();
-                if (docSnap.exists) {
-                    const cloudData = docSnap.data();
-                    if (cloudData.weeklySchedule) weeklySchedule = cloudData.weeklySchedule;
-                    if (cloudData.weeklyProjects) weeklyProjects = cloudData.weeklyProjects;
-                    if (cloudData.productivityRules) productivityRules = cloudData.productivityRules;
-                    if (cloudData.taskCategories) taskCategories = cloudData.taskCategories;
-                    else taskCategories = JSON.parse(JSON.stringify(defaultTaskCategories));
-                    
-                    saveData();
-                    saveTaskCategories();
-                    loadConfiguracoesUI();
-                    refreshAgendaView();
-                } else {
+            if (firestoreUnsubscribe) {
+                firestoreUnsubscribe();
+                firestoreUnsubscribe = null;
+            }
+
+            const docRef = db.collection('users').doc(uid);
+
+            // Escuta alterações na nuvem em tempo real (Celular <-> PC instantâneo)
+            firestoreUnsubscribe = docRef.onSnapshot(async (docSnap) => {
+                if (!docSnap.exists) {
                     // NOVO USUÁRIO: Inicializa 100% limpo ("Do Zero") com categorias padrão de exemplo
                     const freshSchedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
                     const freshProjects = {};
@@ -4552,26 +4553,52 @@
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
-                    saveData();
-                    saveTaskCategories();
+                    updateCategoryDropdowns();
                     loadConfiguracoesUI();
                     refreshAgendaView();
+                    if (typeof renderChartsAndInsights === 'function') renderChartsAndInsights();
+                    return;
                 }
-            } catch (e) {
-                console.warn("Erro ao sincronizar Firestore:", e);
-            }
+
+                const cloudData = docSnap.data();
+                if (!cloudData) return;
+
+                isSyncingFromRemote = true;
+
+                if (cloudData.weeklySchedule) weeklySchedule = cloudData.weeklySchedule;
+                if (cloudData.weeklyProjects) weeklyProjects = cloudData.weeklyProjects;
+                if (cloudData.productivityRules) productivityRules = cloudData.productivityRules;
+                if (cloudData.taskCategories) taskCategories = cloudData.taskCategories;
+
+                // Sincroniza cópia local no localStorage para acesso offline/F5 rápido
+                safeSetItem('my_weekly_schedule', JSON.stringify(weeklySchedule));
+                safeSetItem('my_weekly_projects', JSON.stringify(weeklyProjects));
+                safeSetItem('my_productivity_rules', JSON.stringify(productivityRules));
+                safeSetItem('my_task_categories', JSON.stringify(taskCategories));
+
+                // Atualiza dinamicamente toda a interface em tempo real sem recarregar a página!
+                updateCategoryDropdowns();
+                loadConfiguracoesUI();
+                refreshAgendaView();
+                if (typeof renderChartsAndInsights === 'function') renderChartsAndInsights();
+
+                setTimeout(() => { isSyncingFromRemote = false; }, 150);
+            }, (e) => {
+                console.warn("Erro no listener em tempo real do Firestore:", e);
+            });
         }
 
-        // Atualização do saveData() para salvar no Firestore quando autenticado
+        // Atualização do saveData() para propagar alterações instantaneamente ao Firestore
         const originalSaveData = saveData;
         saveData = function() {
             originalSaveData();
-            if (currentUser && db) {
+            if (currentUser && db && !isSyncingFromRemote) {
                 db.collection('users').doc(currentUser.uid).set({
                     weeklySchedule: weeklySchedule,
                     weeklyProjects: weeklyProjects,
                     productivityRules: productivityRules,
-                    taskCategories: taskCategories
+                    taskCategories: taskCategories,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true }).catch(err => console.warn("Erro ao salvar no Firestore:", err));
             }
         };
