@@ -239,6 +239,9 @@
                     <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" class="text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
                         ⚙️ Configurações
                     </button>
+                    <button onclick="switchTab('tutorial')" id="tabBtn-tutorial" class="text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        📖 Tutorial & Guia
+                    </button>
                 </div>
 
                 <!-- Botão de Usuário/Login -->
@@ -628,6 +631,160 @@
                     <button id="cfgBtnNotif" onclick="requestNotificationPermission()" class="bg-indigo-900 hover:bg-black text-white px-3 py-2 rounded-lg text-xs font-bold transition flex-1">🔔 Notificações</button>
                 </div>
             </div>
+        </div>
+    </main>
+
+    <!-- ABA 4: TUTORIAL & GUIA METODOLÓGICO -->
+    <main id="tab-tutorial" class="max-w-[1400px] mx-auto px-4 hidden space-y-8 mb-12">
+        <div class="bg-gradient-to-r from-indigo-900/90 via-purple-900/80 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 sm:p-10 shadow-xl backdrop-blur-sm text-white">
+            <div class="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-400/30 px-3 py-1 rounded-full text-xs font-bold text-indigo-300 mb-4">
+                <span>📚 Documentação Oficial v3.5</span>
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight mb-4">
+                Domine sua rotina com <span class="bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">clareza, foco e equilíbrio mental</span>.
+            </h2>
+            <p class="text-slate-300 text-xs sm:text-sm max-w-3xl leading-relaxed">
+                Bem-vindo ao tutorial oficial do <strong>Bússola da Rotina</strong>. Aqui você entenderá a fundamentação científica por trás do sistema e aprenderá como utilizar cada painel para maximizar sua produtividade sem exaustão.
+            </p>
+        </div>
+
+        <!-- 1. Visão Geral -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
+                <span class="text-xl">🎯</span>
+                <h3 class="text-lg font-extrabold text-gray-900">1. Visão Geral & Proposta de Valor</h3>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                O <strong>Bússola da Rotina</strong> transforma o caos de tarefas diárias em uma rotina fluida e organizada. Ele integra a gestão de projetos ao agendamento semanal com base em <strong>duração de blocos de tempo</strong>, cálculo de <strong>carga cognitiva</strong> e <strong>sincronização multi-dispositivo em tempo real</strong>.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                <div class="bg-indigo-50/60 border border-indigo-100 p-4 rounded-xl">
+                    <div class="text-indigo-700 text-sm font-bold mb-1">⏱️ Zero Fadiga</div>
+                    <p class="text-[11px] text-gray-600">Horários calculados automaticamente com base na duração.</p>
+                </div>
+                <div class="bg-purple-50/60 border border-purple-100 p-4 rounded-xl">
+                    <div class="text-purple-700 text-sm font-bold mb-1">🛡️ Anti-Burnout</div>
+                    <p class="text-[11px] text-gray-600">Controle estrito de carga cognitiva por categoria diária.</p>
+                </div>
+                <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-xl">
+                    <div class="text-emerald-700 text-sm font-bold mb-1">🎯 Foco Elevado</div>
+                    <p class="text-[11px] text-gray-600">Tarefas de maior impacto e duração no topo da manhã.</p>
+                </div>
+                <div class="bg-pink-50/60 border border-pink-100 p-4 rounded-xl">
+                    <div class="text-pink-700 text-sm font-bold mb-1">⚡ Sincronizado</div>
+                    <p class="text-[11px] text-gray-600">Mudanças no celular aparecem no PC em menos de 1 segundo.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Fundamentos Metodológicos -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
+                <span class="text-xl">🧠</span>
+                <h3 class="text-lg font-extrabold text-gray-900">2. Fundamentos Metodológicos por Trás da Bússola</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-indigo-50/40 border border-indigo-100 p-5 rounded-xl space-y-2">
+                    <div class="flex items-center gap-2 text-indigo-900 font-bold text-sm">
+                        <span>🐸</span> "Eat That Frog!" (Brian Tracy / Mark Twain)
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        <em>"Se a sua função é comer um sapo vivo todos os dias, faça isso logo pela manhã."</em> A Bússola ordena automaticamente as tarefas do dia em <strong>ordem decrescente de duração</strong>, garantindo que seus maiores blocos de energia fiquem no topo da manhã (a partir das 08:00).
+                    </p>
+                </div>
+
+                <div class="bg-purple-50/40 border border-purple-100 p-5 rounded-xl space-y-2">
+                    <div class="flex items-center gap-2 text-purple-900 font-bold text-sm">
+                        <span>⏱️</span> Timeblocking & Princípio de Pareto (80/20)
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        20% das ações geram 80% dos resultados. Todas as tarefas são dimensionadas em blocos padronizados de <strong>0,5h, 1,0h, 1,5h, 2,0h, 3,0h ou 4,0h</strong>, eliminando agendas picadas e calculando o término na hora.
+                    </p>
+                </div>
+
+                <div class="bg-emerald-50/40 border border-emerald-100 p-5 rounded-xl space-y-2">
+                    <div class="flex items-center gap-2 text-emerald-900 font-bold text-sm">
+                        <span>🔋</span> Teoria da Carga Cognitiva (John Sweller)
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        O cérebro possui capacidade de foco limitada por dia. A Bússola monitora o limite configurado de blocos por categoria (Trabalho, Estudo, Exercício, Doméstico) e avisa se você estiver excedendo sua capacidade saudável.
+                    </p>
+                </div>
+
+                <div class="bg-pink-50/40 border border-pink-100 p-5 rounded-xl space-y-2">
+                    <div class="flex items-center gap-2 text-pink-900 font-bold text-sm">
+                        <span>📥</span> GTD — Getting Things Done (David Allen)
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        Retire ideias da cabeça para um backlog estruturado. No Painel de Projetos, suas demandas ficam separadas por estados: <strong>Em Andamento</strong>, <strong>Na Fila (Aguardando)</strong> e <strong>Concluídos</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Guia dos Painéis -->
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
+                <span class="text-xl">📱</span>
+                <h3 class="text-lg font-extrabold text-gray-900">3. Guia Detalhado dos Painéis do App</h3>
+            </div>
+
+            <div class="space-y-4">
+                <div class="border border-gray-100 p-4 rounded-xl space-y-2">
+                    <h4 class="font-bold text-indigo-900 text-sm flex items-center gap-2">🗂️ Painel de Projetos (Backlog Kanban)</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        Localizado à esquerda da aba principal. Adicione projetos no campo <code>+</code>. Defina o status entre <em>Em Andamento</em>, <em>Na Fila</em> ou <em>Concluídos</em>. Apenas projetos em andamento podem ter tarefas agendadas.
+                    </p>
+                </div>
+
+                <div class="border border-gray-100 p-4 rounded-xl space-y-2">
+                    <h4 class="font-bold text-indigo-900 text-sm flex items-center gap-2">📅 Agenda Semanal Inteligente</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        Alterne entre a visão por <strong>Dia</strong> ou <strong>Semana</strong>. Escolha a Descrição, a Duração (<code>0,5h</code> a <code>4,0h</code>) e a Categoria. Se o horário inicial for deixado em branco, a Bússola calcula empilhando após a tarefa anterior. O sistema reordena automaticamente as tarefas da maior para a menor duração.
+                    </p>
+                </div>
+
+                <div class="border border-gray-100 p-4 rounded-xl space-y-2">
+                    <h4 class="font-bold text-indigo-900 text-sm flex items-center gap-2">✨ Reorganizar Rotina</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        Botão no Painel de Projetos. Distribui automaticamente blocos de refeição e tarefas domésticas nos dias da semana.
+                    </p>
+                </div>
+
+                <div class="border border-gray-100 p-4 rounded-xl space-y-2">
+                    <h4 class="font-bold text-indigo-900 text-sm flex items-center gap-2">📊 Análise de Produtividade</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        Gráficos interativos em rosca e barras comparando horas planejadas vs. executadas e diagnósticos automáticos do seu nível de foco.
+                    </p>
+                </div>
+
+                <div class="border border-gray-100 p-4 rounded-xl space-y-2">
+                    <h4 class="font-bold text-indigo-900 text-sm flex items-center gap-2">⚡ Sincronização Realtime Celular ↔ PC</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        Ao se cadastrar com o mesmo e-mail no celular e no computador, qualquer modificação feita em um aparelho reflete <strong>instantaneamente na tela do outro em menos de 1 segundo</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Dicas de Ouro -->
+        <div class="bg-indigo-950 text-white p-6 sm:p-8 rounded-2xl shadow-md space-y-4">
+            <h3 class="text-lg font-bold flex items-center gap-2">💡 Dicas de Ouro para Alta Performance</h3>
+            <ul class="space-y-3 text-xs sm:text-sm text-indigo-100">
+                <li class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <span><strong>Planeje no Domingo:</strong> Dedique 15 minutos ao final de semana para revisar seus projetos na Fila e montar a agenda da semana.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <span><strong>Proteja as primeiras horas da manhã:</strong> Execute a tarefa de maior duração logo cedo sem abrir redes sociais ou e-mails.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <span><strong>Respeite o indicador de carga cognitiva:</strong> Se um dia exceder a capacidade visual de energia, transfira tarefas para o dia seguinte.</span>
+                </li>
+            </ul>
         </div>
     </main>
 
@@ -1369,43 +1526,61 @@
             const tabAgenda = document.getElementById('tab-agenda');
             const tabAnalise = document.getElementById('tab-analise');
             const tabConfig = document.getElementById('tab-configuracoes');
+            const tabTutorial = document.getElementById('tab-tutorial');
 
             const btnAgenda = document.getElementById('tabBtn-agenda');
             const btnAnalise = document.getElementById('tabBtn-analise');
             const btnConfig = document.getElementById('tabBtn-configuracoes');
+            const btnTutorial = document.getElementById('tabBtn-tutorial');
 
-            const activeClass = "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition";
-            const inactiveClass = "text-indigo-200 hover:text-white px-4 py-2 rounded-md text-sm font-semibold transition";
+            const activeClass = "bg-indigo-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap";
+            const inactiveClass = "text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap";
 
             if (tabName === 'agenda') {
                 if (tabAgenda) { tabAgenda.classList.remove('hidden'); tabAgenda.classList.add('grid'); }
                 if (tabAnalise) { tabAnalise.classList.add('hidden'); tabAnalise.classList.remove('grid'); }
                 if (tabConfig) { tabConfig.classList.add('hidden'); tabConfig.classList.remove('grid'); }
+                if (tabTutorial) { tabTutorial.classList.add('hidden'); tabTutorial.classList.remove('block'); }
 
                 if (btnAgenda) btnAgenda.className = activeClass;
                 if (btnAnalise) btnAnalise.className = inactiveClass;
                 if (btnConfig) btnConfig.className = inactiveClass;
+                if (btnTutorial) btnTutorial.className = inactiveClass;
                 refreshAgendaView();
             } else if (tabName === 'analise') {
                 if (tabAgenda) { tabAgenda.classList.add('hidden'); tabAgenda.classList.remove('grid'); }
                 if (tabAnalise) { tabAnalise.classList.remove('hidden'); tabAnalise.classList.add('grid'); }
                 if (tabConfig) { tabConfig.classList.add('hidden'); tabConfig.classList.remove('grid'); }
+                if (tabTutorial) { tabTutorial.classList.add('hidden'); tabTutorial.classList.remove('block'); }
 
                 if (btnAgenda) btnAgenda.className = inactiveClass;
                 if (btnAnalise) btnAnalise.className = activeClass;
                 if (btnConfig) btnConfig.className = inactiveClass;
+                if (btnTutorial) btnTutorial.className = inactiveClass;
 
                 renderChartsAndInsights();
             } else if (tabName === 'configuracoes') {
                 if (tabAgenda) { tabAgenda.classList.add('hidden'); tabAgenda.classList.remove('grid'); }
                 if (tabAnalise) { tabAnalise.classList.add('hidden'); tabAnalise.classList.remove('grid'); }
                 if (tabConfig) { tabConfig.classList.remove('hidden'); tabConfig.classList.add('grid'); }
+                if (tabTutorial) { tabTutorial.classList.add('hidden'); tabTutorial.classList.remove('block'); }
 
                 if (btnAgenda) btnAgenda.className = inactiveClass;
                 if (btnAnalise) btnAnalise.className = inactiveClass;
                 if (btnConfig) btnConfig.className = activeClass;
+                if (btnTutorial) btnTutorial.className = inactiveClass;
 
                 loadConfiguracoesUI();
+            } else if (tabName === 'tutorial') {
+                if (tabAgenda) { tabAgenda.classList.add('hidden'); tabAgenda.classList.remove('grid'); }
+                if (tabAnalise) { tabAnalise.classList.add('hidden'); tabAnalise.classList.remove('grid'); }
+                if (tabConfig) { tabConfig.classList.add('hidden'); tabConfig.classList.remove('grid'); }
+                if (tabTutorial) { tabTutorial.classList.remove('hidden'); tabTutorial.classList.add('block'); }
+
+                if (btnAgenda) btnAgenda.className = inactiveClass;
+                if (btnAnalise) btnAnalise.className = inactiveClass;
+                if (btnConfig) btnConfig.className = inactiveClass;
+                if (btnTutorial) btnTutorial.className = activeClass;
             }
         }
 
@@ -4096,7 +4271,7 @@
                         try { localStorage.setItem('bussola_user_logged_in', 'true'); } catch(e) {}
                         await syncUserDataFromCloud(user.uid);
                         const savedTab = localStorage.getItem('my_active_tab');
-                        if (savedTab && ['agenda', 'analise', 'configuracoes'].includes(savedTab)) {
+                        if (savedTab && ['agenda', 'analise', 'configuracoes', 'tutorial'].includes(savedTab)) {
                             switchTab(savedTab);
                         }
                     } else {
