@@ -1986,10 +1986,10 @@
                     </div>
                     
                     <!-- Painel de Detalhes do Projeto (Collapsible) -->
-                    <div id="proj-details-${project.id}" class="mt-2.5 pt-2.5 border-t border-gray-250 text-[11px] text-gray-600 hidden flex flex-col gap-2">
+                    <div id="proj-details-${project.id}" class="mt-2.5 pt-2.5 border-t border-gray-250 text-[11px] text-gray-600 ${openProjectPanelIds.has(project.id) ? '' : 'hidden'} flex flex-col gap-2">
                         <div>
                             <label class="block text-[9px] font-extrabold uppercase text-gray-400 tracking-wider mb-0.5">Nome do Projeto</label>
-                            <input type="text" value="${project.text}" oninput="updateProjectField(${project.id}, 'text', this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                            <input type="text" value="${project.text}" oninput="updateProjectTitleLive(${project.id}, this.value)" onchange="updateProjectField(${project.id}, 'text', this.value)" onblur="updateProjectField(${project.id}, 'text', this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
@@ -2137,10 +2137,20 @@
             loadProjects();
         }
 
+        const openProjectPanelIds = new Set();
+        const openDetailsPanelIds = new Set();
+
         function toggleProjectDetails(id) {
             const panel = document.getElementById(`proj-details-${id}`);
             if (panel) {
-                panel.classList.toggle('hidden');
+                const isHidden = panel.classList.contains('hidden');
+                if (isHidden) {
+                    panel.classList.remove('hidden');
+                    openProjectPanelIds.add(id);
+                } else {
+                    panel.classList.add('hidden');
+                    openProjectPanelIds.delete(id);
+                }
             }
         }
 
@@ -2847,6 +2857,9 @@
 
         function renderTaskCard(day, task) {
             const cat = taskCategories[task.category] || taskCategories['trabalho-pessoal'];
+            const isPanelOpen = openDetailsPanelIds.has(task.id);
+            const detailsHiddenClass = isPanelOpen ? '' : 'hidden';
+            const chevronChar = isPanelOpen ? '▲' : '▼';
             
             // Determina a estilização do card com base no status
             let cardBg = "bg-white border-indigo-500";
@@ -2873,49 +2886,36 @@
                 categoryOptionsHTML += `<option value="${catId}" ${task.category === catId ? 'selected' : ''}>${taskCategories[catId].label}</option>`;
             }
 
-            // Descobre os dias da semana onde esta tarefa está agendada nesta semana
-            const assignedDays = new Set();
-            if (task.title) {
-                const weekData = weeklySchedule[selectedWeekKey];
-                if (weekData) {
-                    for (let d in weekData) {
-                        const hasSameTitle = weekData[d].some(t => 
-                            (task.projectId && t.projectId === task.projectId) || 
-                            isTitleMatching(t.title, task.title)
-                        );
-                        if (hasSameTitle) {
-                            assignedDays.add(parseInt(d, 10));
-                        }
+            // Transforma o array de dias atribuídos (ex: [1, 3, 5]) em badges de letras "S M T W T F S"
+            let daysVisualHTML = "";
+            if (Array.isArray(task.assignedDays) && task.assignedDays.length > 0) {
+                const assignedSet = new Set(task.assignedDays);
+                const daysLetters = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+                const daysFullNames = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+                
+                daysVisualHTML = `<div class="flex items-center gap-1 mt-1.5 flex-wrap">`;
+                [1, 2, 3, 4, 5, 6, 0].forEach(d => {
+                    const isActive = assignedSet.has(d);
+                    if (isActive) {
+                        daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskAssignedDay('${day}', '${task.id}', ${d})" class="w-4 h-4 rounded-full bg-indigo-600 text-white font-extrabold text-[8px] flex items-center justify-center shadow-xs cursor-pointer hover:bg-indigo-700 transition" title="${daysFullNames[d]} (Clique para remover)">${daysLetters[d]}</span>`;
+                    } else {
+                        daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskAssignedDay('${day}', '${task.id}', ${d})" class="w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[8px] flex items-center justify-center cursor-pointer hover:bg-gray-300 transition" title="${daysFullNames[d]} (Clique para agendar)">${daysLetters[d]}</span>`;
                     }
-                }
+                });
+                daysVisualHTML += `</div>`;
             }
-
-            // Gera o HTML da barra de dias da semana
-            let daysVisualHTML = `<div class="flex gap-1 mt-1.5 select-none" title="Dias que esta tarefa está agendada nesta semana">`;
-            const daysOrderList = [1, 2, 3, 4, 5, 6, 0];
-            const daysLetters = {1: "S", 2: "T", 3: "Q", 4: "Q", 5: "S", 6: "S", 0: "D"};
-            const daysFullNames = {1: "Segunda-feira", 2: "Terça-feira", 3: "Quarta-feira", 4: "Quinta-feira", 5: "Sexta-feira", 6: "Sábado", 0: "Domingo"};
-            daysOrderList.forEach(d => {
-                const isActive = assignedDays.has(d);
-                if (isActive) {
-                    daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskDay('${task.id}', ${d})" class="w-5 h-5 rounded-full bg-indigo-600 text-white font-extrabold text-[9px] flex items-center justify-center shadow-sm cursor-pointer hover:bg-indigo-700 transition" style="width: 20px; height: 20px;" title="${daysFullNames[d]} (Clique para remover)">${daysLetters[d]}</span>`;
-                } else {
-                    daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskDay('${task.id}', ${d})" class="w-5 h-5 rounded-full bg-gray-200 text-gray-400 text-[9px] flex items-center justify-center cursor-pointer hover:bg-gray-300 transition" style="width: 20px; height: 20px;" title="${daysFullNames[d]} (Clique para agendar)">${daysLetters[d]}</span>`;
-                }
-            });
-            daysVisualHTML += `</div>`;
 
             // HTML do card com botões de status e painel de comentários
             card.innerHTML = `
-                <div class="flex justify-between items-start gap-3 min-w-0">
-                    <div class="flex gap-2.5 items-start min-w-0 flex-1">
-                        <!-- Botões de Ação de Status -->
-                        <div class="flex gap-1 shrink-0 mt-0.5">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <!-- Três Botões de Status (Sucesso / Falha / Pendente) -->
+                        <div class="flex items-center gap-1 shrink-0">
                             <button onclick="updateTaskStatus('${day}', '${task.id}', 'success')" class="w-6 h-6 flex items-center justify-center text-xs rounded-full font-bold border transition ${task.status === 'success' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-600 border-emerald-300 hover:bg-emerald-50'}" title="Sim, consegui!">
                                 ✓
                             </button>
                             <button onclick="updateTaskStatus('${day}', '${task.id}', 'failed')" class="w-6 h-6 flex items-center justify-center text-xs rounded-full font-bold border transition ${task.status === 'failed' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-600 border-rose-300 hover:bg-rose-50'}" title="Não, não consegui fazer.">
-                                ✗
+                                ✕
                             </button>
                         </div>
                         
@@ -2935,7 +2935,7 @@
                     <!-- Botões da Direita (Delete e Detalhes) -->
                     <div class="flex gap-2 items-center shrink-0">
                         <button onclick="toggleTaskDetailsPanel('${task.id}')" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold px-2 py-1 rounded bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition flex items-center gap-0.5">
-                            💬 Notas <span id="chevron-${task.id}">▼</span>
+                            💬 Notas <span id="chevron-${task.id}">${chevronChar}</span>
                         </button>
                         <button onclick="duplicateDailyTask('${day}', '${task.id}')" title="Duplicar Tarefa" class="text-gray-400 hover:text-indigo-600 text-sm transition px-1">📋</button>
                         <button onclick="deleteDailyTask('${day}', '${task.id}')" title="Excluir" class="text-gray-400 hover:text-red-500 text-sm transition px-1">🗑️</button>
@@ -2943,7 +2943,7 @@
                 </div>
  
                 <!-- Painel de Comentários / Detalhes (Collapsible) -->
-                <div id="details-${task.id}" class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700 hidden slide-fade">
+                <div id="details-${task.id}" class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700 ${detailsHiddenClass} slide-fade">
                     
                     <!-- Edição rápida dos campos principais -->
                     <div class="mb-3.5 p-2.5 bg-indigo-50/40 border border-indigo-100 rounded-lg">
@@ -2964,7 +2964,7 @@
                             </div>
                             <div>
                                 <label class="block font-semibold text-gray-600 mb-0.5">Título:</label>
-                                <input type="text" value="${task.title || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                                <input type="text" value="${task.title || ''}" oninput="updateTaskTitleLive('${day}', '${task.id}', this.value)" onchange="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" onblur="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                             </div>
                             <div>
                                 <label class="block font-semibold text-gray-600 mb-0.5">Segmento (Categoria):</label>
@@ -2975,7 +2975,7 @@
                         </div>
                         <div>
                             <label class="block font-semibold text-gray-600 mb-0.5">Descrição:</label>
-                            <input type="text" value="${task.desc || ''}" oninput="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                            <input type="text" value="${task.desc || ''}" oninput="updateTaskDescLive('${day}', '${task.id}', this.value)" onchange="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" onblur="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                         </div>
                     </div>
 
@@ -3025,10 +3025,43 @@
             if (shouldHide) {
                 panel.classList.add('hidden');
                 chevron.innerText = "▼";
+                openDetailsPanelIds.delete(id);
             } else {
                 panel.classList.remove('hidden');
                 chevron.innerText = "▲";
+                openDetailsPanelIds.add(id);
             }
+        }
+
+        function updateTaskTitleLive(day, id, value) {
+            if (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][day]) {
+                const taskObj = weeklySchedule[selectedWeekKey][day].find(t => t.id === id);
+                if (taskObj) {
+                    taskObj.title = value;
+                }
+            }
+            const el = document.getElementById(`card-title-${id}`);
+            if (el) el.innerText = value || 'Sem título';
+        }
+
+        function updateTaskDescLive(day, id, value) {
+            if (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][day]) {
+                const taskObj = weeklySchedule[selectedWeekKey][day].find(t => t.id === id);
+                if (taskObj) {
+                    taskObj.desc = value;
+                }
+            }
+            const el = document.getElementById(`card-desc-${id}`);
+            if (el) el.innerText = value;
+        }
+
+        function updateProjectTitleLive(id, value) {
+            if (weeklyProjects[selectedWeekKey]) {
+                const p = weeklyProjects[selectedWeekKey].find(item => item.id === id);
+                if (p) p.text = value;
+            }
+            const label = document.querySelector(`label[for="proj-${id}"]`);
+            if (label) label.innerText = value || 'Sem título';
         }
 
         function duplicateDailyTask(day, id) {
