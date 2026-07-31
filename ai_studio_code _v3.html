@@ -444,7 +444,7 @@
             </div>
             <!-- Adicionar Tarefa Diária -->
             <details id="addTaskDetails" class="mb-6 bg-gray-50 rounded-lg border border-gray-200">
-                <summary class="p-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 rounded-lg">➕ Adicionar Nova Tarefa a este dia</summary>
+                <summary class="p-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 rounded-lg flex items-center gap-2">➕ Adicionar Nova Tarefa <span id="addTaskWeekBadge" class="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full"></span></summary>
                 <div class="p-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-1">⏰ Início (Opcional)</label>
@@ -1458,6 +1458,20 @@
             }
         }
 
+        function updateAddTaskWeekBadge() {
+            const badge = document.getElementById('addTaskWeekBadge');
+            if (!badge) return;
+            const todayKey = getWeekKey(new Date());
+            if (selectedWeekKey === todayKey) {
+                badge.textContent = 'Esta semana';
+                badge.className = 'text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full';
+            } else {
+                const wn = selectedWeekKey.split('-W')[1];
+                badge.textContent = `Semana ${wn} (passada)`;
+                badge.className = 'text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full';
+            }
+        }
+
         function autoDetectCurrentWeek() {
             const today = new Date();
             selectedWeekDate = today;
@@ -1539,6 +1553,7 @@
             ensureWeekExists(selectedWeekKey);
             analysisWeekKey = selectedWeekKey;
             updateWeekRangeLabel();
+            updateAddTaskWeekBadge();
             loadProjects();
             refreshAgendaView();
         }
@@ -1589,6 +1604,7 @@
             document.getElementById('daySelector').value = today;
             
             updateWeekRangeLabel();
+            updateAddTaskWeekBadge();
             loadProjects();
             loadRulesToUI();
             loadDaySchedule();
@@ -4865,12 +4881,22 @@
                 const cloudData = docSnap.data();
                 if (!cloudData) return;
 
+                // Se hasPendingWrites=true, o snapshot é um eco otimista do nosso próprio write local.
+                // O estado local já está correto — pular a substituição evita apagar tarefas recém-adicionadas.
+                const isLocalWrite = docSnap.metadata.hasPendingWrites;
+
                 isSyncingFromRemote = true;
 
-                if (cloudData.weeklySchedule) weeklySchedule = cloudData.weeklySchedule;
-                if (cloudData.weeklyProjects) weeklyProjects = cloudData.weeklyProjects;
-                if (cloudData.productivityRules) productivityRules = cloudData.productivityRules;
-                if (cloudData.taskCategories) taskCategories = cloudData.taskCategories;
+                if (!isLocalWrite) {
+                    // Snapshot vem de outro dispositivo (sincronização real): substitui tudo
+                    if (cloudData.weeklySchedule) weeklySchedule = cloudData.weeklySchedule;
+                    if (cloudData.weeklyProjects) weeklyProjects = cloudData.weeklyProjects;
+                    if (cloudData.productivityRules) productivityRules = cloudData.productivityRules;
+                    if (cloudData.taskCategories) taskCategories = cloudData.taskCategories;
+                } else {
+                    // Snapshot é reflexo do nosso próprio write — apenas garante semana atual existe
+                    ensureWeekExists(selectedWeekKey);
+                }
 
                 // Sincroniza cópia local no localStorage para acesso offline/F5 rápido
                 safeSetItem('my_weekly_schedule', JSON.stringify(weeklySchedule));
