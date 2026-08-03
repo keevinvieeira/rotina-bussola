@@ -194,7 +194,7 @@
                 <div id="twoFAAlert" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2 rounded-lg text-center"></div>
 
                 <button onclick="confirmRegistration2FA()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-xs shadow-md transition">🚀 Já confirmei meu e-mail (Verificar Agora)</button>
-                
+
                 <div class="flex gap-2">
                     <button onclick="resendEmailVerificationLink()" class="flex-1 border border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-bold py-2 rounded-xl text-xs transition">📧 Reenviar E-mail</button>
                     <button onclick="logoutUser()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">🚪 Sair / Outra Conta</button>
@@ -227,7 +227,7 @@
                     <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">🧭 Bússola</h1>
                     <p class="text-indigo-200 text-xs sm:text-sm">Planejamento, foco e equilíbrio</p>
                 </div>
-                
+
                 <!-- Navegação entre Abas (Rolagem Horizontal no Celular sem barra) -->
                 <div class="flex bg-indigo-800 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar scrollbar-none justify-start sm:justify-center shrink-0">
                     <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
@@ -265,7 +265,7 @@
                 <h3 class="text-lg font-bold">🗂️ Gerenciar Segmentos (Categorias)</h3>
                 <button onclick="toggleModalSegments()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">×</button>
             </div>
-            
+
             <!-- Lista de Segmentos Existentes -->
             <div class="space-y-3.5 max-h-72 overflow-y-auto pr-1 mb-6" id="segmentsListContainer">
                 <!-- Inserido dinamicamente via JS -->
@@ -334,7 +334,7 @@
                 Para confirmar a exclusão, digite a palavra <span class="text-rose-600 select-all font-extrabold">DELETAR</span> abaixo:
             </p>
             <input type="text" id="resetAllConfirmInput" placeholder="Digite DELETAR..." oninput="checkResetAllConfirmation()" class="w-full border border-gray-300 rounded-lg p-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500 mb-4">
-            
+
             <div class="flex justify-end gap-2">
                 <button onclick="closeResetAllModal()" class="px-4 py-2 border rounded-lg text-xs hover:bg-gray-100 transition font-semibold">Cancelar</button>
                 <button id="btnConfirmResetAll" onclick="executeResetAll()" disabled class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Sim, excluir tudo</button>
@@ -344,7 +344,7 @@
 
     <!-- ABA 1: AGENDA E PROJETOS -->
     <main id="tab-agenda" class="max-w-[1400px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         <!-- Seletor de Semanas -->
         <div class="lg:col-span-3 bg-indigo-50/50 p-4 rounded-xl shadow-inner border border-indigo-100 flex items-center justify-between gap-4">
             <button onclick="changeWeek(-1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3.5 py-2 rounded-lg text-xs transition shadow-sm">
@@ -357,7 +357,7 @@
                 Próxima Semana ▶
             </button>
         </div>
-        
+
         <!-- Coluna de Projetos (Backlog / Fila) -->
         <div class="lg:col-span-1 order-2 lg:order-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-6">
             <div>
@@ -367,7 +367,7 @@
                         ✨ Reorganizar Rotina
                     </button>
                 </div>
-                
+
                 <!-- Input para novos projetos -->
                 <div class="flex gap-2 mb-6">
                     <input type="text" id="newProjectInput" placeholder="Novo projeto/tarefa..." class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -492,7 +492,7 @@
 
     <!-- ABA 2: ANÁLISE DE PRODUTIVIDADE -->
     <main id="tab-analise" class="max-w-[1400px] mx-auto px-4 hidden grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         <!-- Seletores de Escopo da Análise -->
         <div class="lg:col-span-3 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 p-4 rounded-xl border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex flex-col gap-1 text-center sm:text-left">
@@ -515,7 +515,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Bloco de Métricas / Insights -->
         <div class="lg:col-span-1 flex flex-col gap-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -556,7 +556,7 @@
 
     <!-- ABA 3: CONFIGURAÇÕES GERAIS DO APP -->
     <main id="tab-configuracoes" class="max-w-[1400px] mx-auto px-4 hidden grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        
+
         <!-- Bloco 1: Gerenciamento de Segmentos (Categorias) -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4">
             <div class="flex justify-between items-center pb-3 border-b">
@@ -566,7 +566,7 @@
                 </div>
                 <button onclick="toggleModalSegments()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">+ Gerenciar</button>
             </div>
-            
+
             <div class="space-y-3 max-h-96 overflow-y-auto pr-1" id="configSegmentsListContainer">
                 <!-- Preenchido dinamicamente via JS -->
             </div>
@@ -577,7 +577,7 @@
             <div>
                 <h2 class="text-lg font-bold text-gray-900 pb-2 border-b flex items-center gap-2">📋 Regras de Produtividade & Rotinas Fixas</h2>
                 <p class="text-xs text-gray-500 mt-1 mb-4">Defina limites diários por categoria e ajuste suas rotinas semanais dinâmicas.</p>
-                
+
                 <!-- Limites Diários -->
                 <div class="space-y-1.5 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <span class="block text-xs font-bold text-gray-700 mb-2">📊 Limites Diários por Segmento:</span>
@@ -609,7 +609,7 @@
                             ➕ Adicionar Nova Rotina
                         </button>
                     </div>
-                    
+
                     <div id="dynamicRoutinesContainer" class="space-y-3 max-h-96 overflow-y-auto pr-1">
                         <!-- JS Dinâmico via loadRulesToUI() -->
                     </div>
@@ -679,7 +679,7 @@
                 <span class="text-xl">🧠</span>
                 <h3 class="text-lg font-extrabold text-gray-900">2. Fundamentos Metodológicos por Trás da Bússola</h3>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-indigo-50/40 border border-indigo-100 p-5 rounded-xl space-y-2">
                     <div class="flex items-center gap-2 text-indigo-900 font-bold text-sm">
@@ -725,7 +725,7 @@
                 <span class="text-xl">📊</span>
                 <h3 class="text-lg font-extrabold text-gray-900">3. Bússola vs. Outras Ferramentas</h3>
             </div>
-            
+
             <div class="overflow-x-auto rounded-xl border border-gray-200">
                 <table class="w-full text-left text-xs sm:text-sm text-gray-700">
                     <thead class="bg-indigo-950 text-white font-bold uppercase tracking-wider text-[11px]">
@@ -889,14 +889,14 @@
             <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-3xl mb-4 animate-bounce">
                 🧭
             </div>
-            
+
             <span class="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold mb-2" id="alertTaskCategory">Trabalho</span>
-            
+
             <h3 class="text-xl font-extrabold text-gray-950 mb-1" id="alertTaskTitle">Título da Tarefa</h3>
             <span class="text-xs text-indigo-650 font-bold mb-3 block" id="alertTaskTime">08:00</span>
-            
+
             <p class="text-sm text-gray-500 mb-6 bg-gray-50 p-3 rounded-lg w-full border border-gray-150" id="alertTaskDesc">Descrição da tarefa...</p>
-            
+
             <div class="flex gap-2 w-full">
                 <button onclick="acknowledgeTaskAlert()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-1.5 text-sm">
                     🚀 Ok, começar!
@@ -1045,14 +1045,14 @@
             const monday = new Date(d.setDate(diff));
             const sunday = new Date(monday);
             sunday.setDate(monday.getDate() + 6);
-            
+
             const pad = (n) => String(n).padStart(2, '0');
             const targetWeekKey = getWeekKey(date);
             const realCurrentWeekKey = getWeekKey(new Date());
 
             const isCurrentWeek = (targetWeekKey === realCurrentWeekKey);
-            const badge = isCurrentWeek 
-                ? `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">✨ (Semana Atual)</span>` 
+            const badge = isCurrentWeek
+                ? `<span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">✨ (Semana Atual)</span>`
                 : ``;
 
             return `Semana ${targetWeekKey.split('-W')[1]} / ${date.getFullYear()} (${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}/${monday.getFullYear()} a ${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}/${sunday.getFullYear()}) ${badge}`;
@@ -1069,7 +1069,7 @@
 
         function generateInitialScheduleForWeek(weekKey) {
             const weekSchedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
-            
+
             // Popula estritamente com as rotinas recorrentes cadastradas no painel pelo usuário
             const weekNo = getWeekNumber(weekKey);
             const isOddWeek = weekNo % 2 !== 0;
@@ -1120,7 +1120,7 @@
             if (!match) return weekKey;
             const year = parseInt(match[1], 10);
             const week = parseInt(match[2], 10);
-            
+
             if (week === 1) {
                 return `${year - 1}-W52`;
             } else {
@@ -1147,7 +1147,7 @@
         // Recuperação e Migração segura do localStorage
         function loadWeeklyDataFromStorage() {
             let migrated = false;
-            
+
             // 1. Carrega Agenda
             try {
                 const storedSchedule = JSON.parse(safeGetItem('my_weekly_schedule'));
@@ -1202,7 +1202,7 @@
 
             ensureWeekExists(selectedWeekKey);
             purgeImplicitTasks();
-            
+
             if (migrated) {
                 saveData();
             }
@@ -1211,7 +1211,7 @@
         function purgeImplicitTasks() {
             let changed = false;
             const implicitKeywords = [
-                "foco alto", "foco médio", "foco medio", "crm esposa", 
+                "foco alto", "foco médio", "foco medio", "crm esposa",
                 "ia de agendamento", "tirar mofo", "jiu-jitsu / almoço", "jiu-jitsu / jantar"
             ];
 
@@ -1285,7 +1285,7 @@
             for (let weekKey in weeklySchedule) {
                 const weekData = weeklySchedule[weekKey];
                 if (!weekData || typeof weekData !== 'object') continue;
-                
+
                 for (let day in weekData) {
                     if (!Array.isArray(weekData[day])) {
                         weekData[day] = [];
@@ -1346,7 +1346,7 @@
                             else if (title.includes('descanso')) duration = 180;
                             else if (title.includes('academia') || title.includes('jiu-jitsu') || title.includes('jiu jitsu')) duration = 90;
                             else if (title.includes('lixo') || title.includes('louça') || title.includes('louca')) duration = 30;
-                            
+
                             m += duration;
                             if (m >= 60) {
                                 h += Math.floor(m / 60);
@@ -1355,7 +1355,7 @@
                             if (h >= 24) {
                                 h = h % 24;
                             }
-                            
+
                             const hStr = String(h).padStart(2, '0');
                             const mStr = String(m).padStart(2, '0');
                             task.timeEnd = `${hStr}:${mStr}`;
@@ -1389,7 +1389,7 @@
             for (let weekKey in weeklySchedule) {
                 const weekData = weeklySchedule[weekKey];
                 if (!weekData || typeof weekData !== 'object') continue;
-                
+
                 // 1. Quarta-feira (dia 3)
                 if (weekData[3]) {
                     let crmTask = weekData[3].find(t => t.id === "s3-6");
@@ -1397,7 +1397,7 @@
                         crmTask.timeEnd = "17:00";
                         weekAdjusted = true;
                     }
-                    
+
                     let hasBathroom = weekData[3].some(t => t.id === "s3-bathroom" || t.title === "Lavar o Banheiro");
                     if (!hasBathroom) {
                         weekData[3].push({
@@ -1417,7 +1417,7 @@
                         weekAdjusted = true;
                     }
                 }
-                
+
                 // 2. Sexta-feira (dia 5)
                 if (weekData[5]) {
                     const originalLength = weekData[5].length;
@@ -1425,7 +1425,7 @@
                     if (weekData[5].length !== originalLength) {
                         weekAdjusted = true;
                     }
-                    
+
                     let hasFounder = weekData[5].some(t => t.id === "s5-founderpm" || t.title === "Curso FounderPM");
                     if (!hasFounder) {
                         weekData[5].push({
@@ -1507,7 +1507,7 @@
 
             for (const cat in counts) {
                 const pct = ((counts[cat] / total) * 100).toFixed(0);
-                
+
                 // Determina a cor base para o progresso do segmento a partir das classes de bg cadastradas
                 let colorClass = 'bg-gray-500';
                 const catObj = taskCategories[cat];
@@ -1522,7 +1522,7 @@
                     else if (bgClass.includes('bg-pink-100') || bgClass.includes('bg-pink-105')) colorClass = 'bg-pink-500';
                     else if (bgClass.includes('bg-gray-100')) colorClass = 'bg-gray-500';
                 }
-                
+
                 // Cria segmento do progresso
                 const segment = document.createElement('div');
                 segment.className = `h-full ${colorClass} transition-all duration-300`;
@@ -1533,10 +1533,10 @@
                 // Cria legenda
                 const legendItem = document.createElement('div');
                 legendItem.className = 'flex items-center text-[10px] font-bold text-gray-550 shrink-0';
-                
+
                 const dot = document.createElement('span');
                 dot.className = `w-2 h-2 rounded-full inline-block mr-1.5 ${colorClass}`;
-                
+
                 const catLabel = taskCategories[cat]?.label?.split(' ').slice(1).join(' ') || cat;
                 const labelText = document.createTextNode(`${catLabel}: ${pct}%`);
                 legendItem.appendChild(dot);
@@ -1602,13 +1602,24 @@
 
             const today = new Date().getDay(); // 0=Dom, 1=Seg...
             document.getElementById('daySelector').value = today;
-            
+
             updateWeekRangeLabel();
             updateAddTaskWeekBadge();
             loadProjects();
             loadRulesToUI();
             loadDaySchedule();
             startNotificationTimer();
+
+            // Atualiza automaticamente o dia se o usuário deixar a aba aberta de um dia pro outro
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    const currentDay = new Date().getDay();
+                    if (document.getElementById('daySelector').value !== String(currentDay)) {
+                        document.getElementById('daySelector').value = currentDay;
+                        if (agendaViewMode === 'daily') loadDaySchedule();
+                    }
+                }
+            });
 
             // Ativa notificações por padrão se a permissão for default ou já concedida
             if (Notification.permission === "default") {
@@ -1866,7 +1877,7 @@
             for (let i = 0; i < dayTasks.length; i++) {
                 const t = dayTasks[i];
                 const durationMins = getTaskDurationMinutes(t);
-                
+
                 const hStart = Math.floor(currentStartMins / 60) % 24;
                 const mStart = currentStartMins % 60;
                 t.time = `${String(hStart).padStart(2, '0')}:${String(mStart).padStart(2, '0')}`;
@@ -1932,13 +1943,13 @@
             projects.forEach(project => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = "flex flex-col p-2.5 hover:bg-gray-50 border border-gray-100 rounded-lg transition group text-sm shadow-sm";
-                
+
                 const isAndamento = project.status === "andamento";
                 if (isAndamento && !project.done) {
                     activeCount++;
                 }
 
-                const actionButton = isAndamento 
+                const actionButton = isAndamento
                     ? `<button onclick="changeProjectStatus(${project.id}, 'fila')" title="Mover para a fila" class="text-xs text-gray-400 hover:text-amber-500 transition">⏸️</button>`
                     : `<button onclick="changeProjectStatus(${project.id}, 'andamento')" title="Iniciar Projeto" class="text-xs text-gray-400 hover:text-emerald-500 transition">🚀</button>`;
 
@@ -1957,7 +1968,7 @@
                     const weekData = weeklySchedule[selectedWeekKey];
                     if (weekData) {
                         for (let d in weekData) {
-                            const hasSameTitle = weekData[d].some(t => 
+                            const hasSameTitle = weekData[d].some(t =>
                                 t.projectId === project.id || isTitleMatching(t.title, project.text)
                             );
                             if (hasSameTitle) {
@@ -2000,7 +2011,7 @@
                             <button onclick="deleteProject(${project.id})" title="Excluir" class="text-gray-300 hover:text-red-500 text-xs hidden group-hover:block transition">🗑️</button>
                         </div>
                     </div>
-                    
+
                     <!-- Painel de Detalhes do Projeto (Collapsible) -->
                     <div id="proj-details-${project.id}" class="mt-2.5 pt-2.5 border-t border-gray-250 text-[11px] text-gray-600 ${openProjectPanelIds.has(project.id) ? '' : 'hidden'} flex flex-col gap-2">
                         <div>
@@ -2113,7 +2124,7 @@
         function toggleProject(id) {
             weeklyProjects[selectedWeekKey] = weeklyProjects[selectedWeekKey].map(p => p.id === id ? { ...p, done: !p.done } : p);
             projects = weeklyProjects[selectedWeekKey];
-            
+
             const targetProj = projects.find(p => p.id === id);
             if (targetProj) {
                 propagateProjectChangeToFutureWeeks(id, 'done', targetProj.done);
@@ -2121,7 +2132,7 @@
                     cleanNonActiveProjectTasks();
                 }
             }
-            
+
             saveData();
             loadProjects();
             refreshAgendaView();
@@ -2130,12 +2141,12 @@
         function changeProjectStatus(id, newStatus) {
             weeklyProjects[selectedWeekKey] = weeklyProjects[selectedWeekKey].map(p => p.id === id ? { ...p, status: newStatus } : p);
             projects = weeklyProjects[selectedWeekKey];
-            
+
             const targetProj = projects.find(p => p.id === id);
             if (targetProj) {
                 propagateProjectChangeToFutureWeeks(id, 'status', targetProj.status);
             }
-            
+
             if (newStatus !== 'andamento') {
                 cleanNonActiveProjectTasks();
             }
@@ -2180,7 +2191,7 @@
                 return p;
             });
             projects = weeklyProjects[selectedWeekKey];
-            
+
             // Se mudou o nome (campo 'text'), atualiza o título de todas as tarefas vinculadas
             if (field === 'text' && oldText) {
                 // Atualiza em defaultSchedule
@@ -2250,7 +2261,7 @@
         function autoScheduleProjectTasks(projectId) {
             const project = projects.find(p => p.id === projectId);
             if (!project || !project.frequency) return;
-            
+
             const targetFreq = parseInt(project.frequency, 10);
             if (isNaN(targetFreq) || targetFreq < 0) return;
 
@@ -2306,7 +2317,7 @@
 
                 for (let day of weekdaysOnly) {
                     if (daysScheduled.has(day)) continue; // 1x por dia no máximo
-                    
+
                     const tasks = weekData[day] || [];
                     const load = tasks.length;
                     if (load < minLoad) {
@@ -2333,7 +2344,7 @@
                 let timeStart = "14:00";
                 let timeEnd = "15:00";
                 const cat = project.category || 'trabalho-pessoal';
-                
+
                 if (cat === 'domestico') {
                     timeStart = "17:00";
                     timeEnd = "18:00";
@@ -2346,7 +2357,7 @@
                 } else {
                     // Trabalho ou pessoal: tenta achar slot genérico
                     const tasks = weekData[bestDay] || [];
-                    const genericFocusTask = tasks.find(t => 
+                    const genericFocusTask = tasks.find(t =>
                         (t.title === "Foco Alto" || t.title === "Foco Médio" || t.title.startsWith("Foco")) &&
                         t.category === "trabalho-pessoal"
                     );
@@ -2393,6 +2404,41 @@
             refreshAgendaView();
         }
 
+        function createTaskForProjectOnDay(project, day) {
+            const targetDay = String(day);
+            if (!weeklySchedule[selectedWeekKey]) {
+                weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+            }
+            if (!weeklySchedule[selectedWeekKey][targetDay]) {
+                weeklySchedule[selectedWeekKey][targetDay] = [];
+            }
+
+            const dayTasks = weeklySchedule[selectedWeekKey][targetDay];
+            const durationMinutes = 60;
+            const orderedTasks = [...dayTasks].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+            const lastTask = orderedTasks[orderedTasks.length - 1];
+            const startTime = lastTask ? (lastTask.timeEnd || lastTask.time || "08:00") : "08:00";
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const totalMinutes = ((hours || 0) * 60) + (minutes || 0) + durationMinutes;
+            const endTime = `${String(Math.floor(totalMinutes / 60) % 24).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}`;
+
+            dayTasks.push({
+                id: "project-" + Date.now() + Math.random(),
+                projectId: project.id,
+                time: startTime,
+                timeEnd: endTime,
+                duration: durationMinutes,
+                title: project.text,
+                desc: project.desc || `Foco em: ${project.text}`,
+                done: false,
+                status: "pending",
+                category: project.category || 'trabalho-pessoal',
+                justification: "",
+                completion: "nao",
+                difficulty: "",
+                notes: ""
+            });
+        }
         function toggleProjectDay(projectId, day) {
             const project = projects.find(p => p.id === projectId);
             if (!project) return;
@@ -2413,87 +2459,29 @@
                 }
             }
 
-            if (day === 6 || day === 0) {
-                alert("Finais de semana são reservados para descanso! Não é permitido agendar tarefas nestes dias.");
-                return;
+            if (!weeklySchedule[selectedWeekKey]) {
+                weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
             }
-
             const weekData = weeklySchedule[selectedWeekKey];
-            if (!weekData) return;
 
-            const existingTasks = (weekData[day] || []).filter(t => 
+            const existingTasks = (weekData[day] || []).filter(t =>
                 t.projectId === projectId || isTitleMatching(t.title, project.text)
             );
 
             if (existingTasks.length > 0) {
                 // Se já existe, remove
-                weekData[day] = weekData[day].filter(t => 
+                weekData[day] = weekData[day].filter(t =>
                     t.projectId !== projectId && !isTitleMatching(t.title, project.text)
                 );
             } else {
-                // Adiciona
-                const cat = project.category || 'trabalho-pessoal';
-                let timeStart = "14:00";
-                let timeEnd = "15:00";
-                
-                if (cat === 'domestico') {
-                    timeStart = "17:00";
-                    timeEnd = "18:00";
-                } else if (cat === 'educacao') {
-                    timeStart = "08:00";
-                    timeEnd = "09:00";
-                } else if (cat === 'exercicio') {
-                    timeStart = "18:00";
-                    timeEnd = "19:00";
-                } else {
-                    const tasks = weekData[day] || [];
-                    const genericFocusTask = tasks.find(t => 
-                        (t.title === "Foco Alto" || t.title === "Foco Médio" || t.title.startsWith("Foco")) &&
-                        t.category === "trabalho-pessoal"
-                    );
-
-                    if (genericFocusTask) {
-                        genericFocusTask.title = project.text;
-                        genericFocusTask.category = cat;
-                        genericFocusTask.projectId = projectId;
-                        saveData();
-                        refreshAgendaView();
-                        return;
-                    }
-
-                    const hasAfternoonConflict = tasks.some(t => t.time === "14:00");
-                    if (!hasAfternoonConflict) {
-                        timeStart = "14:00";
-                        timeEnd = "15:30";
-                    } else {
-                        timeStart = "09:30";
-                        timeEnd = "11:30";
-                    }
-                }
-
-                if (!weekData[day]) weekData[day] = [];
-                weekData[day].push({
-                    id: "auto-" + Date.now() + Math.random(),
-                    projectId: projectId,
-                    time: timeStart,
-                    timeEnd: timeEnd,
-                    title: project.text,
-                    desc: `Foco em: ${project.text}`,
-                    done: false,
-                    status: "pending",
-                    category: cat,
-                    justification: "",
-                    completion: "nao",
-                    difficulty: "medio",
-                    notes: ""
-                });
+                // Create the linked task on the clicked day through the shared task flow.
+                createTaskForProjectOnDay(project, day);
             }
-
             // Atualiza e propaga a frequência
             let newFreq = 0;
             const weekdaysOnly = [1, 2, 3, 4, 5];
             for (let d of weekdaysOnly) {
-                const hasTask = (weekData[d] || []).some(t => 
+                const hasTask = (weekData[d] || []).some(t =>
                     t.projectId === projectId || isTitleMatching(t.title, project.text)
                 );
                 if (hasTask) newFreq++;
@@ -2505,13 +2493,10 @@
         }
 
         function toggleTaskDay(taskId, day) {
-            if (day === 6 || day === 0) {
-                alert("Finais de semana são reservados para descanso! Não é permitido agendar tarefas nestes dias.");
-                return;
+            if (!weeklySchedule[selectedWeekKey]) {
+                weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
             }
-
             const weekData = weeklySchedule[selectedWeekKey];
-            if (!weekData) return;
 
             // Encontra a tarefa de referência por id em qualquer dia da semana atual
             let refTask = null;
@@ -2526,20 +2511,20 @@
             if (!refTask) return;
 
             // Procura tarefas com o mesmo título naquele dia específico
-            const existingTasks = (weekData[day] || []).filter(t => 
+            const existingTasks = (weekData[day] || []).filter(t =>
                 isTitleMatching(t.title, refTask.title)
             );
 
             if (existingTasks.length > 0) {
                 // Se já existe, remove
-                weekData[day] = weekData[day].filter(t => 
+                weekData[day] = weekData[day].filter(t =>
                     !isTitleMatching(t.title, refTask.title)
                 );
             } else {
                 // Adiciona
                 const cat = refTask.category || 'trabalho-pessoal';
                 const tasksInDay = weekData[day] || [];
-                
+
                 // Contadores do dia de destino
                 let workCount = 0;
                 let eduCount = 0;
@@ -2677,7 +2662,7 @@
                     if (matchingProj) {
                         return matchingProj.status === 'andamento' && !matchingProj.done;
                     }
-                    return true; 
+                    return true;
                 });
 
                 // 2. Remove todas as tarefas de rotinas cadastradas e de almoço para recriá-las limpas
@@ -2723,12 +2708,48 @@
                     return t;
                 });
 
+                // 3.5. Insere tarefas automáticas para os projetos em andamento, baseado na frequência
+                activeProjects.forEach(p => {
+                    const freq = parseInt(p.frequency, 10) || 3;
+                    // Define em quais dias este projeto deve ter tarefas
+                    let targetDays = [];
+                    if (freq >= 5) targetDays = [1, 2, 3, 4, 5];
+                    else if (freq === 4) targetDays = [1, 2, 4, 5];
+                    else if (freq === 3) targetDays = [1, 3, 5];
+                    else if (freq === 2) targetDays = [2, 4];
+                    else targetDays = [3];
+
+                    if (targetDays.includes(day)) {
+                        // Verifica se já não existe uma tarefa desse projeto neste dia
+                        const alreadyExists = dayTasks.some(t => t.projectId === p.id || isTitleMatching(p.text, t.title));
+                        if (!alreadyExists) {
+                            dayTasks.push({
+                                id: "proj-auto-" + p.id + "-" + day + "-" + Date.now(),
+                                projectId: p.id,
+                                title: p.text,
+                                desc: "Progresso automático do projeto",
+                                time: "14:00", // Horário padrão, será ajustado se houver conflito
+                                timeEnd: "15:00",
+                                duration: 60,
+                                done: false,
+                                status: "pending",
+                                category: p.category || "trabalho-foco",
+                                justification: "",
+                                completion: "nao",
+                                difficulty: "medio",
+                                notes: ""
+                            });
+                        }
+                    }
+                });
+
+
                 // 4. Insere tarefas das rotinas cadastradas baseadas em regras de produtividade
                 const activeRoutines = productivityRules.routines || [];
                 activeRoutines.forEach(r => {
                     if (Array.isArray(r.days) && r.days.includes(day)) {
                         if (r.oddWeeksOnly && weekNo % 2 !== 1) {
-                            return; 
+                            return;
                         }
 
                         const start = r.time || "12:00";
@@ -2801,7 +2822,7 @@
 
                 // Junta novamente as listas
                 const finalTasks = [...workTasks, ...eduTasks, ...carTasks, ...domTasks, ...otherTasks];
-                
+
                 // Ordena por horário de início
                 finalTasks.sort((a, b) => a.time.localeCompare(b.time));
                 weekData[day] = finalTasks;
@@ -2876,12 +2897,12 @@
             const isPanelOpen = openDetailsPanelIds.has(task.id);
             const detailsHiddenClass = isPanelOpen ? '' : 'hidden';
             const chevronChar = isPanelOpen ? '▲' : '▼';
-            
+
             // Determina a estilização do card com base no status
             let cardBg = "bg-white border-indigo-500";
             let textMuted = "";
             let titleColor = "text-gray-800";
-            
+
             if (task.status === 'success') {
                 cardBg = "bg-emerald-50/40 border-emerald-500";
                 textMuted = "line-through text-gray-400 font-normal";
@@ -2894,7 +2915,7 @@
 
             const card = document.createElement('div');
             card.className = `flex flex-col p-3 rounded-lg border-l-4 shadow-sm transition ${cardBg} hover:shadow-md border border-gray-100`;
-            
+
             const displayTime = task.timeEnd && task.timeEnd !== task.time ? `${task.time} - ${task.timeEnd}` : task.time;
 
             let categoryOptionsHTML = "";
@@ -2908,7 +2929,7 @@
                 const assignedSet = new Set(task.assignedDays);
                 const daysLetters = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
                 const daysFullNames = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-                
+
                 daysVisualHTML = `<div class="flex items-center gap-1 mt-1.5 flex-wrap">`;
                 [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                     const isActive = assignedSet.has(d);
@@ -2934,7 +2955,7 @@
                                 ✕
                             </button>
                         </div>
-                        
+
                         <!-- Conteúdo de texto -->
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5 flex-wrap">
@@ -2947,7 +2968,7 @@
                             ${daysVisualHTML}
                         </div>
                     </div>
-                    
+
                     <!-- Botões da Direita (Delete e Detalhes) -->
                     <div class="flex gap-2 items-center shrink-0">
                         <button onclick="toggleTaskDetailsPanel('${task.id}')" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold px-2 py-1 rounded bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition flex items-center gap-0.5">
@@ -2957,10 +2978,10 @@
                         <button onclick="deleteDailyTask('${day}', '${task.id}')" title="Excluir" class="text-gray-400 hover:text-red-500 text-sm transition px-1">🗑️</button>
                     </div>
                 </div>
- 
+
                 <!-- Painel de Comentários / Detalhes (Collapsible) -->
                 <div id="details-${task.id}" class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700 ${detailsHiddenClass} slide-fade">
-                    
+
                     <!-- Edição rápida dos campos principais -->
                     <div class="mb-3.5 p-2.5 bg-indigo-50/40 border border-indigo-100 rounded-lg">
                         <span class="block font-bold text-indigo-700 mb-2">✏️ Editar Campos da Tarefa</span>
@@ -3115,7 +3136,7 @@
             weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task => {
                 if (task.id === id) {
                     const nextStatus = task.status === newStatus ? 'pending' : newStatus;
-                    
+
                     if (nextStatus === 'failed') {
                         setTimeout(() => {
                             const panel = document.getElementById(`details-${id}`);
@@ -3126,9 +3147,9 @@
                             if (justifInput) justifInput.focus();
                         }, 100);
                     }
-                    
-                    return { 
-                        ...task, 
+
+                    return {
+                        ...task,
                         status: nextStatus,
                         done: nextStatus === 'success'
                     };
@@ -3368,15 +3389,15 @@
             if (!newStartStr) return false;
             const newStart = timeToMinutes(newStartStr, false);
             const newEnd = timeToMinutes(newEndStr || newStartStr, true);
-            
+
             const tasks = weeklySchedule[selectedWeekKey][day] || [];
             const hasOverlap = tasks.some(t => {
                 if (t.id === excludeTaskId) return false;
                 const start = timeToMinutes(t.time, false);
                 const end = timeToMinutes(t.timeEnd || t.time, true);
-                
-                return (newStart >= start && newStart < end) || 
-                       (newEnd > start && newEnd <= end) || 
+
+                return (newStart >= start && newStart < end) ||
+                       (newEnd > start && newEnd <= end) ||
                        (newStart <= start && newEnd >= end);
             });
             if (hasOverlap) {
@@ -3386,81 +3407,86 @@
         }
 
         function addDailyTask() {
-            const selectedDay = document.getElementById('daySelector').value;
-            const timeEl = document.getElementById('newTaskTime');
-            const timeInput = timeEl ? timeEl.value.trim() : '';
-            const durationMinutes = parseInt(document.getElementById('newTaskDuration').value, 10) || 60;
-            const titleInput = document.getElementById('newTaskTitle');
-            const title = titleInput ? titleInput.value.trim() : '';
-            const descInput = document.getElementById('newTaskDesc');
-            const desc = (descInput && descInput.value.trim()) ? descInput.value.trim() : "Sem descrição";
-            const categorySelect = document.getElementById('newTaskCategory');
-            const category = (categorySelect && categorySelect.value) ? categorySelect.value : (Object.keys(taskCategories)[0] || 'trabalho');
-
-            if (!title) {
-                alert("Por favor, preencha o título da tarefa.");
-                return;
-            }
-
-            let startTime = timeInput;
-            if (!startTime) {
-                const existing = (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][selectedDay]) || [];
-                if (existing.length > 0) {
-                    const lastTask = existing[existing.length - 1];
-                    startTime = lastTask.timeEnd || lastTask.time || "08:00";
-                } else {
-                    startTime = "08:00";
-                }
-            }
-
-            let endTime = startTime;
             try {
-                const parts = startTime.split(':');
-                const h = parseInt(parts[0], 10) || 8;
-                const m = parseInt(parts[1], 10) || 0;
-                const totalMins = h * 60 + m + durationMinutes;
-                const endH = String(Math.floor(totalMins / 60) % 24).padStart(2, '0');
-                const endM = String(totalMins % 60).padStart(2, '0');
-                endTime = `${endH}:${endM}`;
-            } catch(e) {
-                endTime = startTime;
-            }
+                const selectedDay = document.getElementById('daySelector').value;
+                const timeEl = document.getElementById('newTaskTime');
+                const timeInput = timeEl ? timeEl.value.trim() : '';
+                const durationMinutes = parseInt(document.getElementById('newTaskDuration').value, 10) || 60;
+                const titleInput = document.getElementById('newTaskTitle');
+                const title = titleInput ? titleInput.value.trim() : '';
+                const descInput = document.getElementById('newTaskDesc');
+                const desc = (descInput && descInput.value.trim()) ? descInput.value.trim() : "Sem descrição";
+                const categorySelect = document.getElementById('newTaskCategory');
+                const category = (categorySelect && categorySelect.value) ? categorySelect.value : (Object.keys(taskCategories || {})[0] || 'trabalho');
 
-            const newTask = {
-                id: "custom-" + Date.now(),
-                time: startTime,
-                timeEnd: endTime,
-                duration: durationMinutes,
-                title: title,
-                desc: desc,
-                done: false,
-                status: "pending",
-                category: category,
-                justification: "",
-                completion: "nao",
-                difficulty: "",
-                notes: ""
-            };
+                if (!title) {
+                    alert("Por favor, preencha o título da tarefa.");
+                    return;
+                }
 
-            if (!weeklySchedule[selectedWeekKey]) {
-                weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
-            }
-            if (!weeklySchedule[selectedWeekKey][selectedDay]) {
-                weeklySchedule[selectedWeekKey][selectedDay] = [];
-            }
-            weeklySchedule[selectedWeekKey][selectedDay].push(newTask);
-            saveData();
-            refreshAgendaView();
+                let startTime = timeInput;
+                if (!startTime) {
+                    const existing = (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][selectedDay]) || [];
+                    if (existing.length > 0) {
+                        const lastTask = existing[existing.length - 1];
+                        startTime = lastTask.timeEnd || lastTask.time || "08:00";
+                    } else {
+                        startTime = "08:00";
+                    }
+                }
 
-            if (timeEl) timeEl.value = '';
-            if (titleInput) titleInput.value = '';
-            if (descInput) descInput.value = '';
-            const detailsEl = document.getElementById('addTaskDetails');
-            if (detailsEl) detailsEl.open = false;
+                let endTime = startTime;
+                try {
+                    const parts = startTime.split(':');
+                    const h = parseInt(parts[0], 10) || 8;
+                    const m = parseInt(parts[1], 10) || 0;
+                    const totalMins = h * 60 + m + durationMinutes;
+                    const endH = String(Math.floor(totalMins / 60) % 24).padStart(2, '0');
+                    const endM = String(totalMins % 60).padStart(2, '0');
+                    endTime = `${endH}:${endM}`;
+                } catch(e) {
+                    endTime = startTime;
+                }
+
+                const newTask = {
+                    id: "custom-" + Date.now(),
+                    time: startTime,
+                    timeEnd: endTime,
+                    duration: durationMinutes,
+                    title: title,
+                    desc: desc,
+                    done: false,
+                    status: "pending",
+                    category: category,
+                    justification: "",
+                    completion: "nao",
+                    difficulty: "",
+                    notes: ""
+                };
+
+                if (!weeklySchedule[selectedWeekKey]) {
+                    weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+                }
+                if (!weeklySchedule[selectedWeekKey][selectedDay]) {
+                    weeklySchedule[selectedWeekKey][selectedDay] = [];
+                }
+                weeklySchedule[selectedWeekKey][selectedDay].push(newTask);
+                saveData();
+                refreshAgendaView();
+
+                if (timeEl) timeEl.value = '';
+                if (titleInput) titleInput.value = '';
+                if (descInput) descInput.value = '';
+                const detailsEl = document.getElementById('addTaskDetails');
+                if (detailsEl) detailsEl.open = false;
+            } catch(error) {
+                console.error("Erro ao adicionar tarefa:", error);
+                alert("Ocorreu um erro ao tentar salvar a tarefa. Por favor, atualize a página e tente novamente.");
+            }
         }
 
         function toggleDailyTask(day, id) {
-            weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task => 
+            weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task =>
                 task.id === id ? { ...task, done: !task.done } : task
             );
             saveData();
@@ -3516,10 +3542,10 @@
 
             for (let id in taskCategories) {
                 const cat = taskCategories[id];
-                
+
                 const row = document.createElement('div');
                 row.className = "flex items-center gap-2 p-2 bg-gray-50 border border-gray-150 rounded-lg";
-                
+
                 let sampleDotClass = "bg-gray-500";
                 if (cat.bg.includes("bg-blue-100")) sampleDotClass = "bg-blue-500";
                 else if (cat.bg.includes("bg-purple-100")) sampleDotClass = "bg-purple-500";
@@ -3543,7 +3569,7 @@
             if (!newLabel.trim()) return;
             taskCategories[id].label = newLabel.trim();
             saveTaskCategories();
-            
+
             updateCategoryDropdowns();
             refreshAgendaView();
         }
@@ -3586,10 +3612,10 @@
             };
 
             saveTaskCategories();
-            
+
             // Limpa inputs
             nameInput.value = '';
-            
+
             if (typeof renderSegmentsList === 'function') renderSegmentsList();
             updateCategoryDropdowns();
             loadConfiguracoesUI();
@@ -3607,7 +3633,7 @@
             if (confirm(`Deseja realmente excluir o segmento "${taskCategories[id].label}"? As tarefas deste segmento serão remapeadas.`)) {
                 delete taskCategories[id];
                 saveTaskCategories();
-                
+
                 const fallbackId = Object.keys(taskCategories)[0];
                 for (let weekKey in weeklySchedule) {
                     const weekData = weeklySchedule[weekKey];
@@ -3624,7 +3650,7 @@
                         }
                     }
                 }
-                
+
                 saveData();
                 if (typeof renderSegmentsList === 'function') renderSegmentsList();
                 updateCategoryDropdowns();
@@ -3673,7 +3699,7 @@
 
             try {
                 const parsed = JSON.parse(rawData);
-                
+
                 if (parsed.weeklySchedule && parsed.weeklyProjects) {
                     weeklySchedule = parsed.weeklySchedule;
                     weeklyProjects = parsed.weeklyProjects;
@@ -3689,7 +3715,7 @@
                         weeklySchedule = {};
                         weeklySchedule[currentWeek] = oldSchedule;
                     }
-                    
+
                     weeklyProjects = {};
                     const currentWeek = getWeekKey(new Date());
                     weeklyProjects[currentWeek] = Array.isArray(parsed.projects) ? parsed.projects : defaultProjects;
@@ -3716,13 +3742,13 @@
             const jsonString = JSON.stringify(dataToExport, null, 2);
             const blob = new Blob([jsonString], { type: "application/json" });
             const url = URL.createObjectURL(blob);
-            
+
             const downloadAnchor = document.createElement('a');
             downloadAnchor.href = url;
             downloadAnchor.download = "historico_rotina.json";
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
-            
+
             // Limpa recursos
             document.body.removeChild(downloadAnchor);
             URL.revokeObjectURL(url);
@@ -3785,7 +3811,7 @@
         function executeResetAll() {
             const val = document.getElementById('resetAllConfirmInput').value.trim();
             if (val !== 'DELETAR') return;
-            
+
             try {
                 safeRemoveItem('my_weekly_schedule');
                 safeRemoveItem('my_weekly_projects');
@@ -3794,15 +3820,15 @@
                 safeRemoveItem('my_projects');
                 safeRemoveItem('last_notif_time');
             } catch(e) {}
-            
+
             const currentWeekKey = getWeekKey(new Date());
             weeklySchedule = {};
             weeklySchedule[currentWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
-            
+
             weeklyProjects = {};
             weeklyProjects[currentWeekKey] = [];
             projects = [];
-            
+
             productivityRules = {
                 maxWork: 2,
                 maxEdu: 1,
@@ -4115,19 +4141,19 @@
                         if (task.status === 'success') {
                             const start = task.time || "00:00";
                             const end = task.timeEnd || start;
-                            
+
                             const startParts = start.split(':');
                             const endParts = end.split(':');
-                            
+
                             const startMin = parseInt(startParts[0], 10) * 60 + parseInt(startParts[1], 10);
                             const endMin = parseInt(endParts[0], 10) * 60 + parseInt(endParts[1], 10);
-                            
+
                             let diff = endMin - startMin;
                             if (diff < 0) {
                                 diff += 24 * 60;
                             }
                             if (diff === 0) diff = 30; // default 30 min se não houver duração
-                            
+
                             const catKey = task.category || 'trabalho-pessoal';
                             if (timeByCategory[catKey] !== undefined) {
                                 timeByCategory[catKey] += diff;
@@ -4151,7 +4177,7 @@
             if (timeContainer) {
                 timeContainer.innerHTML = '';
                 const totalMinutes = Object.values(timeByCategory).reduce((a, b) => a + b, 0);
-                
+
                 let hasTimeData = false;
 
                 Object.keys(timeByCategory).forEach(catKey => {
@@ -4159,7 +4185,7 @@
                     if (minsTotal > 0) {
                         hasTimeData = true;
                         const cat = taskCategories[catKey] || taskCategories['trabalho-pessoal'];
-                        
+
                         let barColor = 'bg-gray-500';
                         if (cat && cat.bg) {
                             const bgClass = cat.bg;
@@ -4172,13 +4198,13 @@
                             else if (bgClass.includes('bg-pink-100') || bgClass.includes('bg-pink-105')) barColor = 'bg-pink-500';
                             else if (bgClass.includes('bg-gray-100')) barColor = 'bg-gray-500';
                         }
-                        
+
                         const hrs = Math.floor(minsTotal / 60);
                         const mins = minsTotal % 60;
                         const timeStr = hrs > 0 ? `${hrs}h ${mins}min` : `${mins}min`;
-                        
+
                         const pct = totalMinutes > 0 ? Math.round((minsTotal / totalMinutes) * 100) : 0;
-                        
+
                         const row = document.createElement('div');
                         row.className = "flex flex-col md:flex-row md:items-center gap-2";
                         row.innerHTML = `
@@ -4224,9 +4250,9 @@
         function startNotificationTimer() {
             setInterval(() => {
                 const now = new Date();
-                const currentDay = now.getDay(); 
+                const currentDay = now.getDay();
                 const weekKey = getWeekKey(now);
-                
+
                 if (weeklySchedule[weekKey] && weeklySchedule[weekKey][currentDay]) {
                     const hours = String(now.getHours()).padStart(2, '0');
                     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -4237,7 +4263,7 @@
                     if (currentTask && currentTask.status !== 'success' && currentTask.status !== 'failed') {
                         const lastNotif = safeGetItem('last_notif_time');
                         const uniqueId = `${weekKey}-${currentDay}-${currentTimeString}`;
-                        
+
                         if (lastNotif !== uniqueId) {
                             triggerNotification(currentTask);
                             safeSetItem('last_notif_time', uniqueId);
@@ -4250,14 +4276,14 @@
         function playNotificationChime() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
+
                 // Nota 1 (C5 - Dó)
                 const osc1 = audioCtx.createOscillator();
                 const gain1 = audioCtx.createGain();
                 osc1.connect(gain1);
                 gain1.connect(audioCtx.destination);
                 osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+                osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime);
                 gain1.gain.setValueAtTime(0.08, audioCtx.currentTime);
                 gain1.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.3);
                 osc1.start(audioCtx.currentTime);
@@ -4270,7 +4296,7 @@
                     osc2.connect(gain2);
                     gain2.connect(audioCtx.destination);
                     osc2.type = 'sine';
-                    osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); 
+                    osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime);
                     gain2.gain.setValueAtTime(0.08, audioCtx.currentTime);
                     gain2.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.4);
                     osc2.start(audioCtx.currentTime);
@@ -4500,7 +4526,7 @@
             if (!modal) return;
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            
+
             const tabsNav = document.getElementById('authTabsNav');
             const authTitle = document.getElementById('authModalTitle');
 
@@ -4655,7 +4681,7 @@
                 if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
                     return;
                 }
-                
+
                 try {
                     await auth.signInWithRedirect(provider);
                 } catch (redirectErr) {
@@ -4697,7 +4723,7 @@
                 const userCred = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCred.user;
                 await user.updateProfile({ displayName: name });
-                
+
                 // Envia e-mail oficial de verificação
                 await user.sendEmailVerification();
 
@@ -4774,7 +4800,7 @@
             }
             currentUser = null;
             try { localStorage.removeItem('bussola_user_logged_in'); } catch(e) {}
-            
+
             const currentWeekKey = getWeekKey(new Date());
             weeklySchedule = {};
             weeklySchedule[currentWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
@@ -4966,7 +4992,7 @@
             <div class="text-2xl shrink-0">🍪</div>
             <div class="text-xs leading-relaxed text-slate-300">
                 <strong class="text-white block font-bold mb-0.5">Sua privacidade importa!</strong>
-                Utilizamos cookies e armazenamento local apenas para manter sua sessão ativa e sincronizar sua rotina. Saiba mais em nossa 
+                Utilizamos cookies e armazenamento local apenas para manter sua sessão ativa e sincronizar sua rotina. Saiba mais em nossa
                 <a href="/politica-de-privacidade.html" target="_blank" class="text-indigo-300 underline font-semibold hover:text-white">Política de Privacidade</a>.
             </div>
         </div>
