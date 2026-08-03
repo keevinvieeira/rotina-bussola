@@ -1,9 +1,6 @@
-.git
-.gitignore
-.firebase
-.gemini
-*.log
-node_modules
-firebase.json
-bussola_limpa.html
-historico_rotina.json
+*
+!index.html
+!logo.svg
+!politica-de-privacidade.html
+!termos-de-servico.html
+!tutorial.html
