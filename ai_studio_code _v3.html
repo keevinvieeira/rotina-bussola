@@ -935,16 +935,8 @@
         }
 
         function saveTaskCategories() {
-            try {
-                localStorage.setItem('my_task_categories', JSON.stringify(taskCategories));
-            } catch (e) {
-                console.warn("Erro ao salvar categorias no localStorage", e);
-            }
-            if (currentUser && db) {
-                db.collection('users').doc(currentUser.uid).set({
-                    taskCategories: taskCategories
-                }, { merge: true }).catch(err => console.warn("Erro ao salvar categorias no Firestore:", err));
-            }
+            safeSetItem('my_task_categories', JSON.stringify(taskCategories));
+            saveData();
         }
 
         const defaultProductivityRules = {
@@ -973,11 +965,8 @@
         }
 
         function saveProductivityRules() {
-            try {
-                localStorage.setItem('my_productivity_rules', JSON.stringify(productivityRules));
-            } catch (e) {
-                console.warn("Erro ao salvar regras de produtividade no localStorage", e);
-            }
+            safeSetItem('my_productivity_rules', JSON.stringify(productivityRules));
+            saveData();
         }
 
         // Helper para acesso seguro ao localStorage (evita SecurityError em iframe)
@@ -1336,8 +1325,8 @@
                     item.className = "flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-xl";
                     item.innerHTML = `
                         <div class="flex items-center gap-2.5">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${cat.bg} border shrink-0">${cat.label}</span>
-                            <span class="text-xs text-gray-500 font-mono">(${key})</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${cat.bg} border shrink-0">${escapeHtml(cat.label)}</span>
+                            <span class="text-xs text-gray-500 font-mono">(${escapeHtml(key)})</span>
                         </div>
                     `;
                     segContainer.appendChild(item);
@@ -1714,10 +1703,10 @@
             const ruleMaxCar = document.getElementById('ruleMaxCar');
             const ruleMaxDom = document.getElementById('ruleMaxDom');
 
-            if (ruleMaxWork) ruleMaxWork.value = productivityRules.maxWork || 2;
-            if (ruleMaxEdu) ruleMaxEdu.value = productivityRules.maxEdu || 1;
-            if (ruleMaxCar) ruleMaxCar.value = productivityRules.maxCar || 1;
-            if (ruleMaxDom) ruleMaxDom.value = productivityRules.maxDom || 2;
+            if (ruleMaxWork) ruleMaxWork.value = productivityRules.maxWork ?? 2;
+            if (ruleMaxEdu) ruleMaxEdu.value = productivityRules.maxEdu ?? 1;
+            if (ruleMaxCar) ruleMaxCar.value = productivityRules.maxCar ?? 1;
+            if (ruleMaxDom) ruleMaxDom.value = productivityRules.maxDom ?? 2;
 
             const container = document.getElementById('dynamicRoutinesContainer');
             if (!container) return;
@@ -1731,7 +1720,7 @@
 
                 let catOptions = "";
                 for (let catId in taskCategories) {
-                    catOptions += `<option value="${catId}" ${r.category === catId ? 'selected' : ''}>${taskCategories[catId].label}</option>`;
+                    catOptions += `<option value="${catId}" ${r.category === catId ? 'selected' : ''}>${escapeHtml(taskCategories[catId].label)}</option>`;
                 }
 
                 const daysLabels = ["S", "T", "Q", "Q", "S"];
@@ -1745,7 +1734,7 @@
 
                 card.innerHTML = `
                     <div class="flex justify-between items-center gap-2">
-                        <input type="text" value="${r.title}" onchange="updateRoutineField('${r.id}', 'title', this.value)" class="font-bold text-xs bg-gray-50 hover:bg-gray-100 focus:bg-white border-b border-transparent focus:border-indigo-500 rounded px-1 py-0.5 flex-1 min-w-0" placeholder="Nome da rotina...">
+                        <input type="text" value="${escapeHtml(r.title)}" onchange="updateRoutineField('${r.id}', 'title', this.value)" class="font-bold text-xs bg-gray-50 hover:bg-gray-100 focus:bg-white border-b border-transparent focus:border-indigo-500 rounded px-1 py-0.5 flex-1 min-w-0" placeholder="Nome da rotina...">
                         <button onclick="removeRoutine('${r.id}')" class="text-xs text-gray-400 hover:text-red-500 transition shrink-0" title="Excluir rotina">🗑️</button>
                     </div>
 
@@ -1814,7 +1803,7 @@
                 days: [1],
                 time: "14:00",
                 duration: 30,
-                category: "domestico",
+                category: taskCategories['domestico'] ? 'domestico' : getDefaultTaskCategoryId(),
                 desc: "Tarefa recorrente semanal",
                 oddWeeksOnly: false
             });
@@ -3474,6 +3463,7 @@
 
         function renderSegmentsList() {
             const container = document.getElementById('segmentsListContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             for (let id in taskCategories) {
@@ -3483,18 +3473,19 @@
                 row.className = "flex items-center gap-2 p-2 bg-gray-50 border border-gray-150 rounded-lg";
 
                 let sampleDotClass = "bg-gray-500";
-                if (cat.bg.includes("bg-blue-100")) sampleDotClass = "bg-blue-500";
-                else if (cat.bg.includes("bg-purple-100")) sampleDotClass = "bg-purple-500";
-                else if (cat.bg.includes("bg-teal-100")) sampleDotClass = "bg-teal-500";
-                else if (cat.bg.includes("bg-emerald-100")) sampleDotClass = "bg-emerald-500";
-                else if (cat.bg.includes("bg-amber-100")) sampleDotClass = "bg-amber-500";
-                else if (cat.bg.includes("bg-orange-100")) sampleDotClass = "bg-orange-500";
-                else if (cat.bg.includes("bg-pink-105")) sampleDotClass = "bg-pink-500";
-                else if (cat.bg.includes("bg-gray-100")) sampleDotClass = "bg-gray-500";
+                const categoryBg = typeof cat.bg === 'string' ? cat.bg : '';
+                if (categoryBg.includes("bg-blue-100")) sampleDotClass = "bg-blue-500";
+                else if (categoryBg.includes("bg-purple-100")) sampleDotClass = "bg-purple-500";
+                else if (categoryBg.includes("bg-teal-100")) sampleDotClass = "bg-teal-500";
+                else if (categoryBg.includes("bg-emerald-100")) sampleDotClass = "bg-emerald-500";
+                else if (categoryBg.includes("bg-amber-100")) sampleDotClass = "bg-amber-500";
+                else if (categoryBg.includes("bg-orange-100")) sampleDotClass = "bg-orange-500";
+                else if (categoryBg.includes("bg-pink-105")) sampleDotClass = "bg-pink-500";
+                else if (categoryBg.includes("bg-gray-100")) sampleDotClass = "bg-gray-500";
 
                 row.innerHTML = `
                     <span class="w-3 h-3 rounded-full ${sampleDotClass} shrink-0"></span>
-                    <input type="text" value="${cat.label}" onchange="updateSegmentLabel('${id}', this.value)" class="flex-1 bg-white border border-gray-300 rounded px-2 py-0.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <input type="text" value="${escapeHtml(cat.label)}" onchange="updateSegmentLabel('${id}', this.value)" class="flex-1 bg-white border border-gray-300 rounded px-2 py-0.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500">
                     <button onclick="deleteSegment('${id}')" class="text-gray-400 hover:text-red-500 text-sm font-bold p-1" title="Excluir Segmento">🗑️</button>
                 `;
                 container.appendChild(row);
@@ -3502,7 +3493,7 @@
         }
 
         function updateSegmentLabel(id, newLabel) {
-            if (!newLabel.trim()) return;
+            if (!taskCategories[id] || !newLabel.trim()) return;
             taskCategories[id].label = newLabel.trim();
             saveTaskCategories();
 
@@ -3560,33 +3551,48 @@
             alert(`🎉 Segmento "${name}" criado com sucesso!`);
         }
 
+        function remapCategoryReferences(deletedId, fallbackId) {
+            for (let weekKey in weeklySchedule) {
+                const weekData = weeklySchedule[weekKey];
+                if (!weekData || typeof weekData !== 'object') continue;
+                for (let day in weekData) {
+                    if (!Array.isArray(weekData[day])) continue;
+                    weekData[day].forEach(task => {
+                        if (task && task.category === deletedId) task.category = fallbackId;
+                    });
+                }
+            }
+
+            for (let weekKey in weeklyProjects) {
+                const weekProjects = weeklyProjects[weekKey];
+                if (!Array.isArray(weekProjects)) continue;
+                weekProjects.forEach(project => {
+                    if (project && project.category === deletedId) project.category = fallbackId;
+                });
+            }
+            projects = weeklyProjects[selectedWeekKey] || [];
+
+            if (Array.isArray(productivityRules.routines)) {
+                productivityRules.routines.forEach(routine => {
+                    if (routine && routine.category === deletedId) routine.category = fallbackId;
+                });
+            }
+        }
+
         function deleteSegment(id) {
+            const category = taskCategories[id];
+            if (!category) return;
             if (Object.keys(taskCategories).length <= 1) {
                 alert("Deve restar pelo menos um segmento.");
                 return;
             }
 
-            if (confirm(`Deseja realmente excluir o segmento "${taskCategories[id].label}"? As tarefas deste segmento serão remapeadas.`)) {
+            if (confirm(`Deseja realmente excluir o segmento "${category.label}"? Tarefas, projetos e rotinas deste segmento serão remapeados.`)) {
                 delete taskCategories[id];
-                saveTaskCategories();
+                const fallbackId = getDefaultTaskCategoryId();
+                remapCategoryReferences(id, fallbackId);
 
-                const fallbackId = Object.keys(taskCategories)[0];
-                for (let weekKey in weeklySchedule) {
-                    const weekData = weeklySchedule[weekKey];
-                    if (weekData && typeof weekData === 'object') {
-                        for (let day in weekData) {
-                            if (Array.isArray(weekData[day])) {
-                                weekData[day] = weekData[day].map(t => {
-                                    if (t.category === id) {
-                                        t.category = fallbackId;
-                                    }
-                                    return t;
-                                });
-                            }
-                        }
-                    }
-                }
-
+                // Um único salvamento mantém categorias e referências consistentes em todos os dispositivos.
                 saveData();
                 if (typeof renderSegmentsList === 'function') renderSegmentsList();
                 updateCategoryDropdowns();
@@ -3775,17 +3781,8 @@
             };
 
             taskCategories = JSON.parse(JSON.stringify(defaultTaskCategories));
-            saveTaskCategories();
 
-            if (currentUser && db) {
-                db.collection('users').doc(currentUser.uid).set({
-                    weeklySchedule: weeklySchedule,
-                    weeklyProjects: weeklyProjects,
-                    productivityRules: productivityRules,
-                    taskCategories: taskCategories
-                }).catch(err => console.warn("Erro ao resetar no Firestore:", err));
-            }
-
+            // Salva o estado restaurado como uma única atualização sincronizada.
             saveData();
             loadConfiguracoesUI();
             renderProjects();
@@ -4168,6 +4165,8 @@
         function saveData() {
             safeSetItem('my_weekly_schedule', JSON.stringify(weeklySchedule));
             safeSetItem('my_weekly_projects', JSON.stringify(weeklyProjects));
+            safeSetItem('my_productivity_rules', JSON.stringify(productivityRules));
+            safeSetItem('my_task_categories', JSON.stringify(taskCategories));
         }
 
         function requestNotificationPermission() {
@@ -4793,6 +4792,9 @@
         // Sincronização Cloud Firestore em Tempo Real por Usuário (Multi-Dispositivo)
         let firestoreUnsubscribe = null;
         let isSyncingFromRemote = false;
+        const syncClientId = (window.crypto && typeof window.crypto.randomUUID === 'function')
+            ? window.crypto.randomUUID()
+            : `client-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
         async function syncUserDataFromCloud(uid) {
             if (!db) return;
@@ -4850,10 +4852,12 @@
                 // Se hasPendingWrites=true, o snapshot é um eco otimista do nosso próprio write local.
                 // O estado local já está correto — pular a substituição evita apagar tarefas recém-adicionadas.
                 const isLocalWrite = docSnap.metadata.hasPendingWrites;
+                const isOwnConfirmedWrite = cloudData.syncClientId === syncClientId;
 
                 isSyncingFromRemote = true;
 
-                if (!isLocalWrite) {
+                try {
+                if (!isLocalWrite && !isOwnConfirmedWrite) {
                     // Snapshot vem de outro dispositivo (sincronização real): substitui tudo
                     if (cloudData.weeklySchedule) weeklySchedule = cloudData.weeklySchedule;
                     if (cloudData.weeklyProjects) weeklyProjects = cloudData.weeklyProjects;
@@ -4878,25 +4882,65 @@
                 refreshAgendaView();
                 if (typeof renderChartsAndInsights === 'function') renderChartsAndInsights();
 
-                setTimeout(() => { isSyncingFromRemote = false; }, 150);
+                } finally {
+                    isSyncingFromRemote = false;
+                }
             }, (e) => {
                 console.warn("Erro no listener em tempo real do Firestore:", e);
             });
         }
 
-        // Atualização do saveData() para propagar alterações instantaneamente ao Firestore
+        // Fila única evita que cliques rápidos cheguem fora de ordem ao Firestore.
+        let cloudWriteQueue = Promise.resolve();
+
+        function cloneCurrentStateForCloud() {
+            return JSON.parse(JSON.stringify({
+                weeklySchedule: weeklySchedule,
+                weeklyProjects: weeklyProjects,
+                productivityRules: productivityRules,
+                taskCategories: taskCategories,
+                syncClientId: syncClientId
+            }));
+        }
+
+        function queueCloudStateSave() {
+            if (!currentUser || !db) return Promise.resolve();
+
+            const uid = currentUser.uid;
+            const stateSnapshot = cloneCurrentStateForCloud();
+            const payload = {
+                ...stateSnapshot,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            cloudWriteQueue = cloudWriteQueue
+                .catch(() => undefined)
+                .then(async () => {
+                    const docRef = db.collection('users').doc(uid);
+                    try {
+                        // update substitui cada mapa de estado por completo; assim, chaves excluídas não reaparecem.
+                        await docRef.update(payload);
+                    } catch (err) {
+                        if (err && (err.code === 'not-found' || err.code === 'firestore/not-found')) {
+                            await docRef.set(payload, { merge: true });
+                            return;
+                        }
+                        throw err;
+                    }
+                })
+                .catch(err => console.warn("Erro ao salvar no Firestore:", err));
+
+            return cloudWriteQueue;
+        }
+
+        // Propaga o estado completo e consistente para todas as sessões do mesmo usuário.
         const originalSaveData = saveData;
         saveData = function() {
             originalSaveData();
             if (currentUser && db && !isSyncingFromRemote) {
-                db.collection('users').doc(currentUser.uid).set({
-                    weeklySchedule: weeklySchedule,
-                    weeklyProjects: weeklyProjects,
-                    productivityRules: productivityRules,
-                    taskCategories: taskCategories,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }).catch(err => console.warn("Erro ao salvar no Firestore:", err));
+                return queueCloudStateSave();
             }
+            return Promise.resolve();
         };
 
         // Gerenciamento do Banner de Consentimento de Dados (LGPD/GDPR)
