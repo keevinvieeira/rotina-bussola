@@ -1006,6 +1006,96 @@
             }
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        function getDefaultTaskCategoryId() {
+            const categories = (taskCategories && typeof taskCategories === 'object') ? taskCategories : {};
+            if (categories['trabalho-pessoal']) return 'trabalho-pessoal';
+            if (categories['trabalho']) return 'trabalho';
+            return Object.keys(categories)[0] || 'trabalho';
+        }
+
+        function getTaskCategory(categoryId) {
+            const fallbackId = getDefaultTaskCategoryId();
+            return taskCategories[categoryId] || taskCategories[fallbackId] || {
+                label: 'Sem categoria',
+                bg: 'bg-gray-100 text-gray-800 border-gray-200',
+                darkBg: 'bg-gray-900/30 border-gray-500/30 text-gray-300'
+            };
+        }
+        function taskBelongsToProject(task, project) {
+            if (!task || !project) return false;
+            if (task.projectId !== undefined && task.projectId !== null && task.projectId !== '') {
+                return String(task.projectId) === String(project.id);
+            }
+            return isTitleMatching(task.title, project.text);
+        }
+
+        function ensureDaySchedule(day) {
+            const targetDay = String(day);
+            if (!weeklySchedule[selectedWeekKey]) {
+                weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+            }
+            if (!Array.isArray(weeklySchedule[selectedWeekKey][targetDay])) {
+                weeklySchedule[selectedWeekKey][targetDay] = [];
+            }
+            return { targetDay, dayTasks: weeklySchedule[selectedWeekKey][targetDay] };
+        }
+
+        function calculateTaskTimeRange(dayTasks, requestedStart, durationMinutes) {
+            let startTime = (requestedStart || '').trim();
+            if (!startTime) {
+                const orderedTasks = [...dayTasks].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+                const lastTask = orderedTasks[orderedTasks.length - 1];
+                startTime = lastTask ? (lastTask.timeEnd || lastTask.time || '08:00') : '08:00';
+            }
+
+            const [hours, minutes] = startTime.split(':').map(Number);
+            if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+                throw new Error('Horario inicial invalido.');
+            }
+            const totalMinutes = (hours * 60) + minutes + durationMinutes;
+            return {
+                startTime,
+                endTime: `${String(Math.floor(totalMinutes / 60) % 24).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}`
+            };
+        }
+
+        function createTaskInSchedule({ day, title, desc, category, duration = 60, requestedStart = '', projectId = null }) {
+            const cleanTitle = String(title || '').trim();
+            if (!cleanTitle) throw new Error('O titulo da tarefa e obrigatorio.');
+
+            const durationMinutes = Math.max(1, parseInt(duration, 10) || 60);
+            const { dayTasks } = ensureDaySchedule(day);
+            const { startTime, endTime } = calculateTaskTimeRange(dayTasks, requestedStart, durationMinutes);
+            const categoryId = taskCategories[category] ? category : getDefaultTaskCategoryId();
+            const task = {
+                id: 'task-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+                time: startTime,
+                timeEnd: endTime,
+                duration: durationMinutes,
+                title: cleanTitle,
+                desc: String(desc || '').trim() || 'Sem descricao',
+                done: false,
+                status: 'pending',
+                category: categoryId,
+                justification: '',
+                completion: 'nao',
+                difficulty: '',
+                notes: ''
+            };
+            if (projectId !== null && projectId !== undefined && projectId !== '') {
+                task.projectId = projectId;
+            }
+            dayTasks.push(task);
+            return task;
+        }
         function isTitleMatching(t1, t2) {
             if (!t1 || !t2) return false;
             const clean = (s) => s.toLowerCase()
@@ -1015,6 +1105,7 @@
                                   .trim();
             const c1 = clean(t1);
             const c2 = clean(t2);
+            if (!c1 || !c2) return false;
             return c1 === c2 || c1.includes(c2) || c2.includes(c1);
         }
 
@@ -1059,8 +1150,8 @@
         }
 
         function getWeekNumber(weekKey) {
-            const match = weekKey.match(/-W(\d+)/);
-            return match ? parseInt(match[1], 10) : 28;
+            const match = String(weekKey || '').match(/^(\d{4})-W(\d{1,2})$/);
+            return match ? (parseInt(match[1], 10) * 100) + parseInt(match[2], 10) : 0;
         }
 
         function generateInitialProjectsForWeek(weekKey) {
@@ -1129,10 +1220,13 @@
         }
 
         function ensureWeekExists(weekKey) {
-            if (!weeklySchedule[weekKey]) {
+            if (!weeklySchedule[weekKey] || typeof weeklySchedule[weekKey] !== 'object') {
                 weeklySchedule[weekKey] = generateInitialScheduleForWeek(weekKey);
             }
-            if (!weeklyProjects[weekKey]) {
+            [1, 2, 3, 4, 5, 6, 0].forEach(day => {
+                if (!Array.isArray(weeklySchedule[weekKey][day])) weeklySchedule[weekKey][day] = [];
+            });
+            if (!Array.isArray(weeklyProjects[weekKey])) {
                 const prevWeekKey = getPreviousWeekKey(weekKey);
                 if (weeklyProjects[prevWeekKey]) {
                     // Copia o estado dos projetos da semana anterior cronologicamente para propagação contínua
@@ -1186,22 +1280,7 @@
             }
 
             // Garante a migração do projeto id 10 ("Criar site da imobiliária da Mãe") para concluído nas semanas salvas
-            for (let weekKey in weeklyProjects) {
-                if (Array.isArray(weeklyProjects[weekKey])) {
-                    weeklyProjects[weekKey] = weeklyProjects[weekKey].map(p => {
-                        if (p.id === 10 || (p.text && p.text.toLowerCase().includes("site da imobiliária da mãe"))) {
-                            if (!p.done) {
-                                p.done = true;
-                                migrated = true;
-                            }
-                        }
-                        return p;
-                    });
-                }
-            }
-
             ensureWeekExists(selectedWeekKey);
-            purgeImplicitTasks();
 
             if (migrated) {
                 saveData();
@@ -1379,74 +1458,20 @@
                             }
                             updated = true;
                         }
+                        if (!taskCategories[task.category]) {
+                            task.category = getDefaultTaskCategoryId();
+                            updated = true;
+                        }
+                        if (!task.time) {
+                            task.time = '08:00';
+                            updated = true;
+                        }
                         if (updated) migrated = true;
                         return task;
                     });
                 }
             }
-            // Aplica ajuste específico de quarta/sexta em todas as semanas salvas
-            let weekAdjusted = false;
-            for (let weekKey in weeklySchedule) {
-                const weekData = weeklySchedule[weekKey];
-                if (!weekData || typeof weekData !== 'object') continue;
-
-                // 1. Quarta-feira (dia 3)
-                if (weekData[3]) {
-                    let crmTask = weekData[3].find(t => t.id === "s3-6");
-                    if (crmTask && crmTask.timeEnd === "18:00") {
-                        crmTask.timeEnd = "17:00";
-                        weekAdjusted = true;
-                    }
-
-                    let hasBathroom = weekData[3].some(t => t.id === "s3-bathroom" || t.title === "Lavar o Banheiro");
-                    if (!hasBathroom) {
-                        weekData[3].push({
-                            id: "s3-bathroom",
-                            time: "17:00",
-                            timeEnd: "18:00",
-                            title: "Lavar o Banheiro",
-                            desc: "Tarefa doméstica quinzenal",
-                            done: false,
-                            status: "pending",
-                            category: "domestico",
-                            justification: "",
-                            completion: "nao",
-                            difficulty: "",
-                            notes: ""
-                        });
-                        weekAdjusted = true;
-                    }
-                }
-
-                // 2. Sexta-feira (dia 5)
-                if (weekData[5]) {
-                    const originalLength = weekData[5].length;
-                    weekData[5] = weekData[5].filter(t => t.id !== "s5-6" && t.title !== "Lavar o Banheiro");
-                    if (weekData[5].length !== originalLength) {
-                        weekAdjusted = true;
-                    }
-
-                    let hasFounder = weekData[5].some(t => t.id === "s5-founderpm" || t.title === "Curso FounderPM");
-                    if (!hasFounder) {
-                        weekData[5].push({
-                            id: "s5-founderpm",
-                            time: "16:00",
-                            timeEnd: "17:00",
-                            title: "Curso FounderPM",
-                            desc: "Estudo - 40 min",
-                            done: false,
-                            status: "pending",
-                            category: "educacao",
-                            justification: "",
-                            completion: "nao",
-                            difficulty: "",
-                            notes: ""
-                        });
-                        weekAdjusted = true;
-                    }
-                }
-            }
-            if (migrated || weekAdjusted) {
+            if (migrated) {
                 saveData();
             }
         }
@@ -1568,38 +1593,6 @@
             // Executa a migração no início
             migrateScheduleData();
 
-            // Ajuste específico solicitado pelo usuário para Sexta-Feira na Semana 28:
-            if (selectedWeekKey === '2026-W28' && weeklySchedule['2026-W28'] && weeklySchedule['2026-W28'][5]) {
-                // 1. Procurar a tarefa "Lavar o Banheiro" e marcá-la como falha (Adiado para semana que vem)
-                let bathroomTask = weeklySchedule['2026-W28'][5].find(t => t.title === "Lavar o Banheiro" || t.id === "s5-6");
-                if (bathroomTask && bathroomTask.status !== "failed" && !bathroomTask.done) {
-                    bathroomTask.status = "failed";
-                    bathroomTask.done = false;
-                    bathroomTask.justification = "Adiado para a semana que vem";
-                    bathroomTask.completion = "nao";
-                }
-
-                // 2. Adicionar a tarefa "Retirar o lixo e lavar a louça" se ela ainda não existir
-                let trashTaskExists = weeklySchedule['2026-W28'][5].some(t => t.title.toLowerCase().includes("retirar o lixo"));
-                if (!trashTaskExists) {
-                    weeklySchedule['2026-W28'][5].push({
-                        id: "custom-trash-" + Date.now(),
-                        time: "18:30",
-                        timeEnd: "19:00",
-                        title: "Retirar o lixo e lavar a louça",
-                        desc: "Tarefa doméstica diária",
-                        done: false,
-                        status: "pending",
-                        category: "domestico",
-                        justification: "",
-                        completion: "nao",
-                        difficulty: "",
-                        notes: ""
-                    });
-                }
-                saveData();
-            }
-
             const today = new Date().getDay(); // 0=Dom, 1=Seg...
             document.getElementById('daySelector').value = today;
 
@@ -1625,7 +1618,7 @@
             if (Notification.permission === "default") {
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
-                        const btn = document.getElementById('btnNotif');
+                        const btn = document.getElementById('cfgBtnNotif');
                         if (btn) {
                             btn.innerText = "🔔 Notificações Ativas";
                             btn.disabled = true;
@@ -1633,7 +1626,7 @@
                     }
                 });
             } else if (Notification.permission === "granted") {
-                const btn = document.getElementById('btnNotif');
+                const btn = document.getElementById('cfgBtnNotif');
                 if (btn) {
                     btn.innerText = "🔔 Notificações Ativas";
                     btn.disabled = true;
@@ -1941,6 +1934,7 @@
             let activeCount = 0;
 
             projects.forEach(project => {
+                const projectIdJs = JSON.stringify(project.id);
                 const itemDiv = document.createElement('div');
                 itemDiv.className = "flex flex-col p-2.5 hover:bg-gray-50 border border-gray-100 rounded-lg transition group text-sm shadow-sm";
 
@@ -1950,8 +1944,8 @@
                 }
 
                 const actionButton = isAndamento
-                    ? `<button onclick="changeProjectStatus(${project.id}, 'fila')" title="Mover para a fila" class="text-xs text-gray-400 hover:text-amber-500 transition">⏸️</button>`
-                    : `<button onclick="changeProjectStatus(${project.id}, 'andamento')" title="Iniciar Projeto" class="text-xs text-gray-400 hover:text-emerald-500 transition">🚀</button>`;
+                    ? `<button onclick="changeProjectStatus(${projectIdJs}, 'fila')" title="Mover para a fila" class="text-xs text-gray-400 hover:text-amber-500 transition">⏸️</button>`
+                    : `<button onclick="changeProjectStatus(${projectIdJs}, 'andamento')" title="Iniciar Projeto" class="text-xs text-gray-400 hover:text-emerald-500 transition">🚀</button>`;
 
                 let projectCategoryOptionsHTML = `<option value="" ${!project.category ? "selected" : ""}>Nenhum</option>`;
                 for (let catId in taskCategories) {
@@ -1968,9 +1962,8 @@
                     const weekData = weeklySchedule[selectedWeekKey];
                     if (weekData) {
                         for (let d in weekData) {
-                            const hasSameTitle = weekData[d].some(t =>
-                                t.projectId === project.id || isTitleMatching(t.title, project.text)
-                            );
+                            const dayTasks = Array.isArray(weekData[d]) ? weekData[d] : [];
+                            const hasSameTitle = dayTasks.some(t => taskBelongsToProject(t, project));
                             if (hasSameTitle) {
                                 assignedDays.add(parseInt(d, 10));
                             }
@@ -1986,9 +1979,9 @@
                 daysOrderList.forEach(d => {
                     const isActive = assignedDays.has(d);
                     if (isActive) {
-                        projectDaysVisualHTML += `<span onclick="event.stopPropagation(); toggleProjectDay(${project.id}, ${d})" class="w-4.5 h-4.5 rounded-full bg-indigo-600 text-white font-extrabold text-[8px] flex items-center justify-center shadow-xs cursor-pointer hover:bg-indigo-700 transition" style="width: 16px; height: 16px;" title="${daysFullNames[d]} (Clique para remover)">${daysLetters[d]}</span>`;
+                        projectDaysVisualHTML += `<span onclick="event.stopPropagation(); toggleProjectDay(${projectIdJs}, ${d})" class="w-4.5 h-4.5 rounded-full bg-indigo-600 text-white font-extrabold text-[8px] flex items-center justify-center shadow-xs cursor-pointer hover:bg-indigo-700 transition" style="width: 16px; height: 16px;" title="${daysFullNames[d]} (Clique para remover)">${daysLetters[d]}</span>`;
                     } else {
-                        projectDaysVisualHTML += `<span onclick="event.stopPropagation(); toggleProjectDay(${project.id}, ${d})" class="w-4.5 h-4.5 rounded-full bg-gray-250 text-gray-450 text-[8px] flex items-center justify-center cursor-pointer hover:bg-gray-300 transition" style="width: 16px; height: 16px;" title="${daysFullNames[d]} (Clique para agendar)">${daysLetters[d]}</span>`;
+                        projectDaysVisualHTML += `<span onclick="event.stopPropagation(); toggleProjectDay(${projectIdJs}, ${d})" class="w-4.5 h-4.5 rounded-full bg-gray-250 text-gray-450 text-[8px] flex items-center justify-center cursor-pointer hover:bg-gray-300 transition" style="width: 16px; height: 16px;" title="${daysFullNames[d]} (Clique para agendar)">${daysLetters[d]}</span>`;
                     }
                 });
                 projectDaysVisualHTML += `</div>`;
@@ -1996,9 +1989,9 @@
                 itemDiv.innerHTML = `
                     <div class="flex items-start justify-between gap-2 w-full">
                         <div class="flex items-start gap-2 max-w-[80%] flex-1 min-w-0">
-                            <input type="checkbox" id="proj-${project.id}" ${project.done ? 'checked' : ''} onchange="toggleProject(${project.id})" class="mt-1 h-3.5 w-3.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 shrink-0">
+                            <input type="checkbox" id="proj-${project.id}" ${project.done ? 'checked' : ''} onchange="toggleProject(${projectIdJs})" class="mt-1 h-3.5 w-3.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 shrink-0">
                             <div class="flex flex-col min-w-0 flex-1">
-                                <label for="proj-${project.id}" class="${project.done ? 'line-through text-gray-400' : 'text-gray-700 font-bold'} cursor-pointer select-none leading-snug break-words">${project.text}</label>
+                                <label for="proj-${project.id}" class="${project.done ? 'line-through text-gray-400' : 'text-gray-700 font-bold'} cursor-pointer select-none leading-snug break-words">${escapeHtml(project.text)}</label>
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     ${catBadge}
                                     ${projectDaysVisualHTML}
@@ -2006,9 +1999,9 @@
                             </div>
                         </div>
                         <div class="flex gap-2 items-center shrink-0">
-                            <button onclick="toggleProjectDetails(${project.id})" title="Detalhes do Projeto" class="text-gray-400 hover:text-indigo-600 text-xs transition">📝</button>
+                            <button onclick="toggleProjectDetails(${projectIdJs})" title="Detalhes do Projeto" class="text-gray-400 hover:text-indigo-600 text-xs transition">📝</button>
                             ${actionButton}
-                            <button onclick="deleteProject(${project.id})" title="Excluir" class="text-gray-300 hover:text-red-500 text-xs hidden group-hover:block transition">🗑️</button>
+                            <button onclick="deleteProject(${projectIdJs})" title="Excluir" class="text-gray-300 hover:text-red-500 text-xs hidden group-hover:block transition">🗑️</button>
                         </div>
                     </div>
 
@@ -2016,18 +2009,18 @@
                     <div id="proj-details-${project.id}" class="mt-2.5 pt-2.5 border-t border-gray-250 text-[11px] text-gray-600 ${openProjectPanelIds.has(project.id) ? '' : 'hidden'} flex flex-col gap-2">
                         <div>
                             <label class="block text-[9px] font-extrabold uppercase text-gray-400 tracking-wider mb-0.5">Nome do Projeto</label>
-                            <input type="text" value="${project.text}" oninput="updateProjectTitleLive(${project.id}, this.value)" onchange="updateProjectField(${project.id}, 'text', this.value)" onblur="updateProjectField(${project.id}, 'text', this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
+                            <input type="text" value="${escapeHtml(project.text)}" oninput="updateProjectTitleLive(${projectIdJs}, this.value)" onchange="updateProjectField(${projectIdJs}, 'text', this.value)" onblur="updateProjectField(${projectIdJs}, 'text', this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold">
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[9px] font-extrabold uppercase text-gray-400 tracking-wider mb-0.5">Segmento (Categoria)</label>
-                                <select onchange="updateProjectField(${project.id}, 'category', this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <select onchange="updateProjectField(${projectIdJs}, 'category', this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     ${projectCategoryOptionsHTML}
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-[9px] font-extrabold uppercase text-gray-400 tracking-wider mb-0.5">Frequência Semanal</label>
-                                <select onchange="updateProjectFrequency(${project.id}, this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <select onchange="updateProjectFrequency(${projectIdJs}, this.value)" class="w-full bg-white border border-gray-300 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     <option value="" ${!project.frequency ? 'selected' : ''}>Não agendar</option>
                                     <option value="1" ${project.frequency === '1' ? 'selected' : ''}>1x na semana</option>
                                     <option value="2" ${project.frequency === '2' ? 'selected' : ''}>2x na semana</option>
@@ -2039,7 +2032,7 @@
                         </div>
                         <div>
                             <label class="block text-[9px] font-extrabold uppercase text-gray-400 tracking-wider mb-0.5">Resumo / O que vou fazer</label>
-                            <textarea rows="2" onblur="updateProjectField(${project.id}, 'desc', this.value)" placeholder="Descreva os objetivos do projeto..." class="w-full bg-white border border-gray-300 rounded p-1.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y">${project.desc || ''}</textarea>
+                            <textarea rows="2" onblur="updateProjectField(${projectIdJs}, 'desc', this.value)" placeholder="Descreva os objetivos do projeto..." class="w-full bg-white border border-gray-300 rounded p-1.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y">${escapeHtml(project.desc || '')}</textarea>
                         </div>
                     </div>
                 `;
@@ -2104,6 +2097,7 @@
             const text = input.value.trim();
             if (!text) return;
 
+            ensureWeekExists(selectedWeekKey);
             const newProject = {
                 id: Date.now(),
                 text: text,
@@ -2259,7 +2253,7 @@
         }
 
         function autoScheduleProjectTasks(projectId) {
-            const project = projects.find(p => p.id === projectId);
+            const project = projects.find(p => String(p.id) === String(projectId));
             if (!project || !project.frequency) return;
 
             const targetFreq = parseInt(project.frequency, 10);
@@ -2405,42 +2399,17 @@
         }
 
         function createTaskForProjectOnDay(project, day) {
-            const targetDay = String(day);
-            if (!weeklySchedule[selectedWeekKey]) {
-                weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
-            }
-            if (!weeklySchedule[selectedWeekKey][targetDay]) {
-                weeklySchedule[selectedWeekKey][targetDay] = [];
-            }
-
-            const dayTasks = weeklySchedule[selectedWeekKey][targetDay];
-            const durationMinutes = 60;
-            const orderedTasks = [...dayTasks].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-            const lastTask = orderedTasks[orderedTasks.length - 1];
-            const startTime = lastTask ? (lastTask.timeEnd || lastTask.time || "08:00") : "08:00";
-            const [hours, minutes] = startTime.split(':').map(Number);
-            const totalMinutes = ((hours || 0) * 60) + (minutes || 0) + durationMinutes;
-            const endTime = `${String(Math.floor(totalMinutes / 60) % 24).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}`;
-
-            dayTasks.push({
-                id: "project-" + Date.now() + Math.random(),
-                projectId: project.id,
-                time: startTime,
-                timeEnd: endTime,
-                duration: durationMinutes,
+            return createTaskInSchedule({
+                day,
                 title: project.text,
                 desc: project.desc || `Foco em: ${project.text}`,
-                done: false,
-                status: "pending",
-                category: project.category || 'trabalho-pessoal',
-                justification: "",
-                completion: "nao",
-                difficulty: "",
-                notes: ""
+                category: project.category,
+                duration: 60,
+                projectId: project.id
             });
         }
         function toggleProjectDay(projectId, day) {
-            const project = projects.find(p => p.id === projectId);
+            const project = projects.find(p => String(p.id) === String(projectId));
             if (!project) return;
 
             // Regra Estrita: Só pode agendar na semana se o projeto estiver em andamento
@@ -2464,15 +2433,11 @@
             }
             const weekData = weeklySchedule[selectedWeekKey];
 
-            const existingTasks = (weekData[day] || []).filter(t =>
-                t.projectId === projectId || isTitleMatching(t.title, project.text)
-            );
+            const existingTasks = (weekData[day] || []).filter(t => taskBelongsToProject(t, project));
 
             if (existingTasks.length > 0) {
                 // Se já existe, remove
-                weekData[day] = weekData[day].filter(t =>
-                    t.projectId !== projectId && !isTitleMatching(t.title, project.text)
-                );
+                weekData[day] = weekData[day].filter(t => !taskBelongsToProject(t, project));
             } else {
                 // Create the linked task on the clicked day through the shared task flow.
                 createTaskForProjectOnDay(project, day);
@@ -2481,9 +2446,7 @@
             let newFreq = 0;
             const weekdaysOnly = [1, 2, 3, 4, 5];
             for (let d of weekdaysOnly) {
-                const hasTask = (weekData[d] || []).some(t =>
-                    t.projectId === projectId || isTitleMatching(t.title, project.text)
-                );
+                const hasTask = (weekData[d] || []).some(t => taskBelongsToProject(t, project));
                 if (hasTask) newFreq++;
             }
             project.frequency = String(newFreq);
@@ -2492,6 +2455,9 @@
             refreshAgendaView();
         }
 
+        function toggleTaskAssignedDay(sourceDay, taskId, targetDay) {
+            toggleTaskDay(taskId, targetDay);
+        }
         function toggleTaskDay(taskId, day) {
             if (!weeklySchedule[selectedWeekKey]) {
                 weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
@@ -2885,7 +2851,7 @@
                 if (statusFilter === 'pending' && task.done) return false;
                 if (statusFilter === 'completed' && !task.done) return false;
                 if (searchTerm) {
-                    const haystack = `${task.title} ${task.desc} ${task.time}`.toLowerCase();
+                    const haystack = `${task.title || ''} ${task.desc || ''} ${task.time || ''}`.toLowerCase();
                     if (!haystack.includes(searchTerm)) return false;
                 }
                 return true;
@@ -2893,7 +2859,8 @@
         }
 
         function renderTaskCard(day, task) {
-            const cat = taskCategories[task.category] || taskCategories['trabalho-pessoal'];
+            task = (task && typeof task === 'object') ? task : {};
+            const cat = getTaskCategory(task.category);
             const isPanelOpen = openDetailsPanelIds.has(task.id);
             const detailsHiddenClass = isPanelOpen ? '' : 'hidden';
             const chevronChar = isPanelOpen ? '▲' : '▼';
@@ -2963,8 +2930,8 @@
                                 <span id="card-badge-${task.id}" class="px-1.5 py-0.5 text-[9px] font-bold rounded-full ${cat.bg} border shrink-0">${cat.label}</span>
                                 ${task.status === 'failed' && task.justification ? `<span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[9px] font-bold border border-amber-200">⚠️ Justificado</span>` : ''}
                             </div>
-                            <h4 id="card-title-${task.id}" class="font-bold text-sm md:text-base ${titleColor} ${textMuted} mt-0.5 truncate">${task.title}</h4>
-                            <p id="card-desc-${task.id}" class="text-xs ${task.status === 'success' ? 'text-emerald-600/70' : task.status === 'failed' ? 'text-rose-600/70' : 'text-gray-500'} truncate">${task.desc}</p>
+                            <h4 id="card-title-${task.id}" class="font-bold text-sm md:text-base ${titleColor} ${textMuted} mt-0.5 truncate">${escapeHtml(task.title)}</h4>
+                            <p id="card-desc-${task.id}" class="text-xs ${task.status === 'success' ? 'text-emerald-600/70' : task.status === 'failed' ? 'text-rose-600/70' : 'text-gray-500'} truncate">${escapeHtml(task.desc)}</p>
                             ${daysVisualHTML}
                         </div>
                     </div>
@@ -3001,7 +2968,7 @@
                             </div>
                             <div>
                                 <label class="block font-semibold text-gray-600 mb-0.5">Título:</label>
-                                <input type="text" value="${task.title || ''}" oninput="updateTaskTitleLive('${day}', '${task.id}', this.value)" onchange="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" onblur="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                                <input type="text" value="${escapeHtml(task.title || '')}" oninput="updateTaskTitleLive('${day}', '${task.id}', this.value)" onchange="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" onblur="saveTaskDetails('${day}', '${task.id}', 'title', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                             </div>
                             <div>
                                 <label class="block font-semibold text-gray-600 mb-0.5">Segmento (Categoria):</label>
@@ -3012,14 +2979,14 @@
                         </div>
                         <div>
                             <label class="block font-semibold text-gray-600 mb-0.5">Descrição:</label>
-                            <input type="text" value="${task.desc || ''}" oninput="updateTaskDescLive('${day}', '${task.id}', this.value)" onchange="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" onblur="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                            <input type="text" value="${escapeHtml(task.desc || '')}" oninput="updateTaskDescLive('${day}', '${task.id}', this.value)" onchange="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" onblur="saveTaskDetails('${day}', '${task.id}', 'desc', this.value)" class="w-full bg-white border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                         </div>
                     </div>
 
                     <!-- Justificativa -->
                     <div class="mb-3">
                         <label class="block font-bold text-gray-655 mb-1">Justificativa (Por que não foi possível realizar?):</label>
-                        <input type="text" id="justif-${task.id}" value="${task.justification || ''}" onblur="saveTaskDetails('${day}', '${task.id}', 'justification', this.value)" placeholder="Descreva o motivo ou impedimento..." class="w-full bg-gray-50 border border-gray-300 rounded px-2.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition">
+                        <input type="text" id="justif-${task.id}" value="${escapeHtml(task.justification || '')}" onblur="saveTaskDetails('${day}', '${task.id}', 'justification', this.value)" placeholder="Descreva o motivo ou impedimento..." class="w-full bg-gray-50 border border-gray-300 rounded px-2.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition">
                     </div>
 
                     <!-- Progresso e Dificuldade -->
@@ -3046,7 +3013,7 @@
                     <!-- Caixa de Comentários / Anotações -->
                     <div>
                         <label class="block font-bold text-gray-655 mb-1">Comentários (O que estava fazendo, onde parei e próximos passos):</label>
-                        <textarea id="notes-${task.id}" rows="2" onblur="saveTaskDetails('${day}', '${task.id}', 'notes', this.value)" placeholder="O que eu estava fazendo? Onde parei? O que preciso para continuar?..." class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition h-20 resize-y">${task.notes || ''}</textarea>
+                        <textarea id="notes-${task.id}" rows="2" onblur="saveTaskDetails('${day}', '${task.id}', 'notes', this.value)" placeholder="O que eu estava fazendo? Onde parei? O que preciso para continuar?..." class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition h-20 resize-y">${escapeHtml(task.notes || '')}</textarea>
                     </div>
                 </div>
             `;
@@ -3102,9 +3069,10 @@
         }
 
         function duplicateDailyTask(day, id) {
-            const index = weeklySchedule[selectedWeekKey][day].findIndex(t => t.id === id);
+            const { dayTasks } = ensureDaySchedule(day);
+            const index = dayTasks.findIndex(t => t.id === id);
             if (index === -1) return;
-            const taskToClone = weeklySchedule[selectedWeekKey][day][index];
+            const taskToClone = dayTasks[index];
             const clonedTask = {
                 ...taskToClone,
                 id: "custom-" + Date.now() + Math.random(),
@@ -3116,7 +3084,7 @@
                 difficulty: "",
                 notes: ""
             };
-            weeklySchedule[selectedWeekKey][day].splice(index + 1, 0, clonedTask);
+            dayTasks.splice(index + 1, 0, clonedTask);
             saveData();
             refreshAgendaView();
         }
@@ -3133,7 +3101,8 @@
         });
 
         function updateTaskStatus(day, id, newStatus) {
-            weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task => {
+            const { targetDay, dayTasks } = ensureDaySchedule(day);
+            weeklySchedule[selectedWeekKey][targetDay] = dayTasks.map(task => {
                 if (task.id === id) {
                     const nextStatus = task.status === newStatus ? 'pending' : newStatus;
 
@@ -3196,7 +3165,10 @@
         }
 
         function saveTaskDetails(day, id, field, value) {
-            const taskObj = weeklySchedule[selectedWeekKey][day].find(t => t.id === id);
+            const { targetDay, dayTasks } = ensureDaySchedule(day);
+            day = targetDay;
+            const taskObj = dayTasks.find(t => t.id === id);
+            if (!taskObj) return;
             const taskTitle = taskObj ? taskObj.title : "";
 
             if (field === 'duration') {
@@ -3289,7 +3261,7 @@
             } else if (field === 'category') {
                 const el = document.getElementById(`card-badge-${id}`);
                 if (el) {
-                    const cat = taskCategories[value] || taskCategories['trabalho-pessoal'];
+                    const cat = getTaskCategory(value);
                     el.innerText = cat.label;
                     el.className = `px-1.5 py-0.5 text-[9px] font-bold rounded-full ${cat.bg} border shrink-0`;
                 }
@@ -3308,7 +3280,7 @@
             let totalAll = 0;
 
             daysOrder.forEach(day => {
-                const allTasks = weeklySchedule[selectedWeekKey][day] || [];
+                const allTasks = (weeklySchedule[selectedWeekKey] && Array.isArray(weeklySchedule[selectedWeekKey][day])) ? weeklySchedule[selectedWeekKey][day] : [];
                 totalAll += allTasks.length;
                 const tasks = filterWeeklyTasks([...allTasks].sort((a, b) => a.time.localeCompare(b.time)));
                 totalFiltered += tasks.length;
@@ -3361,7 +3333,7 @@
             timeline.innerHTML = '';
 
             const tasks = (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][selectedDay]) || [];
-            tasks.sort((a, b) => a.time.localeCompare(b.time));
+            tasks.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
             if (tasks.length === 0) {
                 timeline.innerHTML = '<p class="text-gray-500 text-sm">Sem compromissos fixos agendados para este dia.</p>';
@@ -3386,6 +3358,7 @@
         }
 
         function checkTimeOverlaps(day, excludeTaskId, newStartStr, newEndStr) {
+            ensureDaySchedule(day);
             if (!newStartStr) return false;
             const newStart = timeToMinutes(newStartStr, false);
             const newEnd = timeToMinutes(newEndStr || newStartStr, true);
@@ -3424,53 +3397,14 @@
                     return;
                 }
 
-                let startTime = timeInput;
-                if (!startTime) {
-                    const existing = (weeklySchedule[selectedWeekKey] && weeklySchedule[selectedWeekKey][selectedDay]) || [];
-                    if (existing.length > 0) {
-                        const lastTask = existing[existing.length - 1];
-                        startTime = lastTask.timeEnd || lastTask.time || "08:00";
-                    } else {
-                        startTime = "08:00";
-                    }
-                }
-
-                let endTime = startTime;
-                try {
-                    const parts = startTime.split(':');
-                    const h = parseInt(parts[0], 10) || 8;
-                    const m = parseInt(parts[1], 10) || 0;
-                    const totalMins = h * 60 + m + durationMinutes;
-                    const endH = String(Math.floor(totalMins / 60) % 24).padStart(2, '0');
-                    const endM = String(totalMins % 60).padStart(2, '0');
-                    endTime = `${endH}:${endM}`;
-                } catch(e) {
-                    endTime = startTime;
-                }
-
-                const newTask = {
-                    id: "custom-" + Date.now(),
-                    time: startTime,
-                    timeEnd: endTime,
+                const newTask = createTaskInSchedule({
+                    day: selectedDay,
+                    title,
+                    desc,
+                    category,
                     duration: durationMinutes,
-                    title: title,
-                    desc: desc,
-                    done: false,
-                    status: "pending",
-                    category: category,
-                    justification: "",
-                    completion: "nao",
-                    difficulty: "",
-                    notes: ""
-                };
-
-                if (!weeklySchedule[selectedWeekKey]) {
-                    weeklySchedule[selectedWeekKey] = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
-                }
-                if (!weeklySchedule[selectedWeekKey][selectedDay]) {
-                    weeklySchedule[selectedWeekKey][selectedDay] = [];
-                }
-                weeklySchedule[selectedWeekKey][selectedDay].push(newTask);
+                    requestedStart: timeInput
+                });
                 saveData();
                 refreshAgendaView();
 
@@ -3481,12 +3415,13 @@
                 if (detailsEl) detailsEl.open = false;
             } catch(error) {
                 console.error("Erro ao adicionar tarefa:", error);
-                alert("Ocorreu um erro ao tentar salvar a tarefa. Por favor, atualize a página e tente novamente.");
+                alert(`Nao foi possivel criar a tarefa: ${error.message || 'erro inesperado'}.`);
             }
         }
 
         function toggleDailyTask(day, id) {
-            weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].map(task =>
+            const { targetDay, dayTasks } = ensureDaySchedule(day);
+            weeklySchedule[selectedWeekKey][targetDay] = dayTasks.map(task =>
                 task.id === id ? { ...task, done: !task.done } : task
             );
             saveData();
@@ -3495,7 +3430,8 @@
 
         function deleteDailyTask(day, id) {
             if (confirm("Deseja realmente remover esta tarefa da agenda?")) {
-                weeklySchedule[selectedWeekKey][day] = weeklySchedule[selectedWeekKey][day].filter(task => task.id !== id);
+                const { targetDay, dayTasks } = ensureDaySchedule(day);
+                weeklySchedule[selectedWeekKey][targetDay] = dayTasks.filter(task => task.id !== id);
                 saveData();
                 refreshAgendaView();
             }
@@ -3720,6 +3656,7 @@
                     const currentWeek = getWeekKey(new Date());
                     weeklyProjects[currentWeek] = Array.isArray(parsed.projects) ? parsed.projects : defaultProjects;
                     ensureWeekExists(selectedWeekKey);
+                    migrateScheduleData();
                 } else {
                     throw new Error("Formato inválido");
                 }
@@ -4184,7 +4121,7 @@
                     const minsTotal = timeByCategory[catKey];
                     if (minsTotal > 0) {
                         hasTimeData = true;
-                        const cat = taskCategories[catKey] || taskCategories['trabalho-pessoal'];
+                        const cat = getTaskCategory(catKey);
 
                         let barColor = 'bg-gray-500';
                         if (cat && cat.bg) {
@@ -4240,8 +4177,8 @@
             }
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
-                    document.getElementById('btnNotif').innerText = "🔔 Notificações Ativas";
-                    document.getElementById('btnNotif').disabled = true;
+                    document.getElementById('cfgBtnNotif').innerText = "🔔 Notificações Ativas";
+                    document.getElementById('cfgBtnNotif').disabled = true;
                     new Notification("Tudo Pronto!", { body: "Bússola está conectado e enviará notificações de tarefas." });
                 }
             });
@@ -4327,7 +4264,7 @@
             const modal = document.getElementById('modalTaskAlert');
             if (!modal) return;
 
-            const cat = taskCategories[task.category] || taskCategories['trabalho-pessoal'];
+            const cat = getTaskCategory(task.category);
 
             const badge = document.getElementById('alertTaskCategory');
             badge.innerText = cat.label;
@@ -4787,6 +4724,9 @@
             }
         }
 
+        function handleLogoutSubmit() {
+            return logoutUser();
+        }
         async function logoutUser() {
             if (!confirm("🚪 Tem certeza de que deseja encerrar a sua sessão e sair da Bússola?")) {
                 return;
@@ -4924,6 +4864,8 @@
                     ensureWeekExists(selectedWeekKey);
                 }
 
+                ensureWeekExists(selectedWeekKey);
+                migrateScheduleData();
                 // Sincroniza cópia local no localStorage para acesso offline/F5 rápido
                 safeSetItem('my_weekly_schedule', JSON.stringify(weeklySchedule));
                 safeSetItem('my_weekly_projects', JSON.stringify(weeklyProjects));
