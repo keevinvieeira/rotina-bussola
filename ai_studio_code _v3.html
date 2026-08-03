@@ -455,6 +455,7 @@
                 align-items: stretch !important;
             }
 
+            .project-card-header,
             .task-card-header {
                 flex-direction: column !important;
             }
@@ -525,11 +526,22 @@
             }
 
             .project-card-header > div:first-child {
-                max-width: calc(100% - 120px) !important;
+                width: 100%;
+                max-width: 100% !important;
             }
 
             .project-card-actions {
-                gap: 0.15rem !important;
+                width: 100%;
+                justify-content: flex-end;
+                gap: 0.25rem !important;
+                margin-top: 0.55rem;
+                padding-top: 0.55rem;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .project-days-row {
+                width: 100%;
+                justify-content: space-between;
             }
 
             .routine-card > .flex,
