@@ -38,6 +38,689 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        :root {
+            --mobile-nav-height: 74px;
+            --mobile-header-height: 76px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        button, input, select, textarea, summary {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, summary {
+            touch-action: manipulation;
+        }
+
+        .app-tab-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+
+        #appMainContent button:focus-visible,
+        #appMainContent summary:focus-visible {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+
+        .app-tab-button:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.9) !important;
+            outline-offset: -3px !important;
+        }
+
+        .tab-label-short,
+        .mobile-section-nav {
+            display: none;
+        }
+
+        @media (max-width: 1180px) {
+            html {
+                scroll-padding-bottom: calc(var(--mobile-nav-height) + 20px);
+            }
+
+            #appMainContent {
+                padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom) + 22px) !important;
+            }
+
+            .app-header {
+                position: sticky;
+                top: 0;
+                z-index: 40;
+                margin-bottom: 0.75rem !important;
+                padding: 0.65rem 0 !important;
+                background: rgba(79, 70, 229, 0.98) !important;
+            }
+
+            .app-header-inner {
+                min-height: 42px;
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                gap: 0.75rem !important;
+                text-align: left !important;
+            }
+
+            .app-brand {
+                min-width: 0;
+                flex-direction: row !important;
+                align-items: center !important;
+            }
+
+            .app-brand h1 {
+                font-size: 1.05rem !important;
+                line-height: 1.1 !important;
+                white-space: nowrap;
+            }
+
+            .app-brand p {
+                display: none;
+            }
+
+            .app-user-area {
+                min-width: 0;
+                flex-wrap: nowrap !important;
+            }
+
+            #userHeaderBadge {
+                min-height: 38px;
+                max-width: 180px;
+                padding: 0.3rem 0.35rem 0.3rem 0.65rem !important;
+                gap: 0.3rem !important;
+                border-radius: 999px !important;
+            }
+
+            #userHeaderName {
+                min-width: 0;
+                max-width: 96px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 0.7rem;
+            }
+
+            #userHeaderActions {
+                margin-left: 0 !important;
+            }
+
+            #userHeaderActions button {
+                min-height: 30px;
+                padding: 0.25rem 0.65rem !important;
+                white-space: nowrap;
+            }
+
+            .app-tab-nav {
+                position: fixed !important;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 50;
+                width: 100% !important;
+                height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+                padding: 0.45rem max(0.55rem, env(safe-area-inset-right)) calc(0.45rem + env(safe-area-inset-bottom)) max(0.55rem, env(safe-area-inset-left)) !important;
+                display: grid !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                align-items: stretch;
+                gap: 0.3rem;
+                overflow: visible !important;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-bottom: 0;
+                border-radius: 1.35rem 1.35rem 0 0 !important;
+                background: rgba(30, 27, 75, 0.97) !important;
+                box-shadow: 0 -12px 30px rgba(15, 23, 42, 0.18);
+                backdrop-filter: blur(18px);
+            }
+
+            .app-tab-button {
+                min-width: 0;
+                min-height: 56px;
+                padding: 0.35rem 0.25rem !important;
+                border-radius: 1rem !important;
+                flex-direction: column;
+                gap: 0.1rem;
+                color: #a5b4fc !important;
+                background: transparent !important;
+                font-size: 0.67rem !important;
+                line-height: 1.05;
+                font-weight: 800 !important;
+            }
+
+            .app-tab-button.bg-indigo-600 {
+                color: white !important;
+                background: rgba(99, 102, 241, 0.9) !important;
+                box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+            }
+
+            .tab-icon {
+                display: block;
+                font-size: 1.15rem;
+                line-height: 1;
+            }
+
+            .tab-label-long {
+                display: none;
+            }
+
+            .tab-label-short {
+                display: inline;
+            }
+
+            .app-tab-content {
+                width: 100%;
+                padding-left: max(1rem, env(safe-area-inset-left)) !important;
+                padding-right: max(1rem, env(safe-area-inset-right)) !important;
+                gap: 1.1rem !important;
+            }
+
+            #tab-agenda,
+            #tab-analise,
+            #tab-configuracoes {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+
+            #tab-agenda > *,
+            #tab-analise > *,
+            #tab-configuracoes > * {
+                grid-column: auto !important;
+            }
+
+            #agendaPanel {
+                order: 1 !important;
+            }
+
+            #projectsPanel {
+                order: 2 !important;
+            }
+
+            #listAndamento,
+            #listFila,
+            #listConcluidos,
+            #configSegmentsListContainer,
+            #dynamicRoutinesContainer {
+                max-height: none !important;
+                overflow: visible !important;
+                padding-right: 0 !important;
+            }
+
+            #analysisScopeSelector,
+            #analysisWeekSelector {
+                width: 100%;
+            }
+
+            #cookieConsentBanner {
+                left: max(0.75rem, env(safe-area-inset-left)) !important;
+                right: max(0.75rem, env(safe-area-inset-right)) !important;
+                bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom) + 0.75rem) !important;
+                max-width: none !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            :root {
+                --mobile-nav-height: 76px;
+                --mobile-header-height: 76px;
+            }
+
+            .app-header-inner {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+
+            .app-brand h1 {
+                font-size: 1rem !important;
+            }
+
+            #userHeaderBadge {
+                max-width: 155px;
+            }
+
+            #userHeaderName {
+                max-width: 72px;
+            }
+
+            .app-tab-content {
+                padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+                padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+                gap: 0.85rem !important;
+            }
+
+            .mobile-section-nav {
+                position: sticky;
+                top: calc(var(--mobile-header-height) + 0.35rem);
+                z-index: 30;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.35rem;
+                padding: 0.35rem;
+                border: 1px solid #e0e7ff;
+                border-radius: 1rem;
+                background: rgba(255, 255, 255, 0.94);
+                box-shadow: 0 8px 24px rgba(79, 70, 229, 0.1);
+                backdrop-filter: blur(14px);
+            }
+
+            .mobile-section-button {
+                min-height: 44px;
+                padding: 0.55rem 0.75rem;
+                border-radius: 0.75rem;
+                color: #64748b;
+                font-size: 0.75rem;
+                font-weight: 800;
+            }
+
+            .mobile-section-button.is-active {
+                color: white;
+                background: #4f46e5;
+                box-shadow: 0 6px 16px rgba(79, 70, 229, 0.24);
+            }
+
+            .mobile-agenda-panel {
+                scroll-margin-top: calc(var(--mobile-header-height) + 68px);
+            }
+
+            .mobile-agenda-panel.mobile-panel-hidden {
+                display: none !important;
+            }
+
+            .week-selector {
+                padding: 0.6rem !important;
+                gap: 0.5rem !important;
+                border-radius: 1rem !important;
+            }
+
+            .week-selector #currentWeekRangeLabel {
+                font-size: 0.72rem !important;
+                line-height: 1.25;
+            }
+
+            .week-nav-button {
+                width: 44px;
+                min-width: 44px;
+                height: 44px;
+                padding: 0 !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem !important;
+            }
+
+            .week-nav-text {
+                display: none;
+            }
+
+            #projectsPanel,
+            #agendaPanel,
+            #tab-analise > div,
+            #tab-configuracoes > div {
+                padding: 1rem !important;
+                border-radius: 1rem !important;
+            }
+
+            #projectsPanel {
+                gap: 1rem !important;
+            }
+
+            #projectsPanel h2,
+            #agendaPanel h2,
+            #tab-analise h2,
+            #tab-configuracoes h2 {
+                font-size: 1rem !important;
+                line-height: 1.25;
+            }
+
+            #projectsPanel > div > div:first-child,
+            #agendaPanel > div:first-child,
+            #tab-configuracoes > div > div:first-child {
+                gap: 0.65rem !important;
+            }
+
+            #agendaPanel > div:first-child {
+                margin-bottom: 1rem !important;
+            }
+
+            #agendaPanel > div:first-child > div {
+                width: 100% !important;
+                gap: 0.5rem !important;
+            }
+
+            #agendaPanel #daySelector,
+            #agendaPanel #weeklyStatusFilter,
+            #agendaPanel #weeklySearchFilter {
+                flex: 1 1 100%;
+                width: 100% !important;
+            }
+
+            #appMainContent input:not([type="checkbox"]),
+            #appMainContent select,
+            #appMainContent textarea {
+                min-height: 44px;
+                font-size: 16px !important;
+                border-radius: 0.75rem !important;
+            }
+
+            #appMainContent input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+            }
+
+            #appMainContent button,
+            #appMainContent summary {
+                min-height: 44px;
+            }
+
+            #addTaskDetails {
+                margin-bottom: 1rem !important;
+                border-radius: 1rem !important;
+            }
+
+            #addTaskDetails summary {
+                padding: 0.8rem !important;
+                font-size: 0.8rem !important;
+            }
+
+            #addTaskDetails > div {
+                padding: 0.85rem !important;
+                gap: 0.75rem !important;
+            }
+
+            #cognitiveLoadContainer {
+                margin-bottom: 1rem !important;
+                padding: 0.8rem !important;
+            }
+
+            #cognitiveLoadContainer > div:first-child {
+                align-items: flex-start !important;
+                gap: 0.5rem;
+            }
+
+            #cognitiveLoadContainer span:first-child {
+                font-size: 0.67rem !important;
+            }
+
+            .project-card,
+            .task-card,
+            .routine-card {
+                padding: 0.8rem !important;
+                border-radius: 0.9rem !important;
+            }
+
+            .project-card-header,
+            .task-card-header {
+                align-items: stretch !important;
+            }
+
+            .task-card-header {
+                flex-direction: column !important;
+            }
+
+            .task-card-content {
+                align-items: flex-start !important;
+                gap: 0.65rem !important;
+            }
+
+            .task-status-actions {
+                padding-top: 0.15rem;
+            }
+
+            .task-status-actions button {
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 0.9rem !important;
+            }
+
+            .task-card-actions {
+                width: 100%;
+                justify-content: flex-end;
+                padding-top: 0.6rem;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .task-card-actions button,
+            .project-card-actions button {
+                min-width: 40px;
+                min-height: 40px !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                padding: 0.4rem !important;
+                font-size: 0.9rem !important;
+            }
+
+            .task-card-actions button:first-child {
+                padding-left: 0.7rem !important;
+                padding-right: 0.7rem !important;
+            }
+
+            .task-card h4,
+            .task-card p {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+            }
+
+            .task-card h4 {
+                font-size: 0.95rem !important;
+                line-height: 1.25;
+                margin-top: 0.35rem !important;
+            }
+
+            .task-card p {
+                line-height: 1.35;
+            }
+
+            .task-card [id^="details-"] {
+                margin-top: 0.75rem !important;
+                padding-top: 0.75rem !important;
+            }
+
+            .task-card [id^="details-"] .grid.grid-cols-2,
+            .project-card [id^="proj-details-"] .grid.grid-cols-2 {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+
+            .project-card-header > div:first-child {
+                max-width: calc(100% - 120px) !important;
+            }
+
+            .project-card-actions {
+                gap: 0.15rem !important;
+            }
+
+            .routine-card > .flex,
+            .routine-card .grid + .flex {
+                flex-wrap: wrap;
+            }
+
+            #listAndamento .project-card button,
+            #listFila .project-card button,
+            #listConcluidos .project-card button {
+                display: inline-flex !important;
+            }
+
+            #listAndamento span[onclick*="toggleProjectDay"],
+            #listFila span[onclick*="toggleProjectDay"],
+            #listConcluidos span[onclick*="toggleProjectDay"],
+            .task-day-chip {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.65rem !important;
+                border: 1px solid rgba(99, 102, 241, 0.18);
+            }
+
+            .project-days-row,
+            .task-days-row {
+                gap: 0.3rem !important;
+                margin-top: 0.45rem !important;
+            }
+
+            #tab-analise > div:first-child,
+            #tab-configuracoes > div:first-child > div:first-child,
+            #tab-configuracoes > div:nth-child(2) > div:first-child {
+                align-items: stretch !important;
+                text-align: left !important;
+            }
+
+            #tab-analise > div:first-child > div:last-child,
+            #tab-analise > div:first-child > div:last-child > div {
+                width: 100% !important;
+            }
+
+            #tab-analise .grid.md\:grid-cols-2 {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+
+            #tab-configuracoes > div:first-child > div:first-child {
+                flex-direction: column;
+            }
+
+            #tab-configuracoes > div:first-child > div:first-child button,
+            #tab-configuracoes button[onclick="addNewRoutine()"] {
+                width: 100%;
+            }
+
+            #tab-configuracoes .grid.grid-cols-2.sm\:grid-cols-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 0.65rem !important;
+            }
+
+            #tab-configuracoes .flex.flex-wrap.gap-2 {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+            }
+
+            #tab-tutorial {
+                gap: 1rem !important;
+            }
+
+            #tab-tutorial > div {
+                padding: 1rem !important;
+                border-radius: 1rem !important;
+            }
+
+            #tab-tutorial h2 {
+                font-size: 1.45rem !important;
+            }
+
+            #tab-tutorial h3 {
+                font-size: 1rem !important;
+                line-height: 1.3;
+            }
+
+            #tab-tutorial article,
+            #tab-tutorial .border.border-gray-100.p-4 {
+                padding: 0.9rem !important;
+            }
+
+            #modalAuth,
+            #modalSegments,
+            #modalResetAll,
+            #modalTaskAlert {
+                align-items: flex-end !important;
+                padding: 0 !important;
+            }
+
+            .app-modal-panel {
+                width: 100% !important;
+                max-width: none !important;
+                max-height: calc(92dvh - env(safe-area-inset-top));
+                overflow-y: auto;
+                padding: 1.1rem 1rem calc(1.1rem + env(safe-area-inset-bottom)) !important;
+                border-radius: 1.5rem 1.5rem 0 0 !important;
+                overscroll-behavior: contain;
+            }
+
+            #modalTaskAlert .app-modal-panel {
+                transform: none !important;
+            }
+
+            #modalAuth input,
+            #modalSegments input,
+            #modalSegments select,
+            #modalResetAll input {
+                min-height: 46px;
+                font-size: 16px !important;
+            }
+
+            #landingPage button {
+                min-height: 44px;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1180px) {
+            .app-header-inner,
+            .app-tab-content {
+                padding-left: 1.25rem !important;
+                padding-right: 1.25rem !important;
+            }
+
+            .app-tab-button {
+                flex-direction: row;
+                gap: 0.4rem;
+                font-size: 0.75rem !important;
+            }
+
+            #projectsPanel,
+            #agendaPanel,
+            #tab-analise > div,
+            #tab-configuracoes > div {
+                padding: 1.25rem !important;
+            }
+
+            #tab-configuracoes {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+
+            #appMainContent input:not([type="checkbox"]),
+            #appMainContent select,
+            #appMainContent textarea {
+                min-height: 42px;
+                font-size: 16px !important;
+            }
+
+            .task-status-actions button {
+                width: 36px !important;
+                height: 36px !important;
+            }
+
+            .task-card-actions button,
+            .project-card-actions button {
+                min-width: 40px;
+                min-height: 40px;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #listAndamento span[onclick*="toggleProjectDay"],
+            #listFila span[onclick*="toggleProjectDay"],
+            #listConcluidos span[onclick*="toggleProjectDay"],
+            .task-day-chip {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.62rem !important;
+            }
+
+            .project-days-row,
+            .task-days-row {
+                gap: 0.25rem !important;
+            }
+        }
+
+        @media (min-width: 1181px) {
+            .tab-label-long {
+                display: inline;
+            }
+
+            .tab-label-short {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="bg-indigo-950 text-gray-800 font-sans min-h-screen m-0 p-0 overflow-x-hidden">
@@ -117,8 +800,8 @@
     </div>
 
     <!-- Modal de Autenticação / Login Individual (Acessível na LP e no App) -->
-    <div id="modalAuth" class="fixed inset-0 bg-gray-900/70 backdrop-blur-xs hidden justify-center items-center p-4 z-50" onclick="handleModalBackdropClick(event)">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
+    <div id="modalAuth" class="app-modal fixed inset-0 bg-gray-900/70 backdrop-blur-xs hidden justify-center items-center p-4 z-50" onclick="handleModalBackdropClick(event)">
+        <div class="app-modal-panel bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
             <!-- Header do Modal -->
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
                 <div class="flex items-center gap-2">
@@ -221,31 +904,31 @@
 
     <!-- Conteúdo Principal do App (Apenas para usuários autenticados) -->
     <div id="appMainContent" class="hidden bg-gray-50 min-h-screen pb-12">
-        <header class="bg-indigo-600 text-white py-4 sm:py-6 shadow-md mb-6 sm:mb-8">
-            <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-                <div class="flex flex-col items-center md:items-start">
+        <header class="app-header bg-indigo-600 text-white py-4 sm:py-6 shadow-md mb-6 sm:mb-8">
+            <div class="app-header-inner max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                <div class="app-brand flex flex-col items-center md:items-start">
                     <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">🧭 Bússola</h1>
                     <p class="text-indigo-200 text-xs sm:text-sm">Planejamento, foco e equilíbrio</p>
                 </div>
 
                 <!-- Navegação entre Abas (Rolagem Horizontal no Celular sem barra) -->
-                <div class="flex bg-indigo-800 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar scrollbar-none justify-start sm:justify-center shrink-0">
-                    <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="bg-indigo-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
-                        📅 Agenda e Projetos
+                <nav class="app-tab-nav flex bg-indigo-800 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar scrollbar-none justify-start sm:justify-center shrink-0" aria-label="Navegação principal">
+                    <button onclick="switchTab('agenda')" id="tabBtn-agenda" aria-current="page" class="app-tab-button bg-indigo-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        <span class="tab-icon" aria-hidden="true">📅</span><span class="tab-label-long">Agenda e Projetos</span><span class="tab-label-short">Agenda</span>
                     </button>
-                    <button onclick="switchTab('analise')" id="tabBtn-analise" class="text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
-                        📊 Análise de Produtividade
+                    <button onclick="switchTab('analise')" id="tabBtn-analise" aria-current="false" class="app-tab-button text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        <span class="tab-icon" aria-hidden="true">📊</span><span class="tab-label-long">Análise de Produtividade</span><span class="tab-label-short">Análise</span>
                     </button>
-                    <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" class="text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
-                        ⚙️ Configurações
+                    <button onclick="switchTab('configuracoes')" id="tabBtn-configuracoes" aria-current="false" class="app-tab-button text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        <span class="tab-icon" aria-hidden="true">⚙️</span><span class="tab-label-long">Configurações</span><span class="tab-label-short">Ajustes</span>
                     </button>
-                    <button onclick="switchTab('tutorial')" id="tabBtn-tutorial" class="text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
-                        📖 Tutorial & Guia
+                    <button onclick="switchTab('tutorial')" id="tabBtn-tutorial" aria-current="false" class="app-tab-button text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap">
+                        <span class="tab-icon" aria-hidden="true">📖</span><span class="tab-label-long">Tutorial & Guia</span><span class="tab-label-short">Guia</span>
                     </button>
-                </div>
+                </nav>
 
                 <!-- Botão de Usuário/Login -->
-                <div class="flex gap-2 flex-wrap justify-center md:justify-end items-center">
+                <div class="app-user-area flex gap-2 flex-wrap justify-center md:justify-end items-center">
                     <div id="userHeaderBadge" class="flex items-center gap-2 bg-indigo-800/90 border border-indigo-700/60 px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition shadow-sm">
                         <span id="userHeaderName" class="font-bold flex items-center gap-1.5">👤 Visitante</span>
                         <div id="userHeaderActions" class="flex items-center gap-1.5 ml-1">
@@ -259,8 +942,8 @@
         </header>
 
     <!-- Modal de Gerenciamento de Segmentos (Categorias) -->
-    <div id="modalSegments" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-lg">
+    <div id="modalSegments" class="app-modal fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
+        <div class="app-modal-panel bg-white rounded-xl p-6 max-w-md w-full shadow-lg">
             <div class="flex justify-between items-center mb-4 pb-2 border-b">
                 <h3 class="text-lg font-bold">🗂️ Gerenciar Segmentos (Categorias)</h3>
                 <button onclick="toggleModalSegments()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">×</button>
@@ -318,8 +1001,8 @@
     </div>
 
     <!-- Modal de Reset Completo (Resetar Tudo) -->
-    <div id="modalResetAll" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-lg border border-rose-100 relative">
+    <div id="modalResetAll" class="app-modal fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center p-4 z-50">
+        <div class="app-modal-panel bg-white rounded-xl p-6 max-w-md w-full shadow-lg border border-rose-100 relative">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2.5 text-rose-600">
                     <span class="text-2xl">🚨</span>
@@ -343,23 +1026,28 @@
     </div>
 
     <!-- ABA 1: AGENDA E PROJETOS -->
-    <main id="tab-agenda" class="max-w-[1400px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <main id="tab-agenda" class="app-tab-content max-w-[1400px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <!-- Seletor de Semanas -->
-        <div class="lg:col-span-3 bg-indigo-50/50 p-4 rounded-xl shadow-inner border border-indigo-100 flex items-center justify-between gap-4">
-            <button onclick="changeWeek(-1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3.5 py-2 rounded-lg text-xs transition shadow-sm">
-                ◀ Semana Anterior
+        <div class="week-selector lg:col-span-3 bg-indigo-50/50 p-4 rounded-xl shadow-inner border border-indigo-100 flex items-center justify-between gap-4">
+            <button onclick="changeWeek(-1)" aria-label="Semana anterior" class="week-nav-button bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3.5 py-2 rounded-lg text-xs transition shadow-sm">
+                ◀ <span class="week-nav-text">Semana Anterior</span>
             </button>
             <div class="text-center">
                 <span id="currentWeekRangeLabel" class="text-xs sm:text-sm font-extrabold text-indigo-900 block tracking-tight">Carregando semana...</span>
             </div>
-            <button onclick="changeWeek(1)" class="bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3.5 py-2 rounded-lg text-xs transition shadow-sm">
-                Próxima Semana ▶
+            <button onclick="changeWeek(1)" aria-label="Próxima semana" class="week-nav-button bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-bold px-3.5 py-2 rounded-lg text-xs transition shadow-sm">
+                <span class="week-nav-text">Próxima Semana</span> ▶
             </button>
         </div>
 
+        <div class="mobile-section-nav lg:col-span-3" aria-label="Seções da agenda">
+            <button id="mobileSectionBtn-agenda" class="mobile-section-button is-active" aria-pressed="true" onclick="showMobileAgendaSection('agenda')">📅 Minha Agenda</button>
+            <button id="mobileSectionBtn-projects" class="mobile-section-button" aria-pressed="false" onclick="showMobileAgendaSection('projects')">🗂️ Projetos</button>
+        </div>
+
         <!-- Coluna de Projetos (Backlog / Fila) -->
-        <div class="lg:col-span-1 order-2 lg:order-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-6">
+        <div id="projectsPanel" class="mobile-agenda-panel mobile-panel-hidden lg:col-span-1 order-2 lg:order-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-6">
             <div>
                 <div class="flex justify-between items-center mb-4 pb-2 border-b gap-2">
                     <h2 class="text-xl font-bold text-gray-900 truncate">🗂️ Painel de Projetos</h2>
@@ -404,7 +1092,7 @@
         </div>
 
         <!-- Coluna da Agenda Diária -->
-        <div class="lg:col-span-2 order-1 lg:order-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div id="agendaPanel" class="mobile-agenda-panel lg:col-span-2 order-1 lg:order-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-2 border-b">
                 <h2 id="agendaTitle" class="text-xl font-bold text-gray-900">📅 Agenda do Dia</h2>
                 <div class="flex flex-wrap gap-3 items-center w-full sm:w-auto">
@@ -491,7 +1179,7 @@
     </main>
 
     <!-- ABA 2: ANÁLISE DE PRODUTIVIDADE -->
-    <main id="tab-analise" class="max-w-[1400px] mx-auto px-4 hidden grid-cols-1 lg:grid-cols-3 gap-8">
+    <main id="tab-analise" class="app-tab-content max-w-[1400px] mx-auto px-4 hidden grid-cols-1 lg:grid-cols-3 gap-8">
 
         <!-- Seletores de Escopo da Análise -->
         <div class="lg:col-span-3 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 p-4 rounded-xl border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -555,7 +1243,7 @@
     </main>
 
     <!-- ABA 3: CONFIGURAÇÕES GERAIS DO APP -->
-    <main id="tab-configuracoes" class="max-w-[1400px] mx-auto px-4 hidden grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+    <main id="tab-configuracoes" class="app-tab-content max-w-[1400px] mx-auto px-4 hidden grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
 
         <!-- Bloco 1: Gerenciamento de Segmentos (Categorias) -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4">
@@ -635,7 +1323,7 @@
     </main>
 
     <!-- ABA 4: TUTORIAL & GUIA METODOLÓGICO -->
-    <main id="tab-tutorial" class="max-w-[1400px] mx-auto px-4 hidden space-y-8 mb-12">
+    <main id="tab-tutorial" class="app-tab-content max-w-[1400px] mx-auto px-4 hidden space-y-8 mb-12">
         <div class="bg-gradient-to-r from-indigo-900/90 via-purple-900/80 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 sm:p-10 shadow-xl backdrop-blur-sm text-white">
             <div class="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-400/30 px-3 py-1 rounded-full text-xs font-bold text-indigo-300 mb-4">
                 <span>📚 Documentação Oficial v3.5</span>
@@ -883,8 +1571,8 @@
     </main>
 
     <!-- MODAL DE INÍCIO DE TAREFA (POPUP DE AVISO) -->
-    <div id="modalTaskAlert" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-all duration-300 opacity-0">
-        <div class="bg-white rounded-2xl shadow-2xl border border-indigo-100 max-w-md w-full p-6 transform scale-95 transition-all duration-300 flex flex-col items-center text-center">
+    <div id="modalTaskAlert" class="app-modal fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-all duration-300 opacity-0">
+        <div class="app-modal-panel bg-white rounded-2xl shadow-2xl border border-indigo-100 max-w-md w-full p-6 transform scale-95 transition-all duration-300 flex flex-col items-center text-center">
             <!-- Icon/Visual -->
             <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-3xl mb-4 animate-bounce">
                 🧭
@@ -902,6 +1590,8 @@
                     🚀 Ok, começar!
                 </button>
             </div>
+        </div>
+    </div>
     </div> <!-- Fim de #appMainContent -->
 
     <script>
@@ -1636,8 +2326,12 @@
             const btnConfig = document.getElementById('tabBtn-configuracoes');
             const btnTutorial = document.getElementById('tabBtn-tutorial');
 
-            const activeClass = "bg-indigo-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap";
-            const inactiveClass = "text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap";
+            const activeClass = "app-tab-button bg-indigo-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap";
+            const inactiveClass = "app-tab-button text-indigo-200 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap";
+
+            [btnAgenda, btnAnalise, btnConfig, btnTutorial].forEach(button => {
+                if (button) button.setAttribute('aria-current', 'false');
+            });
 
             if (tabName === 'agenda') {
                 if (tabAgenda) { tabAgenda.classList.remove('hidden'); tabAgenda.classList.add('grid'); }
@@ -1645,10 +2339,14 @@
                 if (tabConfig) { tabConfig.classList.add('hidden'); tabConfig.classList.remove('grid'); }
                 if (tabTutorial) { tabTutorial.classList.add('hidden'); tabTutorial.classList.remove('block'); }
 
-                if (btnAgenda) btnAgenda.className = activeClass;
+                if (btnAgenda) {
+                    btnAgenda.className = activeClass;
+                    btnAgenda.setAttribute('aria-current', 'page');
+                }
                 if (btnAnalise) btnAnalise.className = inactiveClass;
                 if (btnConfig) btnConfig.className = inactiveClass;
                 if (btnTutorial) btnTutorial.className = inactiveClass;
+                restoreMobileAgendaSection();
                 refreshAgendaView();
             } else if (tabName === 'analise') {
                 if (tabAgenda) { tabAgenda.classList.add('hidden'); tabAgenda.classList.remove('grid'); }
@@ -1657,7 +2355,10 @@
                 if (tabTutorial) { tabTutorial.classList.add('hidden'); tabTutorial.classList.remove('block'); }
 
                 if (btnAgenda) btnAgenda.className = inactiveClass;
-                if (btnAnalise) btnAnalise.className = activeClass;
+                if (btnAnalise) {
+                    btnAnalise.className = activeClass;
+                    btnAnalise.setAttribute('aria-current', 'page');
+                }
                 if (btnConfig) btnConfig.className = inactiveClass;
                 if (btnTutorial) btnTutorial.className = inactiveClass;
 
@@ -1670,7 +2371,10 @@
 
                 if (btnAgenda) btnAgenda.className = inactiveClass;
                 if (btnAnalise) btnAnalise.className = inactiveClass;
-                if (btnConfig) btnConfig.className = activeClass;
+                if (btnConfig) {
+                    btnConfig.className = activeClass;
+                    btnConfig.setAttribute('aria-current', 'page');
+                }
                 if (btnTutorial) btnTutorial.className = inactiveClass;
 
                 loadConfiguracoesUI();
@@ -1683,8 +2387,42 @@
                 if (btnAgenda) btnAgenda.className = inactiveClass;
                 if (btnAnalise) btnAnalise.className = inactiveClass;
                 if (btnConfig) btnConfig.className = inactiveClass;
-                if (btnTutorial) btnTutorial.className = activeClass;
+                if (btnTutorial) {
+                    btnTutorial.className = activeClass;
+                    btnTutorial.setAttribute('aria-current', 'page');
+                }
             }
+
+            if (window.matchMedia('(max-width: 1180px)').matches) {
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            }
+        }
+
+        function showMobileAgendaSection(section, shouldScroll = true) {
+            const agendaPanel = document.getElementById('agendaPanel');
+            const projectsPanel = document.getElementById('projectsPanel');
+            const agendaButton = document.getElementById('mobileSectionBtn-agenda');
+            const projectsButton = document.getElementById('mobileSectionBtn-projects');
+            if (!agendaPanel || !projectsPanel || !agendaButton || !projectsButton) return;
+
+            const showProjects = section === 'projects';
+            agendaPanel.classList.toggle('mobile-panel-hidden', showProjects);
+            projectsPanel.classList.toggle('mobile-panel-hidden', !showProjects);
+            agendaButton.classList.toggle('is-active', !showProjects);
+            projectsButton.classList.toggle('is-active', showProjects);
+            agendaButton.setAttribute('aria-pressed', String(!showProjects));
+            projectsButton.setAttribute('aria-pressed', String(showProjects));
+            safeSetItem('my_mobile_agenda_section', showProjects ? 'projects' : 'agenda');
+
+            if (shouldScroll && window.matchMedia('(max-width: 767px)').matches) {
+                const targetPanel = showProjects ? projectsPanel : agendaPanel;
+                targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function restoreMobileAgendaSection() {
+            const savedSection = safeGetItem('my_mobile_agenda_section');
+            showMobileAgendaSection(savedSection === 'projects' ? 'projects' : 'agenda', false);
         }
 
         function updateRule(key, value) {
@@ -1716,7 +2454,7 @@
 
             routines.forEach(r => {
                 const card = document.createElement('div');
-                card.className = "p-2.5 bg-white border border-gray-200 rounded-lg shadow-sm space-y-2 relative";
+                card.className = "routine-card p-2.5 bg-white border border-gray-200 rounded-lg shadow-sm space-y-2 relative";
 
                 let catOptions = "";
                 for (let catId in taskCategories) {
@@ -1925,7 +2663,7 @@
             projects.forEach(project => {
                 const projectIdJs = JSON.stringify(project.id);
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "flex flex-col p-2.5 hover:bg-gray-50 border border-gray-100 rounded-lg transition group text-sm shadow-sm";
+                itemDiv.className = "project-card flex flex-col p-2.5 hover:bg-gray-50 border border-gray-100 rounded-lg transition group text-sm shadow-sm";
 
                 const isAndamento = project.status === "andamento";
                 if (isAndamento && !project.done) {
@@ -1961,7 +2699,7 @@
                 }
 
                 // Gera o HTML da barra de dias da semana para o projeto
-                let projectDaysVisualHTML = `<div class="flex gap-0.5 mt-1 select-none" title="Dias que este projeto possui tarefas agendadas nesta semana">`;
+                let projectDaysVisualHTML = `<div class="project-days-row flex gap-0.5 mt-1 select-none" title="Dias que este projeto possui tarefas agendadas nesta semana">`;
                 const daysOrderList = [1, 2, 3, 4, 5, 6, 0];
                 const daysLetters = {1: "S", 2: "T", 3: "Q", 4: "Q", 5: "S", 6: "S", 0: "D"};
                 const daysFullNames = {1: "Segunda-feira", 2: "Terça-feira", 3: "Quarta-feira", 4: "Quinta-feira", 5: "Sexta-feira", 6: "Sábado", 0: "Domingo"};
@@ -1976,7 +2714,7 @@
                 projectDaysVisualHTML += `</div>`;
 
                 itemDiv.innerHTML = `
-                    <div class="flex items-start justify-between gap-2 w-full">
+                    <div class="project-card-header flex items-start justify-between gap-2 w-full">
                         <div class="flex items-start gap-2 max-w-[80%] flex-1 min-w-0">
                             <input type="checkbox" id="proj-${project.id}" ${project.done ? 'checked' : ''} onchange="toggleProject(${projectIdJs})" class="mt-1 h-3.5 w-3.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 shrink-0">
                             <div class="flex flex-col min-w-0 flex-1">
@@ -1987,7 +2725,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex gap-2 items-center shrink-0">
+                        <div class="project-card-actions flex gap-2 items-center shrink-0">
                             <button onclick="toggleProjectDetails(${projectIdJs})" title="Detalhes do Projeto" class="text-gray-400 hover:text-indigo-600 text-xs transition">📝</button>
                             ${actionButton}
                             <button onclick="deleteProject(${projectIdJs})" title="Excluir" class="text-gray-300 hover:text-red-500 text-xs hidden group-hover:block transition">🗑️</button>
@@ -2870,7 +3608,7 @@
             }
 
             const card = document.createElement('div');
-            card.className = `flex flex-col p-3 rounded-lg border-l-4 shadow-sm transition ${cardBg} hover:shadow-md border border-gray-100`;
+            card.className = `task-card flex flex-col p-3 rounded-lg border-l-4 shadow-sm transition ${cardBg} hover:shadow-md border border-gray-100`;
 
             const displayTime = task.timeEnd && task.timeEnd !== task.time ? `${task.time} - ${task.timeEnd}` : task.time;
 
@@ -2886,13 +3624,13 @@
                 const daysLetters = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
                 const daysFullNames = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
-                daysVisualHTML = `<div class="flex items-center gap-1 mt-1.5 flex-wrap">`;
+                daysVisualHTML = `<div class="task-days-row flex items-center gap-1 mt-1.5 flex-wrap">`;
                 [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                     const isActive = assignedSet.has(d);
                     if (isActive) {
-                        daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskAssignedDay('${day}', '${task.id}', ${d})" class="w-4 h-4 rounded-full bg-indigo-600 text-white font-extrabold text-[8px] flex items-center justify-center shadow-xs cursor-pointer hover:bg-indigo-700 transition" title="${daysFullNames[d]} (Clique para remover)">${daysLetters[d]}</span>`;
+                        daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskAssignedDay('${day}', '${task.id}', ${d})" class="task-day-chip w-4 h-4 rounded-full bg-indigo-600 text-white font-extrabold text-[8px] flex items-center justify-center shadow-xs cursor-pointer hover:bg-indigo-700 transition" title="${daysFullNames[d]} (Clique para remover)">${daysLetters[d]}</span>`;
                     } else {
-                        daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskAssignedDay('${day}', '${task.id}', ${d})" class="w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[8px] flex items-center justify-center cursor-pointer hover:bg-gray-300 transition" title="${daysFullNames[d]} (Clique para agendar)">${daysLetters[d]}</span>`;
+                        daysVisualHTML += `<span onclick="event.stopPropagation(); toggleTaskAssignedDay('${day}', '${task.id}', ${d})" class="task-day-chip w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[8px] flex items-center justify-center cursor-pointer hover:bg-gray-300 transition" title="${daysFullNames[d]} (Clique para agendar)">${daysLetters[d]}</span>`;
                     }
                 });
                 daysVisualHTML += `</div>`;
@@ -2900,10 +3638,10 @@
 
             // HTML do card com botões de status e painel de comentários
             card.innerHTML = `
-                <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                <div class="task-card-header flex items-center justify-between gap-2">
+                    <div class="task-card-content flex items-center gap-3 min-w-0 flex-1">
                         <!-- Três Botões de Status (Sucesso / Falha / Pendente) -->
-                        <div class="flex items-center gap-1 shrink-0">
+                        <div class="task-status-actions flex items-center gap-1 shrink-0">
                             <button onclick="updateTaskStatus('${day}', '${task.id}', 'success')" class="w-6 h-6 flex items-center justify-center text-xs rounded-full font-bold border transition ${task.status === 'success' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-600 border-emerald-300 hover:bg-emerald-50'}" title="Sim, consegui!">
                                 ✓
                             </button>
@@ -2926,7 +3664,7 @@
                     </div>
 
                     <!-- Botões da Direita (Delete e Detalhes) -->
-                    <div class="flex gap-2 items-center shrink-0">
+                    <div class="task-card-actions flex gap-2 items-center shrink-0">
                         <button onclick="toggleTaskDetailsPanel('${task.id}')" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold px-2 py-1 rounded bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition flex items-center gap-0.5">
                             💬 Notas <span id="chevron-${task.id}">${chevronChar}</span>
                         </button>
